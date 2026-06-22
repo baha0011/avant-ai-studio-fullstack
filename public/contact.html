@@ -15,29 +15,99 @@
   <header class="header">
     <a class="logo" href="index.html" aria-label="Avant AI Studio"><span class="logo-mark">AI</span><span data-i18n="common.brand">Avant AI Studio</span></a>
     <nav class="nav" aria-label="Primary navigation">
-    <a href="index.html" data-nav="home" data-i18n="common.navHome">Головна</a>
-    <a href="services.html" data-nav="services" data-i18n="common.navServices">Послуги</a>
-    <a href="integrations.html" data-nav="integrations" data-i18n="common.navIntegrations">Інтеграції</a>
-    <a href="process.html" data-nav="process" data-i18n="common.navProcess">Процес</a>
-    <a href="contact.html" data-nav="contact" data-i18n="common.navContact">Контакти</a>
-    <a href="admin.html" data-nav="admin" data-i18n="common.navAdmin">Admin</a></nav>
-    <div class="header-actions"><div class="lang-switch desktop-lang" aria-label="Language switcher"><button class="lang-btn" type="button" data-lang="uk">UA</button><button class="lang-btn" type="button" data-lang="en">EN</button></div><button class="menu-toggle" type="button" aria-controls="mobileMenu" aria-expanded="false" data-i18n-aria="common.menuOpen"><span></span></button></div>
+      <a href="index.html" data-nav="home" data-i18n="common.navHome">Головна</a>
+      <a href="services.html" data-nav="services" data-i18n="common.navServices">Послуги</a>
+      <a href="integrations.html" data-nav="integrations" data-i18n="common.navIntegrations">Інтеграції</a>
+      <a href="process.html" data-nav="process" data-i18n="common.navProcess">Процес</a>
+      <a href="contact.html" data-nav="contact" data-i18n="common.navContact">Контакти</a>
+      <a href="admin.html" data-nav="admin" data-i18n="common.navAdmin">Admin</a>
+    </nav>
+    <div class="header-actions">
+      <div class="lang-switch desktop-lang" aria-label="Language switcher">
+        <button class="lang-btn" type="button" data-lang="uk">UA</button>
+        <button class="lang-btn" type="button" data-lang="en">EN</button>
+      </div>
+      <button class="menu-toggle" type="button" aria-controls="mobileMenu" aria-expanded="false" data-i18n-aria="common.menuOpen"><span></span></button>
+    </div>
   </header>
 
-  <div class="mobile-panel" id="mobileMenu"><nav class="mobile-nav" aria-label="Mobile navigation">
-    <a href="index.html" data-nav="home" data-i18n="common.navHome">Головна</a>
-    <a href="services.html" data-nav="services" data-i18n="common.navServices">Послуги</a>
-    <a href="integrations.html" data-nav="integrations" data-i18n="common.navIntegrations">Інтеграції</a>
-    <a href="process.html" data-nav="process" data-i18n="common.navProcess">Процес</a>
-    <a href="contact.html" data-nav="contact" data-i18n="common.navContact">Контакти</a>
-    <a href="admin.html" data-nav="admin" data-i18n="common.navAdmin">Admin</a></nav><div class="lang-switch" aria-label="Language switcher"><button class="lang-btn" type="button" data-lang="uk">UA</button><button class="lang-btn" type="button" data-lang="en">EN</button></div></div>
+  <div class="mobile-panel" id="mobileMenu">
+    <nav class="mobile-nav" aria-label="Mobile navigation">
+      <a href="index.html" data-nav="home" data-i18n="common.navHome">Головна</a>
+      <a href="services.html" data-nav="services" data-i18n="common.navServices">Послуги</a>
+      <a href="integrations.html" data-nav="integrations" data-i18n="common.navIntegrations">Інтеграції</a>
+      <a href="process.html" data-nav="process" data-i18n="common.navProcess">Процес</a>
+      <a href="contact.html" data-nav="contact" data-i18n="common.navContact">Контакти</a>
+      <a href="admin.html" data-nav="admin" data-i18n="common.navAdmin">Admin</a>
+    </nav>
+    <div class="lang-switch" aria-label="Language switcher">
+      <button class="lang-btn" type="button" data-lang="uk">UA</button>
+      <button class="lang-btn" type="button" data-lang="en">EN</button>
+    </div>
+  </div>
 
   <main>
-    <section class="page-hero"><div class="container"><div class="reveal"><div class="eyebrow"><span class="eyebrow-dot"></span><span data-i18n="contact.badge">Контакти</span></div><h1><span class="gradient-text" data-i18n="contact.title">Залиште заявку — вона потрапить у backend, базу даних, Google Sheets і Telegram.</span></h1><p class="lead" data-i18n="contact.subtitle">Форма нижче вже відправляє POST-запит на /api/leads. Після налаштування .env вона стане реальною робочою заявкою.</p></div></div></section>
-    <section class="section"><div class="container contact-layout"><form class="form-card reveal" id="leadForm"><h3 data-i18n="contact.formTitle">Заявка на консультацію</h3><br><div class="form-grid"><div class="field"><label for="name" data-i18n="contact.nameLabel">Ім’я</label><input id="name" name="name" type="text" required data-i18n-placeholder="contact.namePlaceholder" placeholder="Ваше ім’я"></div><div class="field"><label for="contactField" data-i18n="contact.contactLabel">Телефон / Telegram</label><input id="contactField" name="contact" type="text" required data-i18n-placeholder="contact.contactPlaceholder" placeholder="+380 або @username"></div><div class="field full"><label for="niche" data-i18n="contact.nicheLabel">Ніша бізнесу</label><select id="niche" name="niche" required><option value="" data-i18n="contact.nichePlaceholder">Оберіть нішу</option><option value="clinic" data-i18n="contact.niche1">Клініка або стоматологія</option><option value="beauty" data-i18n="contact.niche2">Салон краси</option><option value="education" data-i18n="contact.niche3">Онлайн-школа</option><option value="service" data-i18n="contact.niche4">Сервісна компанія</option><option value="sales" data-i18n="contact.niche5">Відділ продажів</option><option value="other" data-i18n="contact.niche6">Інший бізнес</option></select></div><div class="field full"><label for="message" data-i18n="contact.taskLabel">Короткий опис задачі</label><textarea id="message" name="message" required data-i18n-placeholder="contact.taskPlaceholder" placeholder="Наприклад: потрібен ШІ-асистент для запису клієнтів, відповідей на питання та Telegram-сповіщень адміну."></textarea></div></div><button class="btn btn-primary form-submit" type="submit" data-i18n="contact.submit">Надіслати заявку</button><div class="form-message" id="formMessage"></div></form><aside class="form-card reveal"><h3 data-i18n="contact.directTitle">Контакти</h3><p class="muted" data-i18n="contact.directText">Замініть ці placeholders перед публікацією.</p><div class="contact-list"><div class="contact-item"><span data-i18n="contact.telegram">Telegram</span><a href="#">@your_username</a></div><div class="contact-item"><span data-i18n="contact.email">Email</span><a href="mailto:hello@avantai.studio">hello@avantai.studio</a></div><div class="contact-item"><span data-i18n="contact.phone">Phone</span><a href="tel:+380000000000">+380 XX XXX XX XX</a></div><div class="contact-item"><span data-i18n="contact.instagram">Instagram / LinkedIn</span><a href="#">Avant AI Studio</a></div></div></aside></div></section>
-</main>
+    <section class="page-hero">
+      <div class="container">
+        <div class="reveal">
+          <div class="eyebrow"><span class="eyebrow-dot"></span><span data-i18n="contact.badge">Контакти</span></div>
+          <h1><span class="gradient-text" data-i18n="contact.title">Залиште заявку — вона потрапить у backend, базу даних, Google Sheets і Telegram.</span></h1>
+          <p class="lead" data-i18n="contact.subtitle">Форма нижче вже відправляє POST-запит на /api/leads. Після налаштування .env вона стане реальною робочою заявкою.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container contact-layout">
+        <form class="form-card reveal" id="leadForm" novalidate>
+          <h3 data-i18n="contact.formTitle">Заявка на консультацію</h3>
+          <br>
+          <div class="form-grid">
+            <div class="field">
+              <label for="name" data-i18n="contact.nameLabel">Ім’я</label>
+              <input id="name" name="name" type="text" required minlength="2" autocomplete="name" data-i18n-placeholder="contact.namePlaceholder" placeholder="Ваше ім’я">
+            </div>
+            <div class="field">
+              <label for="contactField" data-i18n="contact.contactLabel">Телефон / Telegram</label>
+              <input id="contactField" name="contact" type="text" required minlength="3" autocomplete="tel" data-i18n-placeholder="contact.contactPlaceholder" placeholder="+380 або @username">
+            </div>
+            <div class="field full">
+              <label for="niche" data-i18n="contact.nicheLabel">Ніша бізнесу</label>
+              <select id="niche" name="niche" required>
+                <option value="" data-i18n="contact.nichePlaceholder">Оберіть нішу</option>
+                <option value="clinic" data-i18n="contact.niche1">Клініка або стоматологія</option>
+                <option value="beauty" data-i18n="contact.niche2">Салон краси</option>
+                <option value="education" data-i18n="contact.niche3">Онлайн-школа</option>
+                <option value="service" data-i18n="contact.niche4">Сервісна компанія</option>
+                <option value="sales" data-i18n="contact.niche5">Відділ продажів</option>
+                <option value="other" data-i18n="contact.niche6">Інший бізнес</option>
+              </select>
+            </div>
+            <div class="field full">
+              <label for="message" data-i18n="contact.taskLabel">Короткий опис задачі</label>
+              <textarea id="message" name="message" required minlength="8" data-i18n-placeholder="contact.taskPlaceholder" placeholder="Наприклад: потрібен ШІ-асистент для запису клієнтів, відповідей на питання та Telegram-сповіщень адміну."></textarea>
+            </div>
+          </div>
+          <button class="btn btn-primary form-submit" type="submit" data-i18n="contact.submit">Надіслати заявку</button>
+          <div class="form-message" id="formMessage" role="status" aria-live="polite"></div>
+        </form>
+
+        <aside class="form-card reveal">
+          <h3 data-i18n="contact.directTitle">Контакти</h3>
+          <p class="muted" data-i18n="contact.directText">Замініть ці placeholders перед публікацією.</p>
+          <div class="contact-list">
+            <div class="contact-item"><span data-i18n="contact.telegram">Telegram</span><a href="#">@your_username</a></div>
+            <div class="contact-item"><span data-i18n="contact.email">Email</span><a href="mailto:hello@avantai.studio">hello@avantai.studio</a></div>
+            <div class="contact-item"><span data-i18n="contact.phone">Phone</span><a href="tel:+380000000000">+380 XX XXX XX XX</a></div>
+            <div class="contact-item"><span data-i18n="contact.instagram">Instagram / LinkedIn</span><a href="#">Avant AI Studio</a></div>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
 
   <footer class="footer"><div class="container footer-inner"><span data-i18n="common.footerCopy">© 2026 Avant AI Studio. Усі права захищені.</span><span data-i18n="common.footerNote">ШІ-асистенти, база даних, Google Sheets і Telegram для бізнесу.</span></div></footer>
   <script src="assets/js/app.js"></script>
+  <script src="assets/js/form-fix.js"></script>
 </body>
 </html>
