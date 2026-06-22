@@ -8,7 +8,7 @@ It is not just a static landing page. The project includes:
 - Ukrainian / English language switcher;
 - Node.js + Express backend;
 - SQLite database for leads;
-- Google Sheets integration instead of CRM;
+- Google Sheets integration through Google Apps Script;
 - Telegram notifications for administrators;
 - simple admin panel for viewing leads and changing statuses.
 
@@ -32,6 +32,8 @@ avant-ai-studio-fullstack/
 │   ├── googleSheets.js
 │   ├── telegram.js
 │   └── validators.js
+├── apps-script/
+│   └── Code.gs
 ├── data/
 │   └── .gitkeep
 ├── package.json
@@ -65,7 +67,7 @@ http://localhost:3000/admin.html
 2. Frontend sends `POST /api/leads`.
 3. Express backend validates the request.
 4. SQLite stores the lead in `data/avant.sqlite`.
-5. Backend tries to append the lead to Google Sheets.
+5. Backend tries to append the lead to Google Sheets through Apps Script.
 6. Backend tries to send a Telegram notification.
 7. Admin can open `/admin.html` and see leads from the database.
 
@@ -153,40 +155,87 @@ DATABASE_PATH=./data/avant.sqlite
 4. Copy the bot token.
 5. Add the bot to your admin chat, group, or channel.
 6. Get `chat_id`.
-7. Update `.env`:
+7. Update `.env` with your Telegram values.
 
-```env
-TELEGRAM_ENABLED=true
-TELEGRAM_BOT_TOKEN=123456:ABCDEF_your_bot_token
-TELEGRAM_CHAT_ID=123456789
+## Google Sheets setup through Google Apps Script
+
+This project uses **Google Apps Script** as a simple bridge between the backend and Google Sheets.
+
+Why this option is simpler:
+
+- no Google Cloud service account;
+- no private key in `.env`;
+- no Google Sheets API credentials in Node.js;
+- the backend sends one `POST` request to an Apps Script Web App URL;
+- Apps Script appends the lead to the Google Sheet.
+
+### 1. Create the sheet
+
+Create a new Google Sheet. The first tab may be called `Leads`, but the Apps Script will create it automatically if it does not exist.
+
+The Apps Script creates these columns automatically:
+
+```txt
+Created At | Lead ID | Name | Contact | Niche | Message | Language | Source | Status | Page | Internal ID
 ```
 
-## Google Sheets setup
+### 2. Add Apps Script code
 
-1. Create a Google Cloud project.
-2. Enable Google Sheets API.
-3. Create a Service Account.
-4. Create a key in JSON format.
-5. Copy `client_email` to `GOOGLE_SERVICE_ACCOUNT_EMAIL`.
-6. Copy `private_key` to `GOOGLE_PRIVATE_KEY`.
-7. Create a Google Sheet.
-8. Share the sheet with the service account email.
-9. Copy the Sheet ID from the URL.
-10. Update `.env`:
+Open the Google Sheet and go to:
+
+```txt
+Extensions -> Apps Script
+```
+
+Delete the default code and paste the contents of:
+
+```txt
+apps-script/Code.gs
+```
+
+### 3. Deploy Apps Script as Web App
+
+In Apps Script:
+
+```txt
+Deploy -> New deployment -> Web app
+```
+
+Recommended settings:
+
+```txt
+Execute as: Me
+Who has access: Anyone
+```
+
+Copy the Web App URL. It should look like:
+
+```txt
+https://script.google.com/macros/s/.../exec
+```
+
+### 4. Update `.env`
+
+Add these values:
 
 ```env
 GOOGLE_SHEETS_ENABLED=true
-GOOGLE_SHEET_ID=your_google_sheet_id
-GOOGLE_SHEET_TAB=Leads
-GOOGLE_SERVICE_ACCOUNT_EMAIL=service-account@project.iam.gserviceaccount.com
-GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYOUR_KEY_HERE\n-----END PRIVATE KEY-----\n"
+GOOGLE_APPS_SCRIPT_URL=https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec
 ```
 
-Recommended Google Sheet columns:
+Then restart the backend:
 
-```txt
-Created At | Lead ID | Name | Contact | Niche | Message | Language | Source | Status
+```bash
+npm run dev
 ```
+
+### 5. Test
+
+Send a request from the contact form. The lead should now appear in:
+
+- SQLite database;
+- Telegram;
+- Google Sheets.
 
 ## What to replace before publishing
 
@@ -195,7 +244,7 @@ Created At | Lead ID | Name | Contact | Niche | Message | Language | Source | St
 - Phone: `+380 XX XXX XX XX`.
 - Instagram / LinkedIn placeholder.
 - `ADMIN_TOKEN` in `.env`.
-- Google Sheets credentials.
+- Apps Script Web App URL.
 - Telegram bot token and chat ID.
 - Real domain and deployment settings.
 
