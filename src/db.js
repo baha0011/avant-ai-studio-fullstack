@@ -5,8 +5,23 @@ import { createClient } from '@supabase/supabase-js';
 
 dotenv.config();
 
+function normalizeSupabaseUrl(rawUrl) {
+  const value = String(rawUrl || '').trim();
+
+  if (!value) return '';
+
+  if (value.startsWith('postgres://') || value.startsWith('postgresql://')) {
+    throw new Error('SUPABASE_URL must be the Project URL, not the database connection string. Use a value like https://your-project.supabase.co');
+  }
+
+  return value
+    .replace(/\/+$/, '')
+    .replace(/\/rest\/v1$/i, '')
+    .replace(/\/rest$/i, '');
+}
+
 function getSupabaseClient() {
-  const url = process.env.SUPABASE_URL;
+  const url = normalizeSupabaseUrl(process.env.SUPABASE_URL);
   const key = process.env.SUPABASE_KEY;
 
   if (!url || !key) {
