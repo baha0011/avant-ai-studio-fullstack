@@ -40,6 +40,7 @@ app.get('/api/health', (req, res) => {
   res.json({
     ok: true,
     service: 'Avant AI Studio API',
+    database: 'supabase',
     integrations: {
       googleSheets: isSheetsEnabled(),
       telegram: isTelegramEnabled()
@@ -54,15 +55,22 @@ app.post('/api/leads', async (req, res) => {
     return res.status(400).json({ ok: false, errors: validation.errors });
   }
 
-  const lead = insertLead({
-    ...validation.lead,
-    meta: {
-      userAgent: req.get('user-agent'),
-      ip: req.ip,
-      referrer: req.get('referer'),
-      ...validation.lead.meta
-    }
-  });
+  let lead;
+
+  try {
+    lead = await insertLead({
+      ...validation.lead,
+      meta: {
+        userAgent: req.get('user-agent'),
+        ip: req.ip,
+        referrer: req.get('referer'),
+        ...validation.lead.meta
+      }
+    });
+  } catch (error) {
+    console.error('[Database]', error);
+    return res.status(500).json({ ok: false, error: 'Failed to save lead' });
+  }
 
   const integration = {
     googleSheets: 'pending',
@@ -72,28 +80,28 @@ app.post('/api/leads', async (req, res) => {
   try {
     const result = await appendLeadToSheet(lead);
     integration.googleSheets = result.skipped ? 'skipped' : 'sent';
-    updateLeadIntegrationStatus(lead.id, 'sheet_status', integration.googleSheets);
-    addIntegrationLog(lead.id, 'google_sheets', integration.googleSheets, JSON.stringify(result));
+    await updateLeadIntegrationStatus(lead.id, 'sheet_status', integration.googleSheets);
+    await addIntegrationLog(lead.id, 'google_sheets', integration.googleSheets, JSON.stringify(result));
   } catch (error) {
     integration.googleSheets = 'failed';
-    updateLeadIntegrationStatus(lead.id, 'sheet_status', 'failed');
-    addIntegrationLog(lead.id, 'google_sheets', 'failed', error.message);
+    await updateLeadIntegrationStatus(lead.id, 'sheet_status', 'failed').catch(() => null);
+    await addIntegrationLog(lead.id, 'google_sheets', 'failed', error.message).catch(() => null);
     console.error('[Google Sheets]', error);
   }
 
   try {
     const result = await sendTelegramLead(lead);
     integration.telegram = result.skipped ? 'skipped' : 'sent';
-    updateLeadIntegrationStatus(lead.id, 'telegram_status', integration.telegram);
-    addIntegrationLog(lead.id, 'telegram', integration.telegram, JSON.stringify(result));
+    await updateLeadIntegrationStatus(lead.id, 'telegram_status', integration.telegram);
+    await addIntegrationLog(lead.id, 'telegram', integration.telegram, JSON.stringify(result));
   } catch (error) {
     integration.telegram = 'failed';
-    updateLeadIntegrationStatus(lead.id, 'telegram_status', 'failed');
-    addIntegrationLog(lead.id, 'telegram', 'failed', error.message);
+    await updateLeadIntegrationStatus(lead.id, 'telegram_status', 'failed').catch(() => null);
+    await addIntegrationLog(lead.id, 'telegram', 'failed', error.message).catch(() => null);
     console.error('[Telegram]', error);
   }
 
-  const savedLead = getLeadById(lead.id);
+  const savedLead = await getLeadById(lead.id);
 
   res.status(201).json({
     ok: true,
@@ -107,20 +115,26 @@ app.post('/api/leads', async (req, res) => {
   });
 });
 
-app.get('/api/leads', requireAdmin, (req, res) => {
-  res.json({
-    ok: true,
-    stats: getStats(),
-    leads: listLeads({
-      limit: req.query.limit || 100,
-      status: req.query.status || null
-    })
-  });
+app.get('/api/leads', requireAdmin, async (req, res) => {
+  try {
+    const [stats, leads] = await Promise.all([
+      getStats(),
+      listLeads({
+        limit: req.query.limit || 100,
+        status: req.query.status || null
+      })
+    ]);
+
+    res.json({ ok: true, stats, leads });
+  } catch (error) {
+    console.error('[Admin leads]', error);
+    res.status(500).json({ ok: false, error: 'Failed to load leads' });
+  }
 });
 
-app.patch('/api/leads/:id/status', requireAdmin, (req, res) => {
+app.patch('/api/leads/:id/status', requireAdmin, async (req, res) => {
   try {
-    const lead = updateLeadStatus(req.params.id, req.body.status);
+    const lead = await updateLeadStatus(req.params.id, req.body.status);
     res.json({ ok: true, lead });
   } catch (error) {
     res.status(400).json({ ok: false, error: error.message });
