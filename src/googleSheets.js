@@ -1,11 +1,28 @@
-import { google } from 'googleapis';
-
-function normalizePrivateKey(key = '') {
-  return key.replace(/\\n/g, '\n');
-}
-
 export function isSheetsEnabled() {
   return String(process.env.GOOGLE_SHEETS_ENABLED || '').toLowerCase() === 'true';
+}
+
+function getAppsScriptUrl() {
+  return String(process.env.GOOGLE_APPS_SCRIPT_URL || '').trim();
+}
+
+function normalizeLead(lead) {
+  return {
+    id: lead.id,
+    public_id: lead.public_id,
+    publicId: lead.public_id,
+    created_at: lead.created_at,
+    name: lead.name,
+    contact: lead.contact,
+    niche: lead.niche,
+    message: lead.message,
+    language: lead.language,
+    page: lead.page,
+    source: lead.source,
+    status: lead.status,
+    sheet_status: lead.sheet_status,
+    telegram_status: lead.telegram_status
+  };
 }
 
 export async function appendLeadToSheet(lead) {
@@ -13,45 +30,40 @@ export async function appendLeadToSheet(lead) {
     return { skipped: true, reason: 'GOOGLE_SHEETS_ENABLED=false' };
   }
 
-  const spreadsheetId = process.env.GOOGLE_SHEET_ID;
-  const clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-  const privateKey = normalizePrivateKey(process.env.GOOGLE_PRIVATE_KEY || '');
-  const tab = process.env.GOOGLE_SHEET_TAB || 'Leads';
+  const url = getAppsScriptUrl();
 
-  if (!spreadsheetId || !clientEmail || !privateKey) {
-    throw new Error('Google Sheets credentials are incomplete');
+  if (!url) {
+    throw new Error('GOOGLE_APPS_SCRIPT_URL is not configured');
   }
 
-  const auth = new google.auth.JWT({
-    email: clientEmail,
-    key: privateKey,
-    scopes: ['https://www.googleapis.com/auth/spreadsheets']
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'text/plain;charset=utf-8'
+    },
+    body: JSON.stringify({
+      secret: process.env.GOOGLE_APPS_SCRIPT_SECRET || '',
+      lead: normalizeLead(lead)
+    })
   });
 
-  const sheets = google.sheets({ version: 'v4', auth });
+  const raw = await response.text();
+  let data = {};
 
-  const values = [[
-    lead.created_at,
-    lead.public_id,
-    lead.name,
-    lead.contact,
-    lead.niche,
-    lead.message,
-    lead.language,
-    lead.source,
-    lead.status
-  ]];
+  try {
+    data = raw ? JSON.parse(raw) : {};
+  } catch (error) {
+    throw new Error(`Apps Script returned non-JSON response: ${raw.slice(0, 160)}`);
+  }
 
-  const result = await sheets.spreadsheets.values.append({
-    spreadsheetId,
-    range: `${tab}!A:I`,
-    valueInputOption: 'USER_ENTERED',
-    insertDataOption: 'INSERT_ROWS',
-    requestBody: { values }
-  });
+  if (!response.ok || data.ok === false) {
+    throw new Error(data.error || `Apps Script request failed with HTTP ${response.status}`);
+  }
 
   return {
     skipped: false,
-    updatedRange: result.data.updates?.updatedRange || null
+    row: data.row || null,
+    publicId: data.publicId || lead.public_id,
+    appsScript: true
   };
 }
