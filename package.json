@@ -1,6 +1,6 @@
 {
   "name": "avant-ai-studio",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Full-stack website for Avant AI Studio with Supabase, Apps Script Google Sheets and Telegram integrations.",
   "main": "src/server.js",
   "type": "module",
@@ -13,7 +13,8 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
-    "helmet": "^8.0.0"
+    "helmet": "^8.0.0",
+    "ws": "^8.18.0"
   },
   "engines": {
     "node": ">=20.0.0 <22.0.0"
