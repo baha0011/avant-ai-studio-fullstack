@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Avant AI Studio — ШІ-асистенти для бізнесу</title>
+  <meta name="description" content="Avant AI Studio розробляє ШІ-асистентів для бізнесу: заявки, консультації, записи клієнтів, база даних, Google Sheets і Telegram-сповіщення." />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+<body data-page="home">
+  <canvas class="canvas-bg" id="bgCanvas" aria-hidden="true"></canvas>
+  <div class="noise" aria-hidden="true"></div>
+  <div class="cursor-glow" aria-hidden="true"></div>
+
+  <header class="header">
+    <a class="logo" href="index.html" aria-label="Avant AI Studio"><span class="logo-mark">AI</span><span data-i18n="common.brand">Avant AI Studio</span></a>
+    <nav class="nav" aria-label="Primary navigation">
+    <a href="index.html" data-nav="home" data-i18n="common.navHome">Головна</a>
+    <a href="services.html" data-nav="services" data-i18n="common.navServices">Послуги</a>
+    <a href="integrations.html" data-nav="integrations" data-i18n="common.navIntegrations">Інтеграції</a>
+    <a href="process.html" data-nav="process" data-i18n="common.navProcess">Процес</a>
+    <a href="contact.html" data-nav="contact" data-i18n="common.navContact">Контакти</a>
+    <a href="admin.html" data-nav="admin" data-i18n="common.navAdmin">Admin</a></nav>
+    <div class="header-actions"><div class="lang-switch desktop-lang" aria-label="Language switcher"><button class="lang-btn" type="button" data-lang="uk">UA</button><button class="lang-btn" type="button" data-lang="en">EN</button></div><button class="menu-toggle" type="button" aria-controls="mobileMenu" aria-expanded="false" data-i18n-aria="common.menuOpen"><span></span></button></div>
+  </header>
+
+  <div class="mobile-panel" id="mobileMenu"><nav class="mobile-nav" aria-label="Mobile navigation">
+    <a href="index.html" data-nav="home" data-i18n="common.navHome">Головна</a>
+    <a href="services.html" data-nav="services" data-i18n="common.navServices">Послуги</a>
+    <a href="integrations.html" data-nav="integrations" data-i18n="common.navIntegrations">Інтеграції</a>
+    <a href="process.html" data-nav="process" data-i18n="common.navProcess">Процес</a>
+    <a href="contact.html" data-nav="contact" data-i18n="common.navContact">Контакти</a>
+    <a href="admin.html" data-nav="admin" data-i18n="common.navAdmin">Admin</a></nav><div class="lang-switch" aria-label="Language switcher"><button class="lang-btn" type="button" data-lang="uk">UA</button><button class="lang-btn" type="button" data-lang="en">EN</button></div></div>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-grid">
+        <div class="reveal">
+          <div class="eyebrow"><span class="eyebrow-dot"></span><span data-i18n="home.badge">ШІ-асистенти для бізнесу</span></div>
+          <h1><span class="gradient-text" data-i18n="home.title">Комунікаційна система, яка відповідає клієнтам, збирає заявки та не губить дані.</span></h1>
+          <p class="lead" data-i18n="home.subtitle">Avant AI Studio розробляє ШІ-асистентів для бізнесу: сайт або бот приймає заявку, backend зберігає її в базі даних, дублює в Google Sheets і надсилає Telegram-сповіщення адміністратору.</p>
+          <div class="hero-actions"><a class="btn btn-primary" href="contact.html" data-i18n="home.primary">Отримати консультацію</a><a class="btn btn-secondary" href="integrations.html" data-i18n="home.secondary">Переглянути інтеграції</a></div>
+          <ul class="hero-points"><li data-i18n="home.point1">ШІ відповідає клієнтам 24/7</li><li data-i18n="home.point2">SQLite база даних для заявок</li><li data-i18n="home.point3">Google Sheets замість CRM</li><li data-i18n="home.point4">Telegram-сповіщення адміну</li></ul>
+        </div>
+        <div class="panel assistant-card reveal">
+          <div class="assistant-top"><div class="assistant-title"><div class="avatar">AI</div><div><strong data-i18n="home.visualTitle">Avant Lead Assistant</strong><span data-i18n="home.visualStatus">Працює зараз</span></div></div><div class="status-pill">Live API</div></div>
+          <div class="chat-flow"><div class="message" data-i18n="home.msg1">Клієнт залишає заявку на сайті або в боті.</div><div class="message ai" data-i18n="home.msg2">Backend створює запис у базі даних та присвоює ID заявки.</div><div class="message" data-i18n="home.msg3">Дані автоматично йдуть у Google Sheets.</div><div class="message ai" data-i18n="home.msg4">Адміністратор отримує повідомлення в Telegram.</div></div>
+          <div class="stat-grid"><div class="stat-card"><strong>DB</strong><span data-i18n="home.stat1">заявки в БД</span></div><div class="stat-card"><strong>Sheets</strong><span data-i18n="home.stat2">таблиця для команди</span></div><div class="stat-card"><strong>TG</strong><span data-i18n="home.stat3">сповіщення</span></div><div class="stat-card"><strong>API</strong><span data-i18n="home.stat4">готово до запуску</span></div></div>
+        </div>
+      </div>
+    </section>
+    <section class="section"><div class="container"><div class="section-head reveal"><div class="section-label">System</div><h2>Frontend + backend + integrations</h2><p class="section-description">Сайт уже спроєктований як бізнес-система: заявка не просто показує повідомлення, а проходить через сервер, базу, таблицу та Telegram.</p></div><div class="flow reveal"><div class="flow-step"><strong>01</strong><span>Website / Bot</span></div><div class="flow-step"><strong>02</strong><span>Express API</span></div><div class="flow-step"><strong>03</strong><span>SQLite DB</span></div><div class="flow-step"><strong>04</strong><span>Google Sheets + Telegram</span></div></div></div></section>
+</main>
+
+  <footer class="footer"><div class="container footer-inner"><span data-i18n="common.footerCopy">© 2026 Avant AI Studio. Усі права захищені.</span><span data-i18n="common.footerNote">ШІ-асистенти, база даних, Google Sheets і Telegram для бізнесу.</span></div></footer>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

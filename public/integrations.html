@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Інтеграції — Avant AI Studio</title>
+  <meta name="description" content="Як працює backend Avant AI Studio: форма, база даних, Google Sheets, Telegram-сповіщення та адмін-процеси." />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+<body data-page="integrations">
+  <canvas class="canvas-bg" id="bgCanvas" aria-hidden="true"></canvas>
+  <div class="noise" aria-hidden="true"></div>
+  <div class="cursor-glow" aria-hidden="true"></div>
+
+  <header class="header">
+    <a class="logo" href="index.html" aria-label="Avant AI Studio"><span class="logo-mark">AI</span><span data-i18n="common.brand">Avant AI Studio</span></a>
+    <nav class="nav" aria-label="Primary navigation">
+    <a href="index.html" data-nav="home" data-i18n="common.navHome">Головна</a>
+    <a href="services.html" data-nav="services" data-i18n="common.navServices">Послуги</a>
+    <a href="integrations.html" data-nav="integrations" data-i18n="common.navIntegrations">Інтеграції</a>
+    <a href="process.html" data-nav="process" data-i18n="common.navProcess">Процес</a>
+    <a href="contact.html" data-nav="contact" data-i18n="common.navContact">Контакти</a>
+    <a href="admin.html" data-nav="admin" data-i18n="common.navAdmin">Admin</a></nav>
+    <div class="header-actions"><div class="lang-switch desktop-lang" aria-label="Language switcher"><button class="lang-btn" type="button" data-lang="uk">UA</button><button class="lang-btn" type="button" data-lang="en">EN</button></div><button class="menu-toggle" type="button" aria-controls="mobileMenu" aria-expanded="false" data-i18n-aria="common.menuOpen"><span></span></button></div>
+  </header>
+
+  <div class="mobile-panel" id="mobileMenu"><nav class="mobile-nav" aria-label="Mobile navigation">
+    <a href="index.html" data-nav="home" data-i18n="common.navHome">Головна</a>
+    <a href="services.html" data-nav="services" data-i18n="common.navServices">Послуги</a>
+    <a href="integrations.html" data-nav="integrations" data-i18n="common.navIntegrations">Інтеграції</a>
+    <a href="process.html" data-nav="process" data-i18n="common.navProcess">Процес</a>
+    <a href="contact.html" data-nav="contact" data-i18n="common.navContact">Контакти</a>
+    <a href="admin.html" data-nav="admin" data-i18n="common.navAdmin">Admin</a></nav><div class="lang-switch" aria-label="Language switcher"><button class="lang-btn" type="button" data-lang="uk">UA</button><button class="lang-btn" type="button" data-lang="en">EN</button></div></div>
+
+  <main>
+    <section class="page-hero"><div class="container page-hero-grid"><div class="reveal"><div class="eyebrow"><span class="eyebrow-dot"></span><span data-i18n="integrations.badge">Backend та інтеграції</span></div><h1><span class="gradient-text" data-i18n="integrations.title">Заявка проходить повний шлях: сайт → API → база даних → Google Sheets → Telegram.</span></h1><p class="lead" data-i18n="integrations.subtitle">Це вже не статичний сайт. Проект має Express backend, SQLite DB, Google Sheets API, Telegram Bot API та внутрішню admin-панель.</p></div><div class="panel reveal"><div class="code-block"><pre>POST /api/leads
+GET  /api/leads
+PATCH /api/leads/:id/status
+GET  /api/health</pre></div></div></div></section>
+    <section class="section"><div class="container"><div class="flow reveal"><div class="flow-step"><strong data-i18n="integrations.flow1Title">Frontend</strong><span data-i18n="integrations.flow1Text">Форма на сайті збирає заявку клієнта.</span></div><div class="flow-step"><strong data-i18n="integrations.flow2Title">Backend API</strong><span data-i18n="integrations.flow2Text">Express перевіряє дані та створює заявку.</span></div><div class="flow-step"><strong data-i18n="integrations.flow3Title">Database</strong><span data-i18n="integrations.flow3Text">SQLite зберігає заявку та статуси інтеграцій.</span></div><div class="flow-step"><strong data-i18n="integrations.flow4Title">Google Sheets + Telegram</strong><span data-i18n="integrations.flow4Text">Дані йдуть у таблицю та адміну в Telegram.</span></div></div></div></section>
+    <section class="section"><div class="container integration-map"><div class="integration-row reveal"><div class="integration-node"><strong data-i18n="integrations.dbTitle">База даних</strong><span>SQLite</span></div><div class="integration-node"><span data-i18n="integrations.dbText">Таблиця leads містить ID заявки, ім’я, контакт, нішу, опис задачі, мову, статус, статус Google Sheets, статус Telegram і дату створення.</span></div></div><div class="integration-row reveal"><div class="integration-node"><strong data-i18n="integrations.sheetsTitle">Google Sheets замість CRM</strong><span>Google API</span></div><div class="integration-node"><span data-i18n="integrations.sheetsText">Google Sheets використовується як простий операційний центр для команди. Таблиця отримує новий рядок після кожної заявки.</span></div></div><div class="integration-row reveal"><div class="integration-node"><strong data-i18n="integrations.tgTitle">Telegram для адміністратора</strong><span>Bot API</span></div><div class="integration-node"><span data-i18n="integrations.tgText">Адмін отримує красиве структуроване повідомлення в особистий чат, групу або канал. Це швидко, зручно і не потребує складної CRM.</span></div></div><div class="integration-row reveal"><div class="integration-node"><strong data-i18n="integrations.envTitle">Що потрібно налаштувати</strong><span>.env</span></div><div class="integration-node"><span data-i18n="integrations.envText">У файлі .env потрібно вказати токен Telegram-бота, chat_id, ID Google Sheet, email сервісного акаунта та приватний ключ.</span></div></div></div></section>
+    <section class="section"><div class="container"><div class="section-head reveal"><div class="section-label" data-i18n="integrations.codeTitle">API endpoint для форми</div><h2>POST /api/leads</h2></div><div class="code-block reveal"><pre>{
+  "name": "Client Name",
+  "contact": "@telegram_or_phone",
+  "niche": "Dental clinic",
+  "message": "Need AI assistant for appointments",
+  "language": "uk",
+  "source": "website"
+}</pre></div></div></section>
+</main>
+
+  <footer class="footer"><div class="container footer-inner"><span data-i18n="common.footerCopy">© 2026 Avant AI Studio. Усі права захищені.</span><span data-i18n="common.footerNote">ШІ-асистенти, база даних, Google Sheets і Telegram для бізнесу.</span></div></footer>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
