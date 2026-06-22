@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Процес — Avant AI Studio</title>
-  <meta name="description" content="Як ми аналізуємо бізнес, проєктуємо сценарії, розробляємо ШІ-асистента, підключаємо базу даних, Google Sheets і Telegram." />
+  <meta name="description" content="Поетапний запуск ШІ-асистента для бізнесу: розбір, сценарії, MVP і покращення." />
   <link rel="stylesheet" href="assets/css/styles.css" />
 </head>
 <body data-page="process">
@@ -13,31 +13,21 @@
   <div class="cursor-glow" aria-hidden="true"></div>
 
   <header class="header">
-    <a class="logo" href="index.html" aria-label="Avant AI Studio"><span class="logo-mark">AI</span><span data-i18n="common.brand">Avant AI Studio</span></a>
-    <nav class="nav" aria-label="Primary navigation">
-    <a href="index.html" data-nav="home" data-i18n="common.navHome">Головна</a>
-    <a href="services.html" data-nav="services" data-i18n="common.navServices">Послуги</a>
-    <a href="integrations.html" data-nav="integrations" data-i18n="common.navIntegrations">Інтеграції</a>
-    <a href="process.html" data-nav="process" data-i18n="common.navProcess">Процес</a>
-    <a href="contact.html" data-nav="contact" data-i18n="common.navContact">Контакти</a>
-    <a href="admin.html" data-nav="admin" data-i18n="common.navAdmin">Admin</a></nav>
-    <div class="header-actions"><div class="lang-switch desktop-lang" aria-label="Language switcher"><button class="lang-btn" type="button" data-lang="uk">UA</button><button class="lang-btn" type="button" data-lang="en">EN</button></div><button class="menu-toggle" type="button" aria-controls="mobileMenu" aria-expanded="false" data-i18n-aria="common.menuOpen"><span></span></button></div>
+    <a class="logo" href="index.html" aria-label="Avant AI Studio"><span class="logo-mark">AI</span><span>Avant AI Studio</span></a>
+    <nav class="nav" aria-label="Primary navigation"><a href="index.html" data-nav="home">Головна</a><a href="services.html" data-nav="services">Послуги</a><a href="integrations.html" data-nav="integrations">Рішення</a><a href="process.html" data-nav="process">Процес</a><a class="nav-cta" href="contact.html" data-nav="contact">Залишити заявку</a></nav>
+    <div class="header-actions"><button class="menu-toggle" type="button" aria-controls="mobileMenu" aria-expanded="false" aria-label="Відкрити меню"><span></span></button></div>
   </header>
 
-  <div class="mobile-panel" id="mobileMenu"><nav class="mobile-nav" aria-label="Mobile navigation">
-    <a href="index.html" data-nav="home" data-i18n="common.navHome">Головна</a>
-    <a href="services.html" data-nav="services" data-i18n="common.navServices">Послуги</a>
-    <a href="integrations.html" data-nav="integrations" data-i18n="common.navIntegrations">Інтеграції</a>
-    <a href="process.html" data-nav="process" data-i18n="common.navProcess">Процес</a>
-    <a href="contact.html" data-nav="contact" data-i18n="common.navContact">Контакти</a>
-    <a href="admin.html" data-nav="admin" data-i18n="common.navAdmin">Admin</a></nav><div class="lang-switch" aria-label="Language switcher"><button class="lang-btn" type="button" data-lang="uk">UA</button><button class="lang-btn" type="button" data-lang="en">EN</button></div></div>
+  <div class="mobile-panel" id="mobileMenu"><nav class="mobile-nav" aria-label="Mobile navigation"><a href="index.html" data-nav="home">Головна</a><a href="services.html" data-nav="services">Послуги</a><a href="integrations.html" data-nav="integrations">Рішення</a><a href="process.html" data-nav="process">Процес</a><a href="contact.html" data-nav="contact">Залишити заявку</a></nav></div>
 
   <main>
-    <section class="page-hero"><div class="container"><div class="reveal"><div class="eyebrow"><span class="eyebrow-dot"></span><span data-i18n="process.badge">Процес</span></div><h1><span class="gradient-text" data-i18n="process.title">Розробка йде як продуктова система, а не як одноразова сторінка.</span></h1><p class="lead" data-i18n="process.subtitle">Спочатку проектуємо сценарії та дані, потім збираємо frontend, backend, базу, Google Sheets, Telegram і тестуємо весь ланцюг.</p></div></div></section>
-    <section class="section"><div class="container grid grid-3"><article class="card reveal"><div class="icon">01</div><h3 data-i18n="process.p1Title">Аналіз бізнесу</h3><p data-i18n="process.p1Text">Розбираємо ніші, типові питання, заявки, канали комунікації та роль адміністратора.</p></article><article class="card reveal"><div class="icon">02</div><h3 data-i18n="process.p2Title">Проєктування логіки</h3><p data-i18n="process.p2Text">Визначаємо поля заявки, статуси, сценарії ШІ, правила передачі даних і повідомлень.</p></article><article class="card reveal"><div class="icon">03</div><h3 data-i18n="process.p3Title">Розробка системи</h3><p data-i18n="process.p3Text">Створюємо сайт, backend API, базу даних, інтеграцію Google Sheets і Telegram.</p></article><article class="card reveal"><div class="icon">04</div><h3 data-i18n="process.p4Title">Тестування</h3><p data-i18n="process.p4Text">Перевіряємо форму, збереження в БД, рядок у таблиці, повідомлення в Telegram і admin-панель.</p></article><article class="card reveal"><div class="icon">05</div><h3 data-i18n="process.p5Title">Запуск</h3><p data-i18n="process.p5Text">Готуємо .env, деплой, домен, HTTPS, доступи та базову інструкцію для команди.</p></article><article class="card reveal"><div class="icon">06</div><h3 data-i18n="process.p6Title">Покращення</h3><p data-i18n="process.p6Text">Аналізуємо реальні заявки, уточнюємо сценарії, додаємо поля, фільтри та автоматизації.</p></article></div></section>
-</main>
+    <section class="page-hero"><div class="container"><div class="reveal"><div class="eyebrow"><span class="eyebrow-dot"></span><span>Процес</span></div><h1><span class="gradient-text">Запускаємо асистента поетапно, щоб він реально допомагав бізнесу.</span></h1><p class="lead">Спочатку розбираємо вашу комунікацію з клієнтами, потім збираємо MVP, тестуємо на реальних заявках і покращуємо сценарії.</p><div class="hero-actions"><a class="btn btn-primary" href="contact.html">Почати з розбору</a></div></div></div></section>
+    <section class="section"><div class="container grid grid-4"><article class="card reveal"><div class="icon">01</div><h3>Розбір</h3><p>Дивимось, звідки приходять клієнти, які питання повторюються і де губляться заявки.</p></article><article class="card reveal"><div class="icon">02</div><h3>Сценарії</h3><p>Описуємо логіку відповідей, поля заявки, передачу команді і потрібні інтеграції.</p></article><article class="card reveal"><div class="icon">03</div><h3>Запуск MVP</h3><p>Підключаємо форму, Telegram, Google Sheets або Supabase і тестуємо повний шлях заявки.</p></article><article class="card reveal"><div class="icon">04</div><h3>Покращення</h3><p>Дивимось реальні звернення, доповнюємо відповіді та прибираємо зайві ручні дії.</p></article></div></section>
+    <section class="section"><div class="container"><div class="section-head reveal"><div class="section-label">Перший результат</div><h2>Після MVP ви вже бачите, як асистент працює на ваших заявках.</h2><p class="section-description">Не потрібно одразу будувати складну CRM. Починаємо з простого ланцюга, який можна показати команді та перевірити на практиці.</p></div></div></section>
+    <section class="section bottom-cta"><div class="container"><div class="panel reveal"><div class="section-label">Безкоштовний розбір</div><h2>Почнемо з короткого розбору вашого процесу.</h2><p class="section-description">Залиште заявку — покажемо, які питання й заявки можна автоматизувати першими.</p><br><a class="btn btn-primary" href="contact.html">Залишити заявку</a></div></div></section>
+  </main>
 
-  <footer class="footer"><div class="container footer-inner"><span data-i18n="common.footerCopy">© 2026 Avant AI Studio. Усі права захищені.</span><span data-i18n="common.footerNote">ШІ-асистенти, база даних, Google Sheets і Telegram для бізнесу.</span></div></footer>
+  <footer class="footer"><div class="container footer-inner"><span>© 2026 Avant AI Studio. Усі права захищені.</span><span>ШІ-асистенти для заявок, консультацій і клієнтського сервісу.</span></div></footer>
   <script src="assets/js/app.js"></script>
 </body>
 </html>
