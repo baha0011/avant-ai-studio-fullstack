@@ -212,3 +212,67 @@ select option { color: #101525; background: #fff; }
   .contact-item a { text-align: left; }
   .admin-table { display: block; overflow-x: auto; }
 }
+
+
+/* Brand image logo */
+.logo-image {
+  padding: 0;
+  overflow: hidden;
+  background: rgba(255,255,255,.08);
+}
+
+.logo-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+
+/* Hero brand icon */
+.hero-brand-icon {
+  width: 112px;
+  height: 112px;
+  margin-bottom: 24px;
+  border-radius: 32px;
+  padding: 8px;
+  background:
+    radial-gradient(circle at 30% 15%, rgba(35,214,255,.36), transparent 45%),
+    linear-gradient(135deg, rgba(255,255,255,.18), rgba(255,255,255,.06));
+  border: 1px solid rgba(255,255,255,.18);
+  box-shadow:
+    0 24px 70px rgba(35,214,255,.22),
+    0 18px 54px rgba(124,92,255,.25);
+}
+
+.hero-brand-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 26px;
+}
+
+.avatar-image {
+  padding: 0;
+  overflow: hidden;
+  background: rgba(255,255,255,.08);
+}
+
+.avatar-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+
+@media (max-width: 720px) {
+  .hero-brand-icon {
+    width: 88px;
+    height: 88px;
+    border-radius: 26px;
+    margin-bottom: 20px;
+  }
+
+  .hero-brand-icon img {
+    border-radius: 20px;
+  }
+}
