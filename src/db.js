@@ -1,5 +1,6 @@
 import crypto from 'node:crypto';
 import dotenv from 'dotenv';
+import WebSocket from 'ws';
 import { createClient } from '@supabase/supabase-js';
 
 dotenv.config();
@@ -16,6 +17,9 @@ function getSupabaseClient() {
     auth: {
       persistSession: false,
       autoRefreshToken: false
+    },
+    realtime: {
+      transport: WebSocket
     }
   });
 }
