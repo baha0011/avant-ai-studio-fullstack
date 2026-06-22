@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Послуги — Avant AI Studio</title>
-  <meta name="description" content="ШІ-асистенти для сайтів, Telegram-боти, обробка заявок, база даних, Google Sheets та адмін-панелі для бізнесу." />
+  <meta name="description" content="ШІ-асистенти для сайту, Telegram-боти, автоматизація заявок і клієнтського сервісу." />
   <link rel="stylesheet" href="assets/css/styles.css" />
 </head>
 <body data-page="services">
@@ -13,40 +13,27 @@
   <div class="cursor-glow" aria-hidden="true"></div>
 
   <header class="header">
-    <a class="logo" href="index.html" aria-label="Avant AI Studio"><span class="logo-mark">AI</span><span data-i18n="common.brand">Avant AI Studio</span></a>
+    <a class="logo" href="index.html" aria-label="Avant AI Studio"><span class="logo-mark">AI</span><span>Avant AI Studio</span></a>
     <nav class="nav" aria-label="Primary navigation">
-    <a href="index.html" data-nav="home" data-i18n="common.navHome">Головна</a>
-    <a href="services.html" data-nav="services" data-i18n="common.navServices">Послуги</a>
-    <a href="integrations.html" data-nav="integrations" data-i18n="common.navIntegrations">Інтеграції</a>
-    <a href="process.html" data-nav="process" data-i18n="common.navProcess">Процес</a>
-    <a href="contact.html" data-nav="contact" data-i18n="common.navContact">Контакти</a>
-    <a href="admin.html" data-nav="admin" data-i18n="common.navAdmin">Admin</a></nav>
-    <div class="header-actions"><div class="lang-switch desktop-lang" aria-label="Language switcher"><button class="lang-btn" type="button" data-lang="uk">UA</button><button class="lang-btn" type="button" data-lang="en">EN</button></div><button class="menu-toggle" type="button" aria-controls="mobileMenu" aria-expanded="false" data-i18n-aria="common.menuOpen"><span></span></button></div>
+      <a href="index.html" data-nav="home">Головна</a>
+      <a href="services.html" data-nav="services">Послуги</a>
+      <a href="integrations.html" data-nav="integrations">Рішення</a>
+      <a href="process.html" data-nav="process">Процес</a>
+      <a class="nav-cta" href="contact.html" data-nav="contact">Залишити заявку</a>
+    </nav>
+    <div class="header-actions"><button class="menu-toggle" type="button" aria-controls="mobileMenu" aria-expanded="false" aria-label="Відкрити меню"><span></span></button></div>
   </header>
 
-  <div class="mobile-panel" id="mobileMenu"><nav class="mobile-nav" aria-label="Mobile navigation">
-    <a href="index.html" data-nav="home" data-i18n="common.navHome">Головна</a>
-    <a href="services.html" data-nav="services" data-i18n="common.navServices">Послуги</a>
-    <a href="integrations.html" data-nav="integrations" data-i18n="common.navIntegrations">Інтеграції</a>
-    <a href="process.html" data-nav="process" data-i18n="common.navProcess">Процес</a>
-    <a href="contact.html" data-nav="contact" data-i18n="common.navContact">Контакти</a>
-    <a href="admin.html" data-nav="admin" data-i18n="common.navAdmin">Admin</a></nav><div class="lang-switch" aria-label="Language switcher"><button class="lang-btn" type="button" data-lang="uk">UA</button><button class="lang-btn" type="button" data-lang="en">EN</button></div></div>
+  <div class="mobile-panel" id="mobileMenu"><nav class="mobile-nav" aria-label="Mobile navigation"><a href="index.html" data-nav="home">Головна</a><a href="services.html" data-nav="services">Послуги</a><a href="integrations.html" data-nav="integrations">Рішення</a><a href="process.html" data-nav="process">Процес</a><a href="contact.html" data-nav="contact">Залишити заявку</a></nav></div>
 
   <main>
-    <section class="page-hero"><div class="container page-hero-grid"><div class="reveal"><div class="eyebrow"><span class="eyebrow-dot"></span><span data-i18n="services.badge">Послуги студії</span></div><h1><span class="gradient-text" data-i18n="services.title">Розробляємо не просто бота, а повну систему прийому та обробки заявок.</span></h1><p class="lead" data-i18n="services.subtitle">Frontend, backend, база даних, Google Sheets, Telegram і логіка ШІ-асистента працюють як один бізнес-інструмент.</p></div><div class="panel reveal"><div class="stat-grid"><div class="stat-card"><strong>Web</strong><span>Assistant</span></div><div class="stat-card"><strong>Bot</strong><span>Telegram</span></div><div class="stat-card"><strong>DB</strong><span>SQLite</span></div><div class="stat-card"><strong>Sheets</strong><span>Google</span></div></div></div></div></section>
-    <section class="section"><div class="container grid grid-4">
-      <article class="card reveal"><div class="icon">🌐</div><h3 data-i18n="services.s1Title">ШІ-асистент для сайту</h3><p data-i18n="services.s1Text">Відповідає на питання, пояснює послуги, збирає контакти та передає заявку на backend.</p></article>
-      <article class="card reveal"><div class="icon">💬</div><h3 data-i18n="services.s2Title">Telegram-бот з ШІ</h3><p data-i18n="services.s2Text">Веде діалог із клієнтом, приймає заявки, показує статуси та може працювати як канал комунікації.</p></article>
-      <article class="card reveal"><div class="icon">⚙️</div><h3 data-i18n="services.s3Title">Backend для заявок</h3><p data-i18n="services.s3Text">API приймає форму, валідує дані, зберігає заявку в базі та запускає інтеграції.</p></article>
-      <article class="card reveal"><div class="icon">🗄️</div><h3 data-i18n="services.s4Title">База даних</h3><p data-i18n="services.s4Text">Усі заявки зберігаються локально в SQLite, тому дані не губляться при збоях зовнішніх сервісів.</p></article>
-      <article class="card reveal"><div class="icon">📊</div><h3 data-i18n="services.s5Title">Google Sheets</h3><p data-i18n="services.s5Text">Заявки автоматично додаються в таблицю, яку може вести адміністратор або власник бізнесу.</p></article>
-      <article class="card reveal"><div class="icon">📣</div><h3 data-i18n="services.s6Title">Telegram-сповіщення</h3><p data-i18n="services.s6Text">Адмін або канал отримує структуроване повідомлення: ID, ім’я, контакт, ніша та задача.</p></article>
-      <article class="card reveal"><div class="icon">🧭</div><h3 data-i18n="services.s7Title">Admin-панель</h3><p data-i18n="services.s7Text">Проста панель для перегляду заявок і зміни статусів: нова, в роботі, закрита, скасована.</p></article>
-      <article class="card reveal"><div class="icon">🚀</div><h3 data-i18n="services.s8Title">Підтримка запуску</h3><p data-i18n="services.s8Text">Допомагаємо налаштувати ключі, таблицю, Telegram-бота, деплой і базові бізнес-сценарії.</p></article>
-    </div></section>
-</main>
+    <section class="page-hero"><div class="container"><div class="reveal"><div class="eyebrow"><span class="eyebrow-dot"></span><span>Послуги</span></div><h1><span class="gradient-text">Створюємо ШІ-асистента під ваш процес продажів і сервісу.</span></h1><p class="lead">Не просто “бот заради бота”, а система, яка відповідає клієнтам, збирає заявки та передає їх команді у зручному форматі.</p><div class="hero-actions"><a class="btn btn-primary" href="contact.html">Залишити заявку</a></div></div></div></section>
+    <section class="section"><div class="container grid grid-3"><article class="card reveal"><div class="icon">🌐</div><h3>ШІ-асистент для сайту</h3><p>Відповідає на питання, пояснює послуги, збирає контакти та створює заявку.</p></article><article class="card reveal"><div class="icon">💬</div><h3>Telegram-бот</h3><p>Працює як окремий канал комунікації: консультації, заявки, статуси та повідомлення команді.</p></article><article class="card reveal"><div class="icon">📋</div><h3>Облік заявок</h3><p>Заявки автоматично потрапляють у Google Sheets, Supabase або вашу CRM.</p></article><article class="card reveal"><div class="icon">🔔</div><h3>Сповіщення команді</h3><p>Менеджер отримує структуроване повідомлення: ім’я, контакт, задача, джерело.</p></article><article class="card reveal"><div class="icon">⚙️</div><h3>Сценарії під бізнес</h3><p>Питання, відповіді, логіка запису та кваліфікація клієнтів налаштовуються під вашу нішу.</p></article><article class="card reveal"><div class="icon">🚀</div><h3>Запуск і підтримка</h3><p>Допомагаємо підключити домен, хостинг, таблицю, Telegram і базові сценарії.</p></article></div></section>
+    <section class="section"><div class="container"><div class="section-head reveal"><div class="section-label">Пакети</div><h2>Можна стартувати з малого і розширювати систему поступово.</h2></div><div class="grid grid-3"><article class="card reveal"><h3>Старт</h3><p>Форма, Telegram-сповіщення, Google Sheets і базова логіка заявки.</p></article><article class="card reveal"><h3>Асистент</h3><p>ШІ-відповіді на типові питання, збір контактів і передача менеджеру.</p></article><article class="card reveal"><h3>Система</h3><p>Supabase, статуси, фільтри, інтеграції, хостинг і підготовка до продажів.</p></article></div></div></section>
+    <section class="section bottom-cta"><div class="container"><div class="panel reveal"><div class="section-label">Безкоштовний розбір</div><h2>Хочете зрозуміти, який асистент потрібен саме вашому бізнесу?</h2><p class="section-description">Залиште заявку — коротко розберемо вашу нішу, канал заявок і запропонуємо перший MVP.</p><br><a class="btn btn-primary" href="contact.html">Залишити заявку</a></div></div></section>
+  </main>
 
-  <footer class="footer"><div class="container footer-inner"><span data-i18n="common.footerCopy">© 2026 Avant AI Studio. Усі права захищені.</span><span data-i18n="common.footerNote">ШІ-асистенти, база даних, Google Sheets і Telegram для бізнесу.</span></div></footer>
+  <footer class="footer"><div class="container footer-inner"><span>© 2026 Avant AI Studio. Усі права захищені.</span><span>ШІ-асистенти для заявок, консультацій і клієнтського сервісу.</span></div></footer>
   <script src="assets/js/app.js"></script>
 </body>
 </html>
