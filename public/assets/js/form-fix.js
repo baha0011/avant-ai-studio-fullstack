@@ -1,0 +1,156 @@
+// Robust contact form handler.
+// This file intentionally runs after app.js and overrides the old generic handler.
+(function () {
+  const form = document.getElementById('leadForm');
+  if (!form) return;
+
+  const message = document.getElementById('formMessage');
+  const submitButton = form.querySelector('[type="submit"]');
+
+  const messages = {
+    uk: {
+      success: 'Дякуємо! Заявку створено.',
+      required: 'Заповніть усі поля форми.',
+      shortName: 'Ім’я має містити мінімум 2 символи.',
+      shortContact: 'Телефон або Telegram має містити мінімум 3 символи.',
+      shortMessage: 'Опис задачі має містити мінімум 8 символів.',
+      sending: 'Відправляємо заявку...',
+      submit: 'Надіслати заявку',
+      backend: 'Не вдалося відправити заявку.',
+      details: 'Деталі'
+    },
+    en: {
+      success: 'Thank you! Your request has been created.',
+      required: 'Please complete all form fields.',
+      shortName: 'Name must contain at least 2 characters.',
+      shortContact: 'Phone or Telegram must contain at least 3 characters.',
+      shortMessage: 'Task description must contain at least 8 characters.',
+      sending: 'Sending request...',
+      submit: 'Send request',
+      backend: 'Could not send the request.',
+      details: 'Details'
+    }
+  };
+
+  function getLang() {
+    const lang = document.documentElement.lang || localStorage.getItem('avantLang') || 'uk';
+    return lang.startsWith('en') ? 'en' : 'uk';
+  }
+
+  function t(key) {
+    return messages[getLang()][key] || messages.uk[key] || key;
+  }
+
+  function normalizeApiBase(value) {
+    return String(value || '').trim().replace(/\/+$/, '');
+  }
+
+  function getApiBaseUrl() {
+    const saved = normalizeApiBase(localStorage.getItem('avantApiBase'));
+    if (saved) return saved;
+
+    const { protocol, hostname, port } = window.location;
+    const isLocalHost = ['localhost', '127.0.0.1', '::1'].includes(hostname);
+
+    if (protocol === 'file:' || (isLocalHost && port && port !== '3000')) {
+      return 'http://localhost:3000';
+    }
+
+    return '';
+  }
+
+  function apiUrl(path) {
+    return `${getApiBaseUrl()}${path}`;
+  }
+
+  function showMessage(text, isError = false) {
+    if (!message) return;
+    message.textContent = text;
+    message.className = `form-message show${isError ? ' error' : ''}`;
+  }
+
+  function clean(value) {
+    return String(value || '').trim().replace(/\s+/g, ' ');
+  }
+
+  function validate(payload) {
+    if (!payload.name || !payload.contact || !payload.niche || !payload.message) {
+      return t('required');
+    }
+    if (payload.name.length < 2) return t('shortName');
+    if (payload.contact.length < 3) return t('shortContact');
+    if (payload.message.length < 8) return t('shortMessage');
+    return null;
+  }
+
+  async function readApiResponse(response) {
+    const raw = await response.text();
+    let data = {};
+
+    try {
+      data = raw ? JSON.parse(raw) : {};
+    } catch (error) {
+      throw new Error('Backend returned a non-JSON response. Open the site through http://localhost:3000.');
+    }
+
+    if (!response.ok || !data.ok) {
+      const validationErrors = data.errors ? Object.values(data.errors).join(', ') : '';
+      throw new Error(data.error || validationErrors || `HTTP ${response.status}`);
+    }
+
+    return data;
+  }
+
+  async function submitLead(payload) {
+    const response = await fetch(apiUrl('/api/leads'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    return readApiResponse(response);
+  }
+
+  form.setAttribute('novalidate', 'true');
+
+  form.addEventListener('submit', async function fixedSubmitHandler(event) {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
+    const formData = new FormData(form);
+    const payload = {
+      name: clean(formData.get('name')),
+      contact: clean(formData.get('contact')),
+      niche: clean(formData.get('niche')),
+      message: clean(formData.get('message')),
+      language: getLang(),
+      page: document.body.dataset.page || 'contact',
+      source: 'website'
+    };
+
+    const validationError = validate(payload);
+    if (validationError) {
+      showMessage(validationError, true);
+      return;
+    }
+
+    try {
+      if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.textContent = t('sending');
+      }
+
+      const data = await submitLead(payload);
+      showMessage(`${t('success')} ID: ${data.lead.publicId}`);
+      form.reset();
+    } catch (error) {
+      console.error('[Lead form fixed handler]', error);
+      showMessage(`${t('backend')} ${t('details')}: ${error.message}`, true);
+    } finally {
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = t('submit');
+      }
+    }
+  }, true);
+})();
