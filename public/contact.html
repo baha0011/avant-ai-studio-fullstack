@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Контакти — Avant AI Studio</title>
-  <meta name="description" content="Залиште заявку на консультацію або безкоштовний розбір комунікації бізнесу з клієнтами." />
+  <title>Залишити заявку — Avant AI Studio</title>
+  <meta name="description" content="Залиште заявку на безкоштовний розбір комунікації з клієнтами." />
   <link rel="stylesheet" href="assets/css/styles.css" />
 </head>
 <body data-page="contact">
@@ -13,100 +13,20 @@
   <div class="cursor-glow" aria-hidden="true"></div>
 
   <header class="header">
-    <a class="logo" href="index.html" aria-label="Avant AI Studio"><span class="logo-mark">AI</span><span data-i18n="common.brand">Avant AI Studio</span></a>
-    <nav class="nav" aria-label="Primary navigation">
-      <a href="index.html" data-nav="home" data-i18n="common.navHome">Головна</a>
-      <a href="services.html" data-nav="services" data-i18n="common.navServices">Послуги</a>
-      <a href="integrations.html" data-nav="integrations" data-i18n="common.navIntegrations">Інтеграції</a>
-      <a href="process.html" data-nav="process" data-i18n="common.navProcess">Процес</a>
-      <a href="contact.html" data-nav="contact" data-i18n="common.navContact">Контакти</a>
-      <a href="admin.html" data-nav="admin" data-i18n="common.navAdmin">Admin</a>
-    </nav>
-    <div class="header-actions">
-      <div class="lang-switch desktop-lang" aria-label="Language switcher">
-        <button class="lang-btn" type="button" data-lang="uk">UA</button>
-        <button class="lang-btn" type="button" data-lang="en">EN</button>
-      </div>
-      <button class="menu-toggle" type="button" aria-controls="mobileMenu" aria-expanded="false" data-i18n-aria="common.menuOpen"><span></span></button>
-    </div>
+    <a class="logo" href="index.html" aria-label="Avant AI Studio"><span class="logo-mark">AI</span><span>Avant AI Studio</span></a>
+    <nav class="nav" aria-label="Primary navigation"><a href="index.html" data-nav="home">Головна</a><a href="services.html" data-nav="services">Послуги</a><a href="integrations.html" data-nav="integrations">Рішення</a><a href="process.html" data-nav="process">Процес</a><a class="nav-cta" href="contact.html" data-nav="contact">Залишити заявку</a></nav>
+    <div class="header-actions"><button class="menu-toggle" type="button" aria-controls="mobileMenu" aria-expanded="false" aria-label="Відкрити меню"><span></span></button></div>
   </header>
 
-  <div class="mobile-panel" id="mobileMenu">
-    <nav class="mobile-nav" aria-label="Mobile navigation">
-      <a href="index.html" data-nav="home" data-i18n="common.navHome">Головна</a>
-      <a href="services.html" data-nav="services" data-i18n="common.navServices">Послуги</a>
-      <a href="integrations.html" data-nav="integrations" data-i18n="common.navIntegrations">Інтеграції</a>
-      <a href="process.html" data-nav="process" data-i18n="common.navProcess">Процес</a>
-      <a href="contact.html" data-nav="contact" data-i18n="common.navContact">Контакти</a>
-      <a href="admin.html" data-nav="admin" data-i18n="common.navAdmin">Admin</a>
-    </nav>
-    <div class="lang-switch" aria-label="Language switcher">
-      <button class="lang-btn" type="button" data-lang="uk">UA</button>
-      <button class="lang-btn" type="button" data-lang="en">EN</button>
-    </div>
-  </div>
+  <div class="mobile-panel" id="mobileMenu"><nav class="mobile-nav" aria-label="Mobile navigation"><a href="index.html" data-nav="home">Головна</a><a href="services.html" data-nav="services">Послуги</a><a href="integrations.html" data-nav="integrations">Рішення</a><a href="process.html" data-nav="process">Процес</a><a href="contact.html" data-nav="contact">Залишити заявку</a></nav></div>
 
   <main>
-    <section class="page-hero">
-      <div class="container">
-        <div class="reveal">
-          <div class="eyebrow"><span class="eyebrow-dot"></span><span data-i18n="contact.badge">Контакти</span></div>
-          <h1><span class="gradient-text" data-i18n="contact.title">Залиште заявку — вона потрапить у backend, базу даних, Google Sheets і Telegram.</span></h1>
-          <p class="lead" data-i18n="contact.subtitle">Форма нижче вже відправляє POST-запит на /api/leads. Після налаштування .env вона стане реальною робочою заявкою.</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="container contact-layout">
-        <form class="form-card reveal" id="leadForm" novalidate>
-          <h3 data-i18n="contact.formTitle">Заявка на консультацію</h3>
-          <br>
-          <div class="form-grid">
-            <div class="field">
-              <label for="name" data-i18n="contact.nameLabel">Ім’я</label>
-              <input id="name" name="name" type="text" required minlength="2" autocomplete="name" data-i18n-placeholder="contact.namePlaceholder" placeholder="Ваше ім’я">
-            </div>
-            <div class="field">
-              <label for="contactField" data-i18n="contact.contactLabel">Телефон / Telegram</label>
-              <input id="contactField" name="contact" type="text" required minlength="3" autocomplete="tel" data-i18n-placeholder="contact.contactPlaceholder" placeholder="+380 або @username">
-            </div>
-            <div class="field full">
-              <label for="niche" data-i18n="contact.nicheLabel">Ніша бізнесу</label>
-              <select id="niche" name="niche" required>
-                <option value="" data-i18n="contact.nichePlaceholder">Оберіть нішу</option>
-                <option value="clinic" data-i18n="contact.niche1">Клініка або стоматологія</option>
-                <option value="beauty" data-i18n="contact.niche2">Салон краси</option>
-                <option value="education" data-i18n="contact.niche3">Онлайн-школа</option>
-                <option value="service" data-i18n="contact.niche4">Сервісна компанія</option>
-                <option value="sales" data-i18n="contact.niche5">Відділ продажів</option>
-                <option value="other" data-i18n="contact.niche6">Інший бізнес</option>
-              </select>
-            </div>
-            <div class="field full">
-              <label for="message" data-i18n="contact.taskLabel">Короткий опис задачі</label>
-              <textarea id="message" name="message" required minlength="8" data-i18n-placeholder="contact.taskPlaceholder" placeholder="Наприклад: потрібен ШІ-асистент для запису клієнтів, відповідей на питання та Telegram-сповіщень адміну."></textarea>
-            </div>
-          </div>
-          <button class="btn btn-primary form-submit" type="submit" data-i18n="contact.submit">Надіслати заявку</button>
-          <div class="form-message" id="formMessage" role="status" aria-live="polite"></div>
-        </form>
-
-        <aside class="form-card reveal">
-          <h3 data-i18n="contact.directTitle">Контакти</h3>
-          <p class="muted" data-i18n="contact.directText">Замініть ці placeholders перед публікацією.</p>
-          <div class="contact-list">
-            <div class="contact-item"><span data-i18n="contact.telegram">Telegram</span><a href="#">@your_username</a></div>
-            <div class="contact-item"><span data-i18n="contact.email">Email</span><a href="mailto:hello@avantai.studio">hello@avantai.studio</a></div>
-            <div class="contact-item"><span data-i18n="contact.phone">Phone</span><a href="tel:+380000000000">+380 XX XXX XX XX</a></div>
-            <div class="contact-item"><span data-i18n="contact.instagram">Instagram / LinkedIn</span><a href="#">Avant AI Studio</a></div>
-          </div>
-        </aside>
-      </div>
-    </section>
+    <section class="page-hero"><div class="container"><div class="reveal"><div class="eyebrow"><span class="eyebrow-dot"></span><span>Заявка</span></div><h1><span class="gradient-text">Залиште заявку на безкоштовний розбір комунікації з клієнтами.</span></h1><p class="lead">Опишіть коротко бізнес і задачу. Ми підкажемо, який ШІ-асистент можна запустити першим і які заявки він буде автоматизувати.</p></div></div></section>
+    <section class="section"><div class="container contact-layout"><form class="form-card reveal" id="leadForm" novalidate><h3>Заявка на консультацію</h3><br><div class="form-grid"><div class="field"><label for="name">Ім’я</label><input id="name" name="name" type="text" required minlength="2" autocomplete="name" placeholder="Ваше ім’я"></div><div class="field"><label for="contactField">Телефон / Telegram</label><input id="contactField" name="contact" type="text" required minlength="3" autocomplete="tel" placeholder="+380 або @username"></div><div class="field full"><label for="niche">Ніша бізнесу</label><select id="niche" name="niche" required><option value="">Оберіть нішу</option><option value="clinic">Клініка або стоматологія</option><option value="beauty">Салон краси</option><option value="education">Онлайн-школа</option><option value="service">Сервісна компанія</option><option value="sales">Відділ продажів</option><option value="other">Інший бізнес</option></select></div><div class="field full"><label for="message">Короткий опис задачі</label><textarea id="message" name="message" required minlength="8" placeholder="Наприклад: потрібен ШІ-асистент для запису клієнтів, відповідей на питання та Telegram-сповіщень команді."></textarea></div></div><button class="btn btn-primary form-submit" type="submit">Надіслати заявку</button><div class="form-message" id="formMessage" role="status" aria-live="polite"></div></form><aside class="form-card reveal"><h3>Що буде після заявки</h3><p class="muted">Ми не продаємо “готового бота всім”. Спочатку розбираємо вашу ситуацію і пропонуємо найпростіший корисний MVP.</p><div class="contact-list"><div class="contact-item"><span>1</span><a>Розбір задачі</a></div><div class="contact-item"><span>2</span><a>Пропозиція сценарію</a></div><div class="contact-item"><span>3</span><a>План запуску</a></div></div></aside></div></section>
+    <section class="section bottom-cta"><div class="container"><div class="panel reveal"><div class="section-label">Почати просто</div><h2>Надішліть заявку — далі ми підкажемо перший практичний крок.</h2><p class="section-description">Після розбору буде зрозуміло, чи потрібен асистент на сайт, Telegram-бот, таблиця заявок або повноцінна база.</p></div></div></section>
   </main>
 
-  <footer class="footer"><div class="container footer-inner"><span data-i18n="common.footerCopy">© 2026 Avant AI Studio. Усі права захищені.</span><span data-i18n="common.footerNote">ШІ-асистенти, база даних, Google Sheets і Telegram для бізнесу.</span></div></footer>
+  <footer class="footer"><div class="container footer-inner"><span>© 2026 Avant AI Studio. Усі права захищені.</span><span>ШІ-асистенти для заявок, консультацій і клієнтського сервісу.</span></div></footer>
   <script src="assets/js/app.js"></script>
   <script src="assets/js/form-fix.js"></script>
 </body>
