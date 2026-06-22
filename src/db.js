@@ -1,52 +1,29 @@
-import Database from 'better-sqlite3';
-import path from 'node:path';
-import fs from 'node:fs';
 import crypto from 'node:crypto';
 import dotenv from 'dotenv';
+import { createClient } from '@supabase/supabase-js';
 
 dotenv.config();
 
-const dbPath = process.env.DATABASE_PATH || './data/avant.sqlite';
-const resolvedPath = path.resolve(process.cwd(), dbPath);
-fs.mkdirSync(path.dirname(resolvedPath), { recursive: true });
+function getSupabaseClient() {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_KEY;
 
-export const db = new Database(resolvedPath);
-db.pragma('journal_mode = WAL');
-db.pragma('foreign_keys = ON');
+  if (!url || !key) {
+    throw new Error('Supabase config is missing. Set SUPABASE_URL and SUPABASE_KEY.');
+  }
+
+  return createClient(url, key, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false
+    }
+  });
+}
+
+const supabase = getSupabaseClient();
 
 export function initDb() {
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS leads (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      public_id TEXT NOT NULL UNIQUE,
-      name TEXT NOT NULL,
-      contact TEXT NOT NULL,
-      niche TEXT NOT NULL,
-      message TEXT NOT NULL,
-      language TEXT NOT NULL DEFAULT 'uk',
-      page TEXT,
-      source TEXT NOT NULL DEFAULT 'website',
-      status TEXT NOT NULL DEFAULT 'new',
-      sheet_status TEXT NOT NULL DEFAULT 'pending',
-      telegram_status TEXT NOT NULL DEFAULT 'pending',
-      meta_json TEXT,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-    );
-
-    CREATE TABLE IF NOT EXISTS integration_logs (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      lead_id INTEGER,
-      channel TEXT NOT NULL,
-      status TEXT NOT NULL,
-      message TEXT,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (lead_id) REFERENCES leads(id) ON DELETE CASCADE
-    );
-
-    CREATE INDEX IF NOT EXISTS idx_leads_created_at ON leads(created_at DESC);
-    CREATE INDEX IF NOT EXISTS idx_leads_status ON leads(status);
-  `);
+  return true;
 }
 
 export function createPublicId() {
@@ -56,17 +33,10 @@ export function createPublicId() {
   return `A-${date}-${random}`;
 }
 
-export function insertLead(payload) {
+export async function insertLead(payload) {
   const publicId = createPublicId();
-  const stmt = db.prepare(`
-    INSERT INTO leads (
-      public_id, name, contact, niche, message, language, page, source, meta_json
-    ) VALUES (
-      @public_id, @name, @contact, @niche, @message, @language, @page, @source, @meta_json
-    )
-  `);
 
-  const info = stmt.run({
+  const record = {
     public_id: publicId,
     name: payload.name,
     contact: payload.contact,
@@ -75,56 +45,108 @@ export function insertLead(payload) {
     language: payload.language || 'uk',
     page: payload.page || 'contact',
     source: payload.source || 'website',
-    meta_json: JSON.stringify(payload.meta || {})
-  });
+    meta_json: payload.meta || {}
+  };
 
-  return getLeadById(info.lastInsertRowid);
+  const { data, error } = await supabase
+    .from('leads')
+    .insert(record)
+    .select('*')
+    .single();
+
+  if (error) throw error;
+  return data;
 }
 
-export function getLeadById(id) {
-  return db.prepare('SELECT * FROM leads WHERE id = ?').get(id);
+export async function getLeadById(id) {
+  const { data, error } = await supabase
+    .from('leads')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error) throw error;
+  return data;
 }
 
-export function listLeads({ limit = 100, status = null } = {}) {
+export async function listLeads({ limit = 100, status = null } = {}) {
   const safeLimit = Math.min(Math.max(Number(limit) || 100, 1), 500);
-  if (status) {
-    return db.prepare('SELECT * FROM leads WHERE status = ? ORDER BY created_at DESC LIMIT ?').all(status, safeLimit);
-  }
-  return db.prepare('SELECT * FROM leads ORDER BY created_at DESC LIMIT ?').all(safeLimit);
+  let query = supabase
+    .from('leads')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(safeLimit);
+
+  if (status) query = query.eq('status', status);
+
+  const { data, error } = await query;
+  if (error) throw error;
+  return data || [];
 }
 
-export function updateLeadIntegrationStatus(id, field, value) {
+export async function updateLeadIntegrationStatus(id, field, value) {
   const allowed = new Set(['sheet_status', 'telegram_status']);
   if (!allowed.has(field)) throw new Error(`Unsupported status field: ${field}`);
-  db.prepare(`UPDATE leads SET ${field} = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`).run(value, id);
-  return getLeadById(id);
+
+  const { data, error } = await supabase
+    .from('leads')
+    .update({ [field]: value, updated_at: new Date().toISOString() })
+    .eq('id', id)
+    .select('*')
+    .single();
+
+  if (error) throw error;
+  return data;
 }
 
-export function updateLeadStatus(id, status) {
+export async function updateLeadStatus(id, status) {
   const allowed = new Set(['new', 'in_progress', 'closed', 'cancelled']);
   if (!allowed.has(status)) throw new Error('Unsupported lead status');
-  db.prepare('UPDATE leads SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(status, id);
-  return getLeadById(id);
+
+  const { data, error } = await supabase
+    .from('leads')
+    .update({ status, updated_at: new Date().toISOString() })
+    .eq('id', id)
+    .select('*')
+    .single();
+
+  if (error) throw error;
+  return data;
 }
 
-export function addIntegrationLog(leadId, channel, status, message = '') {
-  db.prepare(`
-    INSERT INTO integration_logs (lead_id, channel, status, message)
-    VALUES (?, ?, ?, ?)
-  `).run(leadId, channel, status, String(message).slice(0, 1200));
+export async function addIntegrationLog(leadId, channel, status, message = '') {
+  const { error } = await supabase
+    .from('integration_logs')
+    .insert({
+      lead_id: leadId,
+      channel,
+      status,
+      message: String(message).slice(0, 1200)
+    });
+
+  if (error) throw error;
 }
 
-export function getStats() {
-  const total = db.prepare('SELECT COUNT(*) AS count FROM leads').get().count;
-  const today = db.prepare("SELECT COUNT(*) AS count FROM leads WHERE date(created_at) = date('now')").get().count;
-  const byStatus = db.prepare('SELECT status, COUNT(*) AS count FROM leads GROUP BY status').all();
-  return { total, today, byStatus };
+export async function getStats() {
+  const { data, error } = await supabase
+    .from('leads')
+    .select('status, created_at')
+    .limit(10000);
+
+  if (error) throw error;
+
+  const rows = data || [];
+  const today = new Date().toISOString().slice(0, 10);
+  const byStatusMap = rows.reduce((acc, lead) => {
+    acc[lead.status] = (acc[lead.status] || 0) + 1;
+    return acc;
+  }, {});
+
+  return {
+    total: rows.length,
+    today: rows.filter((lead) => String(lead.created_at || '').slice(0, 10) === today).length,
+    byStatus: Object.entries(byStatusMap).map(([status, count]) => ({ status, count }))
+  };
 }
 
 initDb();
-
-if (process.argv.includes('--reset')) {
-  db.exec('DROP TABLE IF EXISTS integration_logs; DROP TABLE IF EXISTS leads;');
-  initDb();
-  console.log('Database reset complete:', resolvedPath);
-}
