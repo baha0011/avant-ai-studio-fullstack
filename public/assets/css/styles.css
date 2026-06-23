@@ -4754,3 +4754,9 @@ html[data-theme="light"] .smm-auto-chat-label input {
   background: rgba(255,255,255,.92);
   border-color: rgba(15,23,42,.12);
 }
+
+/* Hide deprecated auto chat_id controls after switching SMM CRM to manual outreach */
+.smm-auto-chat-label,
+[data-smm-save-chat] {
+  display: none !important;
+}

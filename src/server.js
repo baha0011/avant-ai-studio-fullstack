@@ -784,42 +784,6 @@ app.patch('/api/smm/targets/:id/message', requireAdminSession, requireSuperAdmin
   }
 });
 
-app.patch('/api/smm/targets/:id/telegram-auto-chat', requireAdminSession, requireSuperAdmin, async (req, res) => {
-  try {
-    const target = await getSmmTargetById(req.params.id);
-
-    if (!target) {
-      return res.status(404).json({ ok: false, error: 'Target not found' });
-    }
-
-    const telegramAutoChatId = cleanText(req.body.chat_id || req.body.chatId || '', 80).trim();
-
-    if (telegramAutoChatId && !/^-?\d+$/.test(telegramAutoChatId)) {
-      return res.status(400).json({ ok: false, error: 'Auto chat_id must be numeric' });
-    }
-
-    const meta = {
-      ...(target.meta_json || {})
-    };
-
-    if (telegramAutoChatId) {
-      meta.telegramAutoChatId = telegramAutoChatId;
-    } else {
-      delete meta.telegramAutoChatId;
-    }
-
-    const updated = await updateSmmTarget(target.id, {
-      meta_json: meta,
-      error_message: telegramAutoChatId ? '' : target.error_message
-    });
-
-    res.json({ ok: true, target: updated });
-  } catch (error) {
-    console.error('[SMM auto chat id]', error);
-    res.status(400).json({ ok: false, error: error.message || 'Failed to save auto chat_id' });
-  }
-});
-
 app.post('/api/smm/start', requireAdminSession, requireSuperAdmin, async (req, res) => {
   const maxPerRun = Math.min(Math.max(Number(process.env.SMM_MAX_SEND_PER_RUN || 10), 1), 30);
   const delayMs = Math.min(Math.max(Number(process.env.SMM_SEND_DELAY_MS || 4000), 500), 30000);
@@ -845,16 +809,14 @@ app.post('/api/smm/start', requireAdminSession, requireSuperAdmin, async (req, r
       summary.processed += 1;
 
       const contacts = Array.isArray(target.telegram_contacts) ? target.telegram_contacts : [];
-      const publicContact = contacts[0] || '';
-      const autoChatId = String(target.meta_json?.telegramAutoChatId || '').trim();
-      const contact = autoChatId ? `chat_id:${autoChatId}` : publicContact;
+      const contact = contacts[0] || '';
 
       if (!contact) {
         summary.skipped += 1;
 
         await updateSmmTarget(target.id, {
           send_status: 'skipped',
-          error_message: 'No Telegram contact or auto chat_id'
+          error_message: 'No Telegram contact'
         });
 
         await addSmmSendLog({
@@ -862,7 +824,7 @@ app.post('/api/smm/start', requireAdminSession, requireSuperAdmin, async (req, r
           contact: '',
           status: 'skipped',
           message: target.message_uk,
-          errorMessage: 'No Telegram contact or auto chat_id',
+          errorMessage: 'No Telegram contact',
           sentBy: req.adminUser.id
         }).catch(() => null);
 
@@ -888,7 +850,7 @@ app.post('/api/smm/start', requireAdminSession, requireSuperAdmin, async (req, r
           error_message: result.reason || 'Manual sending required',
           meta_json: {
             ...(target.meta_json || {}),
-            manualTelegramUrl: result.manualUrl || getManualTelegramUrl(publicContact)
+            manualTelegramUrl: result.manualUrl || getManualTelegramUrl(contact)
           }
         });
       } else if (result.status === 'skipped') {
@@ -909,7 +871,7 @@ app.post('/api/smm/start', requireAdminSession, requireSuperAdmin, async (req, r
 
       await addSmmSendLog({
         targetId: target.id,
-        contact: autoChatId ? `chat_id:${autoChatId}` : publicContact,
+        contact,
         status: result.status,
         message: target.message_uk,
         errorMessage: result.error || result.reason || '',

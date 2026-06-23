@@ -171,7 +171,6 @@
                 <div><dt>Сфера</dt><dd>${escapeHtml(target.business_type || '—')}</dd></div>
                 <div><dt>Опис</dt><dd>${escapeHtml(target.description || 'Ще не проаналізовано')}</dd></div>
                 <div><dt>Telegram</dt><dd>${tg ? escapeHtml(tg) : '—'}</dd></div>
-                <div><dt>Auto chat_id</dt><dd>${escapeHtml(target.meta_json?.telegramAutoChatId || '—')}</dd></div>
                 <div><dt>Email</dt><dd>${escapeHtml(emails.join(', ') || '—')}</dd></div>
                 <div><dt>Phone</dt><dd>${escapeHtml(phones.join(', ') || '—')}</dd></div>
               </dl>
@@ -185,17 +184,6 @@
                 <input type="checkbox" data-smm-toggle="${escapeHtml(target.id)}" ${target.send_enabled ? 'checked' : ''}>
                 <span>Включити в SMM outreach</span>
               </label>
-
-              <label class="smm-auto-chat-label">
-                Auto chat_id для відправки ботом
-                <input
-                  type="text"
-                  data-smm-auto-chat="${escapeHtml(target.id)}"
-                  value="${escapeHtml(target.meta_json?.telegramAutoChatId || '')}"
-                  placeholder="Наприклад: 123456789"
-                >
-                <small>Якщо є тільки @username — бот не зможе написати автоматично. Для авто потрібен numeric chat_id.</small>
-              </label>
             </section>
           </div>
 
@@ -206,7 +194,6 @@
 
           <div class="smm-card-actions">
             <button class="btn btn-secondary" type="button" data-smm-analyze="${escapeHtml(target.id)}">🔍 Аналіз</button>
-            <button class="btn btn-secondary" type="button" data-smm-save-chat="${escapeHtml(target.id)}">💬 Зберегти chat_id</button>
             <button class="btn btn-secondary" type="button" data-smm-save-message="${escapeHtml(target.id)}">💾 Зберегти текст</button>
             <button class="btn btn-secondary" type="button" data-smm-copy="${escapeHtml(target.id)}">📋 Копіювати</button>
             ${tgUrl ? `<a class="btn btn-secondary" href="${escapeHtml(tgUrl)}" target="_blank" rel="noopener">💬 Відкрити Telegram</a>` : ''}
@@ -344,23 +331,6 @@
       await loadTargets();
     }
   }
-
-  async function saveAutoChatId(id) {
-    const input = document.querySelector(`[data-smm-auto-chat="${CSS.escape(String(id))}"]`);
-    const chatId = input?.value?.trim() || '';
-
-    try {
-      await api(`/api/smm/targets/${id}/telegram-auto-chat`, {
-        method: 'PATCH',
-        body: JSON.stringify({ chat_id: chatId })
-      });
-
-      await loadTargets();
-    } catch (error) {
-      alert(error.message);
-    }
-  }
-
   async function saveMessage(id) {
     const textarea = document.querySelector(`[data-smm-message="${CSS.escape(String(id))}"]`);
     const message = textarea?.value?.trim() || '';
@@ -434,9 +404,6 @@
   document.addEventListener('click', async (event) => {
     const analyze = event.target.closest('[data-smm-analyze]');
     if (analyze) return analyzeTarget(analyze.dataset.smmAnalyze);
-
-    const saveChat = event.target.closest('[data-smm-save-chat]');
-    if (saveChat) return saveAutoChatId(saveChat.dataset.smmSaveChat);
 
     const save = event.target.closest('[data-smm-save-message]');
     if (save) return saveMessage(save.dataset.smmSaveMessage);
