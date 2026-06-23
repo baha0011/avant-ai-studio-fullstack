@@ -1,5 +1,5 @@
 (function () {
-  const root = document.getElementById('adminV2Root');
+  const root = document.getElementById('adminCrmRoot');
   if (!root) return;
 
   const tokenInput = document.getElementById('adminToken');
@@ -8,12 +8,34 @@
   const statusFilter = document.getElementById('adminStatusFilter');
   const searchInput = document.getElementById('adminSearch');
   const statsWrap = document.getElementById('adminStats');
-  const board = document.getElementById('adminBoard');
+  const pipeline = document.getElementById('crmPipeline');
+  const tableBody = document.getElementById('crmLeadList');
+  const mobileList = document.getElementById('crmMobileList');
+  const heroCount = document.getElementById('crmHeroCount');
   const drawer = document.getElementById('leadDrawer');
   const drawerBody = document.getElementById('leadDrawerBody');
   const drawerClose = document.getElementById('leadDrawerClose');
 
   let leads = [];
+  let stats = {};
+  let activeStatus = '';
+  let activeLeadId = null;
+
+  const STATUS_META = {
+    new: { label: 'New', icon: '🆕', className: 'new' },
+    in_progress: { label: 'In work', icon: '🔄', className: 'in-progress' },
+    closed: { label: 'Closed', icon: '✅', className: 'closed' },
+    cancelled: { label: 'Cancelled', icon: '❌', className: 'cancelled' }
+  };
+
+  const NICHE_MAP = {
+    clinic: 'Клініка / стоматологія',
+    beauty: 'Салон краси',
+    education: 'Онлайн-школа',
+    service: 'Сервісна компанія',
+    sales: 'Відділ продажів',
+    other: 'Інший бізнес'
+  };
 
   function escapeHtml(value = '') {
     return String(value)
@@ -21,6 +43,77 @@
       .replaceAll('<', '&lt;')
       .replaceAll('>', '&gt;')
       .replaceAll('"', '&quot;');
+  }
+
+  function clean(value = '') {
+    return String(value || '').trim();
+  }
+
+  function formatNiche(niche = '') {
+    return NICHE_MAP[niche] || niche || '—';
+  }
+
+  function formatDate(value = '') {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value || '—';
+
+    return new Intl.DateTimeFormat('uk-UA', {
+      year: '2-digit',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(date);
+  }
+
+  function getStatusMeta(status = 'new') {
+    return STATUS_META[status] || { label: status || 'new', icon: '•', className: 'new' };
+  }
+
+  function statusBadge(status = 'new') {
+    const meta = getStatusMeta(status);
+    return `<span class="crm-status ${meta.className}">${meta.icon} ${meta.label}</span>`;
+  }
+
+  function scoreClass(label = '') {
+    return label === 'hot' ? 'hot' : label === 'warm' ? 'warm' : 'cold';
+  }
+
+  function scoreBadge(lead) {
+    return `<span class="crm-score ${scoreClass(lead.lead_score_label)}">${escapeHtml(lead.lead_score_emoji || '⚪')} ${escapeHtml(lead.lead_score_title || 'Cold lead')} · ${Number(lead.lead_score || 0)}/100</span>`;
+  }
+
+  function statusActions(status = 'new') {
+    if (status === 'new') {
+      return [
+        { label: 'В роботу', next: 'in_progress', icon: '🔄', type: 'secondary' },
+        { label: 'Закрити', next: 'closed', icon: '✅', type: 'primary' }
+      ];
+    }
+
+    if (status === 'in_progress') {
+      return [
+        { label: 'Закрити', next: 'closed', icon: '✅', type: 'primary' },
+        { label: 'В new', next: 'new', icon: '🆕', type: 'secondary' }
+      ];
+    }
+
+    if (status === 'closed') {
+      return [
+        { label: 'В роботу', next: 'in_progress', icon: '🔄', type: 'secondary' }
+      ];
+    }
+
+    if (status === 'cancelled') {
+      return [
+        { label: 'В роботу', next: 'in_progress', icon: '🔄', type: 'secondary' },
+        { label: 'В new', next: 'new', icon: '🆕', type: 'secondary' }
+      ];
+    }
+
+    return [
+      { label: 'В роботу', next: 'in_progress', icon: '🔄', type: 'secondary' }
+    ];
   }
 
   function getToken() {
@@ -32,70 +125,8 @@
     if (token) localStorage.setItem('avantAdminToken', token);
   }
 
-  function formatNiche(niche = '') {
-    const map = {
-      clinic: 'Клініка / стоматологія',
-      beauty: 'Салон краси',
-      education: 'Онлайн-школа',
-      service: 'Сервісна компанія',
-      sales: 'Відділ продажів',
-      other: 'Інший бізнес'
-    };
-
-    return map[niche] || niche || '—';
-  }
-
-  function statusLabel(status) {
-    const map = {
-      new: '🆕 New',
-      in_progress: '🔄 In work',
-      closed: '✅ Closed',
-      cancelled: '❌ Cancelled'
-    };
-    return map[status] || status;
-  }
-
-  function statusActions(status = 'new') {
-    const normalized = String(status || 'new');
-
-    if (normalized === 'new') {
-      return [
-        { label: '🔄 В роботу', next: 'in_progress', style: 'secondary' },
-        { label: '✅ Закрити', next: 'closed', style: 'primary' }
-      ];
-    }
-
-    if (normalized === 'in_progress') {
-      return [
-        { label: '✅ Закрити', next: 'closed', style: 'primary' },
-        { label: '🆕 Повернути в new', next: 'new', style: 'secondary' }
-      ];
-    }
-
-    if (normalized === 'closed') {
-      return [
-        { label: '🔄 Повернути в роботу', next: 'in_progress', style: 'secondary' }
-      ];
-    }
-
-    if (normalized === 'cancelled') {
-      return [
-        { label: '🔄 Повернути в роботу', next: 'in_progress', style: 'secondary' },
-        { label: '🆕 Повернути в new', next: 'new', style: 'secondary' }
-      ];
-    }
-
-    return [
-      { label: '🔄 В роботу', next: 'in_progress', style: 'secondary' }
-    ];
-  }
-
-  function scoreClass(label) {
-    return label === 'hot' ? 'hot' : label === 'warm' ? 'warm' : 'cold';
-  }
-
   async function api(path, options = {}) {
-    const res = await fetch(path, {
+    const response = await fetch(path, {
       ...options,
       headers: {
         'Content-Type': 'application/json',
@@ -104,110 +135,252 @@
       }
     });
 
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok || !data.ok) throw new Error(data.error || `HTTP ${res.status}`);
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data.ok) {
+      throw new Error(data.error || `HTTP ${response.status}`);
+    }
+
     return data;
   }
 
   async function loadLeads() {
     saveToken();
 
-    const params = new URLSearchParams({
-      limit: '500'
-    });
-
-    if (statusFilter.value) params.set('status', statusFilter.value);
+    const params = new URLSearchParams({ limit: '500' });
+    if (activeStatus) params.set('status', activeStatus);
     if (searchInput.value.trim()) params.set('q', searchInput.value.trim());
 
-    board.innerHTML = '<p class="muted">Завантажуємо заявки...</p>';
+    setLoading(true);
 
     try {
       const data = await api(`/api/leads?${params.toString()}`);
       leads = data.leads || [];
-      renderStats(data.stats || {});
-      renderBoard();
+      stats = data.stats || {};
+      renderAll();
+
+      if (activeLeadId) {
+        const stillExists = leads.find((lead) => String(lead.id) === String(activeLeadId));
+        if (stillExists && drawer.classList.contains('open')) openDrawer(activeLeadId);
+      }
     } catch (error) {
-      statsWrap.innerHTML = '';
-      board.innerHTML = `<p class="muted">Не вдалося завантажити заявки: ${escapeHtml(error.message)}</p>`;
+      leads = [];
+      stats = {};
+      renderStats();
+      renderPipeline();
+      renderEmpty(`Не вдалося завантажити CRM: ${error.message}`);
+    } finally {
+      setLoading(false);
     }
   }
 
-  function renderStats(stats) {
-    const scoreCounts = Object.fromEntries((stats.byScore || []).map((item) => [item.score, item.count]));
+  function setLoading(isLoading) {
+    loadBtn.disabled = isLoading;
+    loadBtn.textContent = isLoading ? 'Оновлюємо...' : 'Оновити CRM';
+  }
+
+  function renderAll() {
+    renderStats();
+    renderPipeline();
+    renderList();
+  }
+
+  function countByStatus() {
+    const map = { new: 0, in_progress: 0, closed: 0, cancelled: 0 };
+    (stats.byStatus || []).forEach((item) => {
+      map[item.status] = item.count;
+    });
+    return map;
+  }
+
+  function countByScore() {
+    const map = { hot: 0, warm: 0, cold: 0 };
+    (stats.byScore || []).forEach((item) => {
+      map[item.score] = item.count;
+    });
+    return map;
+  }
+
+  function renderStats() {
+    const score = countByScore();
+    const total = stats.total || 0;
+    if (heroCount) heroCount.textContent = String(total);
+
     statsWrap.innerHTML = `
-      <div class="stat-card"><strong>${stats.total || 0}</strong><span>Усього</span></div>
-      <div class="stat-card"><strong>${stats.today || 0}</strong><span>Сьогодні</span></div>
-      <div class="stat-card"><strong>${stats.week || 0}</strong><span>За тиждень</span></div>
-      <div class="stat-card"><strong>${stats.month || 0}</strong><span>За місяць</span></div>
-      <div class="stat-card"><strong>${scoreCounts.hot || 0}</strong><span>Hot leads</span></div>
-      <div class="stat-card"><strong>${scoreCounts.warm || 0}</strong><span>Warm leads</span></div>
+      <div class="crm-stat"><span>Усього</span><strong>${total}</strong><small>всі заявки</small></div>
+      <div class="crm-stat"><span>Сьогодні</span><strong>${stats.today || 0}</strong><small>нові за день</small></div>
+      <div class="crm-stat"><span>Тиждень</span><strong>${stats.week || 0}</strong><small>за поточний тиждень</small></div>
+      <div class="crm-stat"><span>Місяць</span><strong>${stats.month || 0}</strong><small>за поточний місяць</small></div>
+      <div class="crm-stat hot"><span>Hot</span><strong>${score.hot || 0}</strong><small>пріоритетні</small></div>
+      <div class="crm-stat warm"><span>Warm</span><strong>${score.warm || 0}</strong><small>перспективні</small></div>
     `;
   }
 
-  function renderStatusButtons(lead, mode = 'card') {
-    return statusActions(lead.status).map((action) => {
-      if (mode === 'drawer') {
-        const cls = action.style === 'primary' ? 'btn btn-primary' : 'btn btn-secondary';
-        return `<button class="${cls}" type="button" data-drawer-status="${escapeHtml(action.next)}">${escapeHtml(action.label)}</button>`;
-      }
+  function renderPipeline() {
+    const byStatus = countByStatus();
+    const total = stats.total || 0;
 
-      return `<button type="button" data-status="${escapeHtml(lead.id)}" data-next="${escapeHtml(action.next)}">${escapeHtml(action.label)}</button>`;
-    }).join('');
+    pipeline.querySelectorAll('[data-status]').forEach((button) => {
+      const status = button.dataset.status;
+      const count = status ? byStatus[status] || 0 : total;
+      button.classList.toggle('active', status === activeStatus);
+      const span = button.querySelector('span');
+      if (span) span.textContent = String(count);
+    });
+
+    statusFilter.value = activeStatus;
   }
 
-  function leadCard(lead) {
-    const source = lead.source_details || {};
+  function renderEmpty(text) {
+    tableBody.innerHTML = `<tr><td colspan="7" class="crm-empty">${escapeHtml(text)}</td></tr>`;
+    mobileList.innerHTML = `<p class="crm-empty mobile">${escapeHtml(text)}</p>`;
+  }
+
+  function shortProject(lead) {
     const details = lead.lead_details || {};
-    const message = details.description || lead.message || '';
-
-    return `
-      <article class="admin-lead-card" data-lead-card="${escapeHtml(lead.id)}">
-        <div class="lead-card-top">
-          <div>
-            <strong>${escapeHtml(lead.public_id)}</strong>
-            <span>${escapeHtml(new Date(lead.created_at).toLocaleString('uk-UA'))}</span>
-          </div>
-          <span class="lead-score ${scoreClass(lead.lead_score_label)}">${escapeHtml(lead.lead_score_emoji)} ${escapeHtml(lead.lead_score_title)} · ${lead.lead_score}/100</span>
-        </div>
-
-        <h3>${escapeHtml(lead.name)}</h3>
-        <p class="muted">${escapeHtml(lead.contact)}</p>
-
-        <div class="lead-card-meta">
-          <span>${statusLabel(lead.status)}</span>
-          <span>${escapeHtml(formatNiche(lead.niche))}</span>
-          <span>${escapeHtml(source.utm_source || source.source || 'website')}</span>
-        </div>
-
-        <p class="lead-card-message">${escapeHtml(message).slice(0, 220)}${message.length > 220 ? '…' : ''}</p>
-
-        <div class="lead-actions">
-          <button type="button" data-open="${escapeHtml(lead.id)}">Картка</button>
-          ${renderStatusButtons(lead)}
-        </div>
-      </article>
-    `;
+    const format = details.format || 'Формат не вказано';
+    const budget = details.budget || 'Бюджет не вказано';
+    return { format, budget };
   }
 
-  function renderBoard() {
+  function sourceLabel(lead) {
+    const source = lead.source_details || {};
+    return source.utm_source || source.source || lead.source || 'website';
+  }
+
+  function sourceSubLabel(lead) {
+    const source = lead.source_details || {};
+    return source.utm_campaign || source.page || lead.page || '—';
+  }
+
+  function clientContact(lead) {
+    return lead.contact || '—';
+  }
+
+  function actionButtons(lead, compact = false) {
+    return statusActions(lead.status).map((action) => `
+      <button
+        class="crm-action ${action.type}"
+        type="button"
+        data-status-action="${escapeHtml(lead.id)}"
+        data-next="${escapeHtml(action.next)}"
+        title="${escapeHtml(action.label)}"
+      >
+        ${action.icon} ${compact ? '' : escapeHtml(action.label)}
+      </button>
+    `).join('');
+  }
+
+  function renderList() {
     if (!leads.length) {
-      board.innerHTML = '<p class="muted">Заявок поки немає або фільтр нічого не знайшов.</p>';
+      renderEmpty('Заявок не знайдено.');
       return;
     }
 
-    board.innerHTML = leads.map(leadCard).join('');
+    tableBody.innerHTML = leads.map((lead) => {
+      const project = shortProject(lead);
 
-    board.querySelectorAll('[data-open]').forEach((button) => {
-      button.addEventListener('click', () => openDrawer(button.dataset.open));
+      return `
+        <tr class="crm-row" data-open-lead="${escapeHtml(lead.id)}">
+          <td>
+            <div class="crm-lead-id">
+              ${scoreBadge(lead)}
+              <strong>${escapeHtml(lead.public_id)}</strong>
+            </div>
+          </td>
+
+          <td>
+            <div class="crm-client">
+              <strong>${escapeHtml(lead.name || 'Без імені')}</strong>
+              <span>${escapeHtml(clientContact(lead))}</span>
+              <small>${escapeHtml(formatNiche(lead.niche))}</small>
+            </div>
+          </td>
+
+          <td>
+            <div class="crm-project">
+              <strong>${escapeHtml(project.format)}</strong>
+              <span>${escapeHtml(project.budget)}</span>
+            </div>
+          </td>
+
+          <td>
+            <div class="crm-source">
+              <strong>${escapeHtml(sourceLabel(lead))}</strong>
+              <span>${escapeHtml(sourceSubLabel(lead))}</span>
+            </div>
+          </td>
+
+          <td>${statusBadge(lead.status)}</td>
+
+          <td>
+            <div class="crm-date">
+              <strong>${escapeHtml(formatDate(lead.created_at))}</strong>
+              <span>${escapeHtml(lead.language || 'uk')}</span>
+            </div>
+          </td>
+
+          <td>
+            <div class="crm-row-actions">
+              <button class="crm-action ghost" type="button" data-open-button="${escapeHtml(lead.id)}">Картка</button>
+              ${actionButtons(lead, true)}
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    mobileList.innerHTML = leads.map((lead) => {
+      const project = shortProject(lead);
+
+      return `
+        <article class="crm-mobile-card" data-open-lead="${escapeHtml(lead.id)}">
+          <div class="crm-mobile-top">
+            ${scoreBadge(lead)}
+            ${statusBadge(lead.status)}
+          </div>
+          <strong>${escapeHtml(lead.name || 'Без імені')}</strong>
+          <span>${escapeHtml(clientContact(lead))}</span>
+          <p>${escapeHtml(project.format)}</p>
+          <div class="crm-mobile-meta">
+            <small>${escapeHtml(lead.public_id)}</small>
+            <small>${escapeHtml(formatDate(lead.created_at))}</small>
+          </div>
+          <div class="crm-row-actions">
+            <button class="crm-action ghost" type="button" data-open-button="${escapeHtml(lead.id)}">Картка</button>
+            ${actionButtons(lead, true)}
+          </div>
+        </article>
+      `;
+    }).join('');
+
+    bindListEvents();
+  }
+
+  function bindListEvents() {
+    document.querySelectorAll('[data-open-lead]').forEach((row) => {
+      row.addEventListener('click', (event) => {
+        if (event.target.closest('button, select, a')) return;
+        openDrawer(row.dataset.openLead);
+      });
     });
 
-    board.querySelectorAll('[data-status]').forEach((button) => {
-      button.addEventListener('click', () => updateStatus(button.dataset.status, button.dataset.next));
+    document.querySelectorAll('[data-open-button]').forEach((button) => {
+      button.addEventListener('click', (event) => {
+        event.stopPropagation();
+        openDrawer(button.dataset.openButton);
+      });
+    });
+
+    document.querySelectorAll('[data-status-action]').forEach((button) => {
+      button.addEventListener('click', (event) => {
+        event.stopPropagation();
+        updateStatus(button.dataset.statusAction, button.dataset.next);
+      });
     });
   }
 
   async function updateStatus(id, status) {
-    const drawerWasOpen = drawer.classList.contains('open');
+    const previousText = event?.target?.textContent;
 
     try {
       await api(`/api/leads/${id}/status`, {
@@ -215,18 +388,11 @@
         body: JSON.stringify({ status })
       });
 
+      activeLeadId = id;
       await loadLeads();
-
-      if (drawerWasOpen) {
-        const refreshedLead = leads.find((item) => String(item.id) === String(id));
-        if (refreshedLead) {
-          openDrawer(id);
-        } else {
-          drawer.classList.remove('open');
-        }
-      }
     } catch (error) {
       alert(`Не вдалося змінити статус: ${error.message}`);
+      if (event?.target && previousText) event.target.textContent = previousText;
     }
   }
 
@@ -234,70 +400,128 @@
     const lead = leads.find((item) => String(item.id) === String(id));
     if (!lead) return;
 
-    const source = lead.source_details || {};
+    activeLeadId = id;
+
     const details = lead.lead_details || {};
+    const source = lead.source_details || {};
+    const scoreReasons = Array.isArray(lead.lead_score_reasons) ? lead.lead_score_reasons : [];
 
     drawerBody.innerHTML = `
-      <div class="drawer-head">
-        <span class="lead-score ${scoreClass(lead.lead_score_label)}">${escapeHtml(lead.lead_score_emoji)} ${escapeHtml(lead.lead_score_title)} · ${lead.lead_score}/100</span>
-        <h2>${escapeHtml(lead.public_id)}</h2>
-        <p>${escapeHtml(new Date(lead.created_at).toLocaleString('uk-UA'))}</p>
+      <div class="crm-drawer-head">
+        <div>
+          ${scoreBadge(lead)}
+          <h2>${escapeHtml(lead.public_id)}</h2>
+          <p>${escapeHtml(formatDate(lead.created_at))}</p>
+        </div>
+        ${statusBadge(lead.status)}
       </div>
 
-      <div class="drawer-section">
-        <h3>Клієнт</h3>
-        <p><b>Імʼя:</b> ${escapeHtml(lead.name)}</p>
-        <p><b>Контакт:</b> ${escapeHtml(lead.contact)}</p>
-        <p><b>Ніша:</b> ${escapeHtml(formatNiche(lead.niche))}</p>
-        <p><b>Статус:</b> ${statusLabel(lead.status)}</p>
+      <div class="crm-drawer-actions">
+        ${actionButtons(lead)}
       </div>
 
-      <div class="drawer-section">
-        <h3>Проєкт</h3>
-        <p><b>Формат:</b> ${escapeHtml(details.format || '—')}</p>
-        <p><b>Бюджет:</b> ${escapeHtml(details.budget || '—')}</p>
-        <p><b>Канал:</b> ${escapeHtml(details.channel || '—')}</p>
-        <p><b>Автоматизація:</b> ${escapeHtml(details.automation || '—')}</p>
-      </div>
+      <div class="crm-drawer-grid">
+        <section class="crm-info-block">
+          <h3>Клієнт</h3>
+          <dl>
+            <div><dt>Імʼя</dt><dd>${escapeHtml(lead.name || '—')}</dd></div>
+            <div><dt>Контакт</dt><dd>${escapeHtml(clientContact(lead))}</dd></div>
+            <div><dt>Ніша</dt><dd>${escapeHtml(formatNiche(lead.niche))}</dd></div>
+            <div><dt>Мова</dt><dd>${escapeHtml(lead.language || 'uk')}</dd></div>
+          </dl>
+        </section>
 
-      <div class="drawer-section">
-        <h3>Опис</h3>
-        <p>${escapeHtml(details.description || lead.message || '—')}</p>
-      </div>
+        <section class="crm-info-block">
+          <h3>Проєкт</h3>
+          <dl>
+            <div><dt>Формат</dt><dd>${escapeHtml(details.format || '—')}</dd></div>
+            <div><dt>Бюджет</dt><dd>${escapeHtml(details.budget || '—')}</dd></div>
+            <div><dt>Канал</dt><dd>${escapeHtml(details.channel || '—')}</dd></div>
+            <div><dt>Автоматизація</dt><dd>${escapeHtml(details.automation || '—')}</dd></div>
+          </dl>
+        </section>
 
-      <div class="drawer-section">
-        <h3>Джерело</h3>
-        <p><b>Source:</b> ${escapeHtml(source.utm_source || source.source || 'website')}</p>
-        <p><b>Campaign:</b> ${escapeHtml(source.utm_campaign || '—')}</p>
-        <p><b>Medium:</b> ${escapeHtml(source.utm_medium || '—')}</p>
-        <p><b>Page:</b> ${escapeHtml(source.page || source.landingPage || '—')}</p>
-        <p><b>Referrer:</b> ${escapeHtml(source.referrer || '—')}</p>
-      </div>
+        <section class="crm-info-block full">
+          <h3>Опис задачі</h3>
+          <p>${escapeHtml(details.description || lead.message || '—')}</p>
+        </section>
 
-      <div class="drawer-actions">
-        ${renderStatusButtons(lead, 'drawer')}
+        <section class="crm-info-block">
+          <h3>Джерело</h3>
+          <dl>
+            <div><dt>Source</dt><dd>${escapeHtml(source.utm_source || source.source || lead.source || 'website')}</dd></div>
+            <div><dt>Campaign</dt><dd>${escapeHtml(source.utm_campaign || '—')}</dd></div>
+            <div><dt>Medium</dt><dd>${escapeHtml(source.utm_medium || '—')}</dd></div>
+            <div><dt>Page</dt><dd>${escapeHtml(source.page || source.landingPage || lead.page || '—')}</dd></div>
+            <div><dt>Referrer</dt><dd>${escapeHtml(source.referrer || '—')}</dd></div>
+          </dl>
+        </section>
+
+        <section class="crm-info-block">
+          <h3>Lead scoring</h3>
+          <dl>
+            <div><dt>Score</dt><dd>${escapeHtml(String(lead.lead_score || 0))}/100</dd></div>
+            <div><dt>Quality</dt><dd>${escapeHtml(lead.lead_score_title || 'Cold lead')}</dd></div>
+            <div><dt>Reasons</dt><dd>${escapeHtml(scoreReasons.join(', ') || '—')}</dd></div>
+          </dl>
+        </section>
       </div>
     `;
 
     drawer.classList.add('open');
+    drawer.setAttribute('aria-hidden', 'false');
 
-    drawerBody.querySelectorAll('[data-drawer-status]').forEach((button) => {
-      button.addEventListener('click', () => updateStatus(lead.id, button.dataset.drawerStatus));
+    drawerBody.querySelectorAll('[data-status-action]').forEach((button) => {
+      button.addEventListener('click', () => updateStatus(button.dataset.statusAction, button.dataset.next));
     });
   }
 
+  function closeDrawer() {
+    drawer.classList.remove('open');
+    drawer.setAttribute('aria-hidden', 'true');
+    activeLeadId = null;
+  }
+
   tokenInput.value = localStorage.getItem('avantAdminToken') || '';
-  saveBtn.addEventListener('click', saveToken);
+
+  saveBtn.addEventListener('click', () => {
+    saveToken();
+    saveBtn.textContent = 'Збережено';
+    setTimeout(() => {
+      saveBtn.textContent = 'Зберегти';
+    }, 900);
+  });
+
   loadBtn.addEventListener('click', loadLeads);
-  statusFilter.addEventListener('change', loadLeads);
+
+  statusFilter.addEventListener('change', () => {
+    activeStatus = statusFilter.value;
+    pipeline.querySelectorAll('[data-status]').forEach((button) => {
+      button.classList.toggle('active', button.dataset.status === activeStatus);
+    });
+    loadLeads();
+  });
+
+  pipeline.querySelectorAll('[data-status]').forEach((button) => {
+    button.addEventListener('click', () => {
+      activeStatus = button.dataset.status;
+      statusFilter.value = activeStatus;
+      loadLeads();
+    });
+  });
+
   searchInput.addEventListener('input', () => {
     clearTimeout(searchInput._timer);
     searchInput._timer = setTimeout(loadLeads, 250);
   });
 
-  drawerClose.addEventListener('click', () => drawer.classList.remove('open'));
+  drawerClose.addEventListener('click', closeDrawer);
   drawer.addEventListener('click', (event) => {
-    if (event.target === drawer) drawer.classList.remove('open');
+    if (event.target === drawer) closeDrawer();
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && drawer.classList.contains('open')) closeDrawer();
   });
 
   if (tokenInput.value) loadLeads();
