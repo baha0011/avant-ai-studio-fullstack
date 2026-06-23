@@ -1,4 +1,6 @@
 const SHEET_NAME = 'Leads';
+const TIMEZONE = 'Europe/Kyiv';
+const DATE_FORMAT = 'dd.MM.yyyy HH:mm';
 
 const HEADERS = [
   'Created At',
@@ -45,6 +47,8 @@ function getSheet() {
   }
 
   ensureHeaders(sheet);
+  formatSheet(sheet);
+
   return sheet;
 }
 
@@ -76,6 +80,50 @@ function getHeaderMap(sheet) {
   }, {});
 }
 
+function formatSheet(sheet) {
+  const map = getHeaderMap(sheet);
+
+  sheet.getRange(1, 1, 1, sheet.getLastColumn())
+    .setFontWeight('bold')
+    .setBackground('#111827')
+    .setFontColor('#ffffff');
+
+  if (map['Created At'] && sheet.getLastRow() >= 2) {
+    sheet
+      .getRange(2, map['Created At'], sheet.getLastRow() - 1, 1)
+      .setNumberFormat(DATE_FORMAT);
+  }
+
+  if (map['Status'] && sheet.getLastRow() >= 2) {
+    sheet
+      .getRange(2, map['Status'], sheet.getLastRow() - 1, 1)
+      .setHorizontalAlignment('center');
+  }
+
+  sheet.autoResizeColumns(1, Math.min(sheet.getLastColumn(), HEADERS.length));
+}
+
+function normalizeIsoDate(value) {
+  if (!value) return new Date();
+
+  if (Object.prototype.toString.call(value) === '[object Date]' && !isNaN(value.getTime())) {
+    return value;
+  }
+
+  const raw = String(value).trim();
+
+  // Supabase can return microseconds: 2026-06-23T08:31:11.837616+00:00
+  // JS Date expects milliseconds, so we trim extra digits.
+  const normalized = raw.replace(/(\.\d{3})\d+/, '$1');
+  const parsed = new Date(normalized);
+
+  if (!isNaN(parsed.getTime())) {
+    return parsed;
+  }
+
+  return new Date();
+}
+
 function getValue(lead, keys, fallback) {
   for (const key of keys) {
     if (lead && lead[key] !== undefined && lead[key] !== null && String(lead[key]).trim() !== '') {
@@ -90,8 +138,10 @@ function appendLead(lead) {
   const map = getHeaderMap(sheet);
   const source = lead.source_details || {};
 
+  const createdAt = normalizeIsoDate(getValue(lead, ['created_at', 'createdAt'], new Date()));
+
   const row = [];
-  row[map['Created At'] - 1] = getValue(lead, ['created_at', 'createdAt'], new Date());
+  row[map['Created At'] - 1] = createdAt;
   row[map['Public ID'] - 1] = getValue(lead, ['public_id', 'publicId'], '');
   row[map['Name'] - 1] = getValue(lead, ['name'], '');
   row[map['Contact'] - 1] = getValue(lead, ['contact'], '');
@@ -108,10 +158,18 @@ function appendLead(lead) {
 
   sheet.appendRow(row);
 
+  const appendedRow = sheet.getLastRow();
+
+  if (map['Created At']) {
+    sheet.getRange(appendedRow, map['Created At']).setNumberFormat(DATE_FORMAT);
+  }
+
+  formatSheet(sheet);
+
   return {
     ok: true,
     action: 'appendLead',
-    row: sheet.getLastRow(),
+    row: appendedRow,
     publicId: row[map['Public ID'] - 1]
   };
 }
@@ -142,11 +200,35 @@ function updateStatus(publicId, status) {
     if (String(ids[i][0]) === String(publicId)) {
       const row = i + 2;
       sheet.getRange(row, statusColumn).setValue(status);
+      formatSheet(sheet);
       return { ok: true, action: 'updateStatus', row, publicId, status };
     }
   }
 
   return { ok: false, error: `Lead ${publicId} not found in sheet` };
+}
+
+// Run this manually once in Apps Script to fix old ISO timestamps.
+function fixExistingCreatedAtDates() {
+  const sheet = getSheet();
+  const map = getHeaderMap(sheet);
+
+  if (!map['Created At']) {
+    throw new Error('Created At column not found');
+  }
+
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return;
+
+  const range = sheet.getRange(2, map['Created At'], lastRow - 1, 1);
+  const values = range.getValues();
+
+  const fixed = values.map(([value]) => [normalizeIsoDate(value)]);
+
+  range.setValues(fixed);
+  range.setNumberFormat(DATE_FORMAT);
+
+  formatSheet(sheet);
 }
 
 function json(data) {
