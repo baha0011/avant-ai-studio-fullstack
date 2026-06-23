@@ -5677,3 +5677,90 @@ body.smm-page .smm-compact-list {
   align-items: start !important;
   gap: 8px !important;
 }
+
+/* FINAL: SMM compact actions aligned cleanly */
+body.smm-page .smm-compact-list {
+  --smm-compact-grid: minmax(260px, 1.35fr) minmax(160px, .7fr) minmax(190px, .8fr) 330px !important;
+}
+
+body.smm-page .smm-compact-head,
+body.smm-page .smm-compact-row {
+  grid-template-columns: var(--smm-compact-grid) !important;
+  align-items: center !important;
+}
+
+body.smm-page .smm-compact-actions {
+  display: grid !important;
+  grid-template-columns: 104px 104px 82px !important;
+  justify-content: end !important;
+  align-items: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+  min-width: 330px !important;
+  max-width: 330px !important;
+}
+
+body.smm-page .smm-compact-actions .btn,
+body.smm-page .smm-compact-actions a.btn,
+body.smm-page .smm-compact-actions button.btn {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+  padding: 0 8px !important;
+  border-radius: 10px !important;
+  font-size: 0.72rem !important;
+  line-height: 1 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+body.smm-page .smm-compact-actions .smm-copy-btn,
+body.smm-page .smm-compact-actions .smm-write-btn {
+  width: 104px !important;
+}
+
+body.smm-page .smm-compact-actions .smm-sent-btn {
+  width: 82px !important;
+}
+
+/* Tablet: keep actions still aligned, just move them under row */
+@media (max-width: 1280px) {
+  body.smm-page .smm-compact-list {
+    --smm-compact-grid: minmax(260px, 1fr) minmax(160px, .7fr) !important;
+  }
+
+  body.smm-page .smm-compact-actions {
+    grid-column: 1 / -1 !important;
+    justify-content: start !important;
+    min-width: 330px !important;
+    max-width: 330px !important;
+  }
+}
+
+/* Mobile: vertical, equal full-width buttons */
+@media (max-width: 620px) {
+  body.smm-page .smm-compact-actions {
+    grid-column: auto !important;
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  body.smm-page .smm-compact-actions .btn,
+  body.smm-page .smm-compact-actions a.btn,
+  body.smm-page .smm-compact-actions button.btn,
+  body.smm-page .smm-compact-actions .smm-copy-btn,
+  body.smm-page .smm-compact-actions .smm-write-btn,
+  body.smm-page .smm-compact-actions .smm-sent-btn {
+    width: 100% !important;
+  }
+}
