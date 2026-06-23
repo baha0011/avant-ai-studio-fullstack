@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Підібрати рішення — Avant AI Studio</title>
+  <meta name="description" content="Квиз, пакети запуску, технічний стек і структура AI-автоматизації для бізнесу." />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <link rel="icon" href="assets/icons/favicon.ico?v=2" sizes="any" />
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32x32.png?v=2" />
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png?v=2" />
+  <link rel="manifest" href="assets/icons/site.webmanifest?v=2" />
+  <meta name="theme-color" content="#060814" />
+</head>
+<body data-page="start">
+  <canvas class="canvas-bg" id="bgCanvas" aria-hidden="true"></canvas>
+  <div class="noise" aria-hidden="true"></div>
+  <div class="cursor-glow" aria-hidden="true"></div>
+
+  <header class="header">
+    <a class="logo" href="index.html" aria-label="Avant AI Studio"><span class="logo-mark logo-image"><img src="assets/icons/icon-512.png" alt="" /></span><span>Avant AI Studio</span></a>
+    <nav class="nav" aria-label="Primary navigation">
+      <a href="index.html" data-nav="home">Головна</a>
+      <a href="services.html" data-nav="services">Послуги</a>
+      <a href="cases.html" data-nav="cases">Кейси</a>
+      <a href="demo.html" data-nav="demo">Демо</a>
+      <a href="start.html" data-nav="start">Підібрати рішення</a>
+      <a class="nav-cta" href="contact.html" data-nav="contact">Залишити заявку</a>
+    </nav>
+    <div class="header-actions"><button class="lamp-toggle" type="button" aria-label="Переключити тему" aria-pressed="false">
+        <span class="lamp-shade"></span>
+        <span class="lamp-bulb"></span>
+        <span class="lamp-chain"></span>
+      </button><button class="menu-toggle" type="button" aria-controls="mobileMenu" aria-expanded="false" aria-label="Відкрити меню"><span></span></button></div>
+  </header>
+
+  <div class="mobile-panel" id="mobileMenu">
+    <nav class="mobile-nav" aria-label="Mobile navigation">
+      <a href="index.html" data-nav="home">Головна</a>
+      <a href="services.html" data-nav="services">Послуги</a>
+      <a href="cases.html" data-nav="cases">Кейси</a>
+      <a href="demo.html" data-nav="demo">Демо</a>
+      <a href="start.html" data-nav="start">Підібрати рішення</a>
+      <a href="contact.html" data-nav="contact">Залишити заявку</a>
+    </nav>
+  </div>
+
+
+  <main>
+    <section class="page-hero start-hero">
+      <div class="container page-hero-grid">
+        <div class="reveal">
+          <div class="eyebrow"><span class="eyebrow-dot"></span><span>Підбір рішення</span></div>
+          <h1><span class="gradient-text">Зрозумійте, який ШІ-асистент потрібен саме вашому бізнесу.</span></h1>
+          <p class="lead">Квиз, формати запуску, що входить у роботу, технічний стек і коротко про студію — усе на одній сторінці, щоб швидко обрати перший крок.</p>
+          <div class="hero-actions"><a class="btn btn-primary" href="#solution-quiz">Пройти квиз</a><a class="btn btn-secondary" href="#launch-formats">Формати запуску</a></div>
+        </div>
+
+        <div class="start-visual panel reveal">
+          <div class="start-visual-top">
+            <img src="assets/icons/icon-512.png" alt="" />
+            <div><strong>AI Launch Architect</strong><span>Підбирає перший MVP</span></div>
+          </div>
+          <div class="start-checklist">
+            <span>✓ канал заявок</span>
+            <span>✓ типові питання</span>
+            <span>✓ інтеграції</span>
+            <span>✓ формат запуску</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="solution-quiz">
+      <div class="container">
+        <div class="section-head reveal">
+          <div class="section-label">Квиз</div>
+          <h2>Який асистент потрібен вашому бізнесу?</h2>
+          <p class="section-description">Відповідайте на питання — сайт одразу підкаже рекомендований формат запуску.</p>
+        </div>
+
+        <div class="solution-quiz reveal">
+          <div class="quiz-questions">
+            <div class="quiz-question">
+              <h3>1. Де зараз приходять основні заявки?</h3>
+              <div class="quiz-options">
+                <button type="button" data-score="start">Сайт / форма</button>
+                <button type="button" data-score="assistant">Telegram / Instagram</button>
+                <button type="button" data-score="system">Кілька каналів одразу</button>
+              </div>
+            </div>
+
+            <div class="quiz-question">
+              <h3>2. Що найбільше болить?</h3>
+              <div class="quiz-options">
+                <button type="button" data-score="start">Заявки губляться</button>
+                <button type="button" data-score="assistant">Клієнти задають однакові питання</button>
+                <button type="button" data-score="system">Потрібен контроль, база і статуси</button>
+              </div>
+            </div>
+
+            <div class="quiz-question">
+              <h3>3. Куди зручно отримувати заявки?</h3>
+              <div class="quiz-options">
+                <button type="button" data-score="start">Telegram + Google Sheets</button>
+                <button type="button" data-score="assistant">Telegram + діалоги</button>
+                <button type="button" data-score="system">Supabase / CRM / Admin</button>
+              </div>
+            </div>
+
+            <div class="quiz-question">
+              <h3>4. Наскільки складна логіка?</h3>
+              <div class="quiz-options">
+                <button type="button" data-score="start">Проста форма і повідомлення</button>
+                <button type="button" data-score="assistant">Потрібні відповіді на питання</button>
+                <button type="button" data-score="system">Потрібні сценарії, ролі і автоматизації</button>
+              </div>
+            </div>
+          </div>
+
+          <aside class="quiz-result-card">
+            <div class="section-label">Рекомендація</div>
+            <h3 id="quizResultTitle">Оберіть відповіді зліва</h3>
+            <p id="quizResultText" class="muted">Після відповідей тут з’явиться рекомендований формат запуску і короткий план.</p>
+            <ul class="quiz-result-list" id="quizResultList">
+              <li>Перший крок буде підібраний під ваш процес.</li>
+              <li>Результат можна передати у форму заявки.</li>
+            </ul>
+            <a class="btn btn-primary quiz-contact-btn" href="contact.html" id="quizContactBtn">Залишити заявку з результатом</a>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="launch-formats">
+      <div class="container">
+        <div class="section-head reveal">
+          <div class="section-label">Формати запуску</div>
+          <h2>Три зрозумілі пакети, щоб почати без хаосу.</h2>
+        </div>
+
+        <div class="package-grid reveal">
+          <article class="package-card">
+            <div class="package-badge">START</div>
+            <h3>Lead Capture</h3>
+            <p>Форма заявки, backend, Telegram-сповіщення і Google Sheets. Для бізнесу, якому потрібно перестати втрачати заявки.</p>
+            <ul><li>Форма на сайті</li><li>Telegram для команди</li><li>Google Sheets</li><li>Базова валідація</li></ul>
+            <a class="btn btn-secondary" href="contact.html">Обрати START</a>
+          </article>
+
+          <article class="package-card featured">
+            <div class="package-badge">ASSISTANT</div>
+            <h3>AI Assistant MVP</h3>
+            <p>ШІ-асистент із сценаріями відповідей, збором контактів і передачею заявки менеджеру.</p>
+            <ul><li>Сценарії діалогів</li><li>База типових питань</li><li>Кваліфікація лідів</li><li>Telegram + таблиця</li></ul>
+            <a class="btn btn-primary" href="contact.html">Обрати ASSISTANT</a>
+          </article>
+
+          <article class="package-card">
+            <div class="package-badge">SYSTEM</div>
+            <h3>Automation System</h3>
+            <p>Повна система: асистент, база, admin-панель, статуси, інтеграції і контроль заявок.</p>
+            <ul><li>Supabase / CRM</li><li>Admin-панель</li><li>Статуси заявок</li><li>Розширені інтеграції</li></ul>
+            <a class="btn btn-secondary" href="contact.html">Обрати SYSTEM</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section included-section">
+      <div class="container">
+        <div class="section-head reveal">
+          <div class="section-label">Що входить</div>
+          <h2>Запуск — це не просто “бот”, а повна система комунікації.</h2>
+        </div>
+
+        <div class="included-grid reveal">
+          <div class="included-item"><span>01</span><strong>Аналіз комунікації</strong><p>Розбираємо канали, типові питання, втрати заявок і роль адміністратора.</p></div>
+          <div class="included-item"><span>02</span><strong>Сценарії діалогів</strong><p>Проєктуємо, як асистент відповідає, уточнює деталі і збирає контакт.</p></div>
+          <div class="included-item"><span>03</span><strong>Форма / чат</strong><p>Додаємо точку входу для клієнта: сайт, Telegram або інший канал.</p></div>
+          <div class="included-item"><span>04</span><strong>Backend</strong><p>Приймаємо заявки, перевіряємо дані і запускаємо інтеграції.</p></div>
+          <div class="included-item"><span>05</span><strong>Telegram / Sheets</strong><p>Команда отримує повідомлення, а дані дублюються в таблицю або базу.</p></div>
+          <div class="included-item"><span>06</span><strong>Тестування і запуск</strong><p>Перевіряємо весь ланцюг і даємо коротку інструкцію для команди.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section tech-stack-section">
+      <div class="container">
+        <div class="section-head reveal">
+          <div class="section-label">Технічна база</div>
+          <h2>Стек, який дозволяє швидко запускати робочі AI-автоматизації.</h2>
+        </div>
+
+        <div class="stack-marquee reveal">
+          <div class="stack-track">
+            <span>OpenAI API</span><span>Telegram Bot API</span><span>Supabase</span><span>Google Sheets</span><span>Render</span><span>Webhooks</span><span>CRM</span><span>Admin Panel</span>
+            <span>OpenAI API</span><span>Telegram Bot API</span><span>Supabase</span><span>Google Sheets</span><span>Render</span><span>Webhooks</span><span>CRM</span><span>Admin Panel</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section about-studio-section">
+      <div class="container">
+        <div class="about-studio panel reveal">
+          <div>
+            <div class="section-label">Про студію</div>
+            <h2>Avant AI Studio будує практичні AI-системи для бізнесів, де швидкість відповіді впливає на продаж.</h2>
+            <p class="section-description">Фокус — не “модний бот”, а зрозуміла операційна система: клієнт ставить питання, асистент відповідає, заявка потрапляє команді, а власник бачить дані.</p>
+          </div>
+
+          <div class="about-stats">
+            <div><strong>24/7</strong><span>відповіді клієнтам</span></div>
+            <div><strong>TG</strong><span>швидкі заявки команді</span></div>
+            <div><strong>CRM</strong><span>таблиця, база або інтеграція</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section bottom-cta">
+      <div class="container">
+        <div class="panel reveal">
+          <div class="section-label">Старт</div>
+          <h2>Пройшли квиз або вже знаєте, що потрібно?</h2>
+          <p class="section-description">Залиште заявку — підкажемо, з якого MVP краще почати саме у вашій ніші.</p>
+          <br><a class="btn btn-primary" href="contact.html">Залишити заявку</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <img src="assets/icons/icon-512.png" alt="" />
+        <div>
+          <strong>Avant AI Studio</strong>
+          <span>ШІ-асистенти для заявок, консультацій і клієнтського сервісу.</span>
+        </div>
+      </div>
+      <div class="footer-contacts" aria-label="Контакти">
+        <a href="mailto:vovaazazz5@gmail.com">✉️ Email: vovaazazz5@gmail.com</a>
+        <a href="https://t.me/BahaRabbit" target="_blank" rel="noopener">💬 Telegram: @BahaRabbit</a>
+        <span>📍 Київ / онлайн</span>
+      </div>
+    </div>
+  </footer>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Кейси — Avant AI Studio</title>
+  <meta name="description" content="Сценарії AI-асистентів для стоматології, салонів, онлайн-шкіл, сервісних компаній і продажів." />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <link rel="icon" href="assets/icons/favicon.ico?v=2" sizes="any" />
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32x32.png?v=2" />
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png?v=2" />
+  <link rel="manifest" href="assets/icons/site.webmanifest?v=2" />
+  <meta name="theme-color" content="#060814" />
+</head>
+<body data-page="cases">
+  <canvas class="canvas-bg" id="bgCanvas" aria-hidden="true"></canvas>
+  <div class="noise" aria-hidden="true"></div>
+  <div class="cursor-glow" aria-hidden="true"></div>
+
+  <header class="header">
+    <a class="logo" href="index.html" aria-label="Avant AI Studio"><span class="logo-mark logo-image"><img src="assets/icons/icon-512.png" alt="" /></span><span>Avant AI Studio</span></a>
+    <nav class="nav" aria-label="Primary navigation">
+      <a href="index.html" data-nav="home">Головна</a>
+      <a href="services.html" data-nav="services">Послуги</a>
+      <a href="cases.html" data-nav="cases">Кейси</a>
+      <a href="demo.html" data-nav="demo">Демо</a>
+      <a href="start.html" data-nav="start">Підібрати рішення</a>
+      <a class="nav-cta" href="contact.html" data-nav="contact">Залишити заявку</a>
+    </nav>
+    <div class="header-actions"><button class="lamp-toggle" type="button" aria-label="Переключити тему" aria-pressed="false">
+        <span class="lamp-shade"></span>
+        <span class="lamp-bulb"></span>
+        <span class="lamp-chain"></span>
+      </button><button class="menu-toggle" type="button" aria-controls="mobileMenu" aria-expanded="false" aria-label="Відкрити меню"><span></span></button></div>
+  </header>
+
+  <div class="mobile-panel" id="mobileMenu">
+    <nav class="mobile-nav" aria-label="Mobile navigation">
+      <a href="index.html" data-nav="home">Головна</a>
+      <a href="services.html" data-nav="services">Послуги</a>
+      <a href="cases.html" data-nav="cases">Кейси</a>
+      <a href="demo.html" data-nav="demo">Демо</a>
+      <a href="start.html" data-nav="start">Підібрати рішення</a>
+      <a href="contact.html" data-nav="contact">Залишити заявку</a>
+    </nav>
+  </div>
+
+
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <div class="reveal">
+          <div class="eyebrow"><span class="eyebrow-dot"></span><span>Кейси та сценарії</span></div>
+          <h1><span class="gradient-text">Подивіться, як ШІ-асистент може працювати в різних нішах.</span></h1>
+          <p class="lead">Це демонстраційні сценарії для типових бізнесів. Вони показують, яку проблему вирішує асистент, що автоматизується і який результат отримує команда.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container cases-grid">
+        <article class="case-card reveal">
+          <div class="case-icon">🦷</div><h3>Стоматологія / клініка</h3>
+          <div class="case-flow"><span>Проблема</span><p>Клієнти питають про ціни, лікарів і вільний час, але адміністратор не завжди відповідає швидко.</p></div>
+          <div class="case-flow"><span>Рішення</span><p>Асистент пояснює послуги, уточнює контакт, бажаний час і передає заявку адміністратору.</p></div>
+          <div class="case-result">Результат: менше пропущених звернень і швидший запис.</div>
+        </article>
+
+        <article class="case-card reveal">
+          <div class="case-icon">💅</div><h3>Салон краси</h3>
+          <div class="case-flow"><span>Проблема</span><p>Запити приходять у різні канали, майстрам незручно вручну збирати дані.</p></div>
+          <div class="case-flow"><span>Рішення</span><p>Асистент уточнює процедуру, майстра, дату, контакт і надсилає заявку в Telegram.</p></div>
+          <div class="case-result">Результат: заявка структурована до того, як менеджер відповість.</div>
+        </article>
+
+        <article class="case-card reveal">
+          <div class="case-icon">🎓</div><h3>Онлайн-школа</h3>
+          <div class="case-flow"><span>Проблема</span><p>Ліди питають про програму, ціну, формат навчання і часто “охолоджуються”.</p></div>
+          <div class="case-flow"><span>Рішення</span><p>Асистент відповідає на типові питання, кваліфікує ліда і передає менеджеру теплий контакт.</p></div>
+          <div class="case-result">Результат: менеджер отримує більше контексту перед розмовою.</div>
+        </article>
+
+        <article class="case-card reveal">
+          <div class="case-icon">🛠</div><h3>Сервісна компанія</h3>
+          <div class="case-flow"><span>Проблема</span><p>Клієнти нечітко описують проблему, а диспетчер витрачає час на уточнення.</p></div>
+          <div class="case-flow"><span>Рішення</span><p>Асистент збирає адресу, тип проблеми, терміновість, фото/опис і контакт.</p></div>
+          <div class="case-result">Результат: майстер отримує зрозумілу заявку.</div>
+        </article>
+
+        <article class="case-card reveal">
+          <div class="case-icon">📞</div><h3>Відділ продажів</h3>
+          <div class="case-flow"><span>Проблема</span><p>Менеджери обробляють багато однотипних звернень і не завжди фіксують статуси.</p></div>
+          <div class="case-flow"><span>Рішення</span><p>Асистент збирає потребу, бюджет, термін і передає ліда з пріоритетом.</p></div>
+          <div class="case-result">Результат: менше хаосу і зрозуміліший pipeline.</div>
+        </article>
+
+        <article class="case-card reveal case-cta-card">
+          <div class="case-icon">✨</div><h3>Ваш бізнес</h3>
+          <p>Якщо ніша інша — логіка така сама: знайти повторювані питання, точки втрат і перший процес, який можна автоматизувати.</p>
+          <a class="btn btn-primary" href="start.html">Підібрати рішення</a>
+        </article>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <img src="assets/icons/icon-512.png" alt="" />
+        <div>
+          <strong>Avant AI Studio</strong>
+          <span>ШІ-асистенти для заявок, консультацій і клієнтського сервісу.</span>
+        </div>
+      </div>
+      <div class="footer-contacts" aria-label="Контакти">
+        <a href="mailto:vovaazazz5@gmail.com">✉️ Email: vovaazazz5@gmail.com</a>
+        <a href="https://t.me/BahaRabbit" target="_blank" rel="noopener">💬 Telegram: @BahaRabbit</a>
+        <span>📍 Київ / онлайн</span>
+      </div>
+    </div>
+  </footer>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

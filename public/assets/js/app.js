@@ -388,3 +388,78 @@ setupMenu(); setupReveal(); setupCanvas(); setupCursorGlow(); setupContactForm()
     });
   });
 })();
+
+
+/* Solution quiz + contact prefill */
+(() => {
+  const quiz = document.querySelector('.solution-quiz');
+  const resultTitle = document.getElementById('quizResultTitle');
+  const resultText = document.getElementById('quizResultText');
+  const resultList = document.getElementById('quizResultList');
+  const contactBtn = document.getElementById('quizContactBtn');
+
+  const resultMap = {
+    start: {
+      title: 'Рекомендація: START / Lead Capture',
+      text: 'Почніть з простої системи: форма заявки → backend → Telegram → Google Sheets. Це швидко прибирає хаос із заявками.',
+      items: ['Підходить для першого запуску', 'Мінімум складної логіки', 'Швидкий контроль заявок']
+    },
+    assistant: {
+      title: 'Рекомендація: ASSISTANT / AI Assistant MVP',
+      text: 'Вам потрібен ШІ-асистент, який відповідає на типові питання, збирає контакти і передає теплі заявки менеджеру.',
+      items: ['Сценарії відповідей', 'Кваліфікація лідів', 'Telegram + таблиця заявок']
+    },
+    system: {
+      title: 'Рекомендація: SYSTEM / Automation System',
+      text: 'Краще будувати повну систему: база, статуси, admin-панель, Telegram, Sheets або CRM-інтеграція.',
+      items: ['Supabase / CRM', 'Admin-панель', 'Статуси і контроль процесу']
+    }
+  };
+
+  if (quiz && resultTitle && resultText && resultList) {
+    const scores = { start: 0, assistant: 0, system: 0 };
+
+    const renderResult = () => {
+      const winner = Object.entries(scores).sort((a, b) => b[1] - a[1])[0][0];
+      const result = resultMap[winner];
+
+      resultTitle.textContent = result.title;
+      resultText.textContent = result.text;
+      resultList.innerHTML = result.items.map((item) => `<li>${item}</li>`).join('');
+
+      const saved = `${result.title}. ${result.text}`;
+      localStorage.setItem('avantQuizResult', saved);
+
+      if (contactBtn) {
+        contactBtn.addEventListener('click', () => {
+          localStorage.setItem('avantQuizResult', saved);
+        }, { once: true });
+      }
+    };
+
+    quiz.querySelectorAll('[data-score]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const group = button.closest('.quiz-options');
+        if (!group) return;
+
+        const prev = group.querySelector('.active');
+        if (prev) scores[prev.dataset.score] -= 1;
+
+        group.querySelectorAll('button').forEach((btn) => btn.classList.remove('active'));
+        button.classList.add('active');
+        scores[button.dataset.score] += 1;
+
+        renderResult();
+      });
+    });
+  }
+
+  const quizResultField = document.getElementById('quizResultField');
+  const quizResultNote = document.getElementById('quizResultNote');
+  const savedQuiz = localStorage.getItem('avantQuizResult');
+
+  if (quizResultField && quizResultNote && savedQuiz) {
+    quizResultField.hidden = false;
+    quizResultNote.textContent = savedQuiz;
+  }
+})();

@@ -118,11 +118,29 @@
     event.stopImmediatePropagation();
 
     const formData = new FormData(form);
+
+    const automationNeeds = formData.getAll('automationNeeds').map(clean).filter(Boolean);
+    const quizResult = clean(localStorage.getItem('avantQuizResult'));
+    const projectFormat = clean(formData.get('projectFormat'));
+    const budget = clean(formData.get('budget'));
+    const mainChannel = clean(formData.get('mainChannel'));
+    const baseMessage = clean(formData.get('message'));
+
+    const details = [
+      quizResult ? `Результат квизу: ${quizResult}` : '',
+      projectFormat ? `Формат: ${projectFormat}` : '',
+      budget ? `Бюджет: ${budget}` : '',
+      mainChannel ? `Основний канал: ${mainChannel}` : '',
+      automationNeeds.length ? `Автоматизувати: ${automationNeeds.join(', ')}` : '',
+      baseMessage ? `Опис: ${baseMessage}` : ''
+    ].filter(Boolean).join('
+');
+
     const payload = {
       name: clean(formData.get('name')),
       contact: clean(formData.get('contact')),
       niche: clean(formData.get('niche')),
-      message: clean(formData.get('message')),
+      message: details || baseMessage,
       language: getLang(),
       page: document.body.dataset.page || 'contact',
       source: 'website'

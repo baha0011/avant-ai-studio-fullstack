@@ -22,9 +22,9 @@
     <nav class="nav" aria-label="Primary navigation">
       <a href="index.html" data-nav="home">Головна</a>
       <a href="services.html" data-nav="services">Послуги</a>
-      <a href="integrations.html" data-nav="integrations">Рішення</a>
+      <a href="cases.html" data-nav="cases">Кейси</a>
       <a href="demo.html" data-nav="demo">Демо</a>
-      <a href="process.html" data-nav="process">Процес</a>
+      <a href="start.html" data-nav="start">Підібрати рішення</a>
       <a class="nav-cta" href="contact.html" data-nav="contact">Залишити заявку</a>
     </nav>
     <div class="header-actions"><button class="lamp-toggle" type="button" aria-label="Переключити тему" aria-pressed="false">
@@ -38,16 +38,63 @@
     <nav class="mobile-nav" aria-label="Mobile navigation">
       <a href="index.html" data-nav="home">Головна</a>
       <a href="services.html" data-nav="services">Послуги</a>
-      <a href="integrations.html" data-nav="integrations">Рішення</a>
+      <a href="cases.html" data-nav="cases">Кейси</a>
       <a href="demo.html" data-nav="demo">Демо</a>
-      <a href="process.html" data-nav="process">Процес</a>
+      <a href="start.html" data-nav="start">Підібрати рішення</a>
       <a href="contact.html" data-nav="contact">Залишити заявку</a>
     </nav>
   </div>
 
 <main>
     <section class="page-hero"><div class="container"><div class="reveal"><div class="eyebrow"><span class="eyebrow-dot"></span><span>Заявка</span></div><h1><span class="gradient-text">Залиште заявку на безкоштовний розбір комунікації з клієнтами.</span></h1><p class="lead">Опишіть коротко бізнес і задачу. Ми підкажемо, який ШІ-асистент можна запустити першим і які заявки він буде автоматизувати.</p></div></div></section>
-    <section class="section"><div class="container contact-layout"><form class="form-card reveal" id="leadForm" novalidate><h3>Заявка на консультацію</h3><br><div class="form-grid"><div class="field"><label for="name">Ім’я</label><input id="name" name="name" type="text" required minlength="2" autocomplete="name" placeholder="Ваше ім’я"></div><div class="field"><label for="contactField">Телефон / Telegram</label><input id="contactField" name="contact" type="text" required minlength="3" autocomplete="tel" placeholder="+380 або @username"></div><div class="field full"><label for="niche">Ніша бізнесу</label><select id="niche" name="niche" required><option value="">Оберіть нішу</option><option value="clinic">Клініка або стоматологія</option><option value="beauty">Салон краси</option><option value="education">Онлайн-школа</option><option value="service">Сервісна компанія</option><option value="sales">Відділ продажів</option><option value="other">Інший бізнес</option></select></div><div class="field full"><label for="message">Короткий опис задачі</label><textarea id="message" name="message" required minlength="8" placeholder="Наприклад: потрібен ШІ-асистент для запису клієнтів, відповідей на питання та Telegram-сповіщень команді."></textarea></div></div><button class="btn btn-primary form-submit" type="submit">Надіслати заявку</button><div class="form-message" id="formMessage" role="status" aria-live="polite"></div></form><aside class="form-card reveal contact-aside">
+    <section class="section"><div class="container contact-layout"><form class="form-card reveal" id="leadForm" novalidate><h3>Заявка на консультацію</h3><br><div class="form-grid"><div class="field"><label for="name">Ім’я</label><input id="name" name="name" type="text" required minlength="2" autocomplete="name" placeholder="Ваше ім’я"></div><div class="field"><label for="contactField">Телефон / Telegram</label><input id="contactField" name="contact" type="text" required minlength="3" autocomplete="tel" placeholder="+380 або @username"></div><div class="field full"><label for="niche">Ніша бізнесу</label><select id="niche" name="niche" required><option value="">Оберіть нішу</option><option value="clinic">Клініка або стоматологія</option><option value="beauty">Салон краси</option><option value="education">Онлайн-школа</option><option value="service">Сервісна компанія</option><option value="sales">Відділ продажів</option><option value="other">Інший бізнес</option></select></div><div class="field full quiz-result-field" id="quizResultField" hidden>
+  <label>Результат квизу</label>
+  <div class="quiz-result-note" id="quizResultNote"></div>
+</div>
+
+<div class="field full">
+  <label for="projectFormat">Який формат цікавить?</label>
+  <select id="projectFormat" name="projectFormat">
+    <option value="">Ще не знаю</option>
+    <option value="START — форма, Telegram, Google Sheets">START — форма, Telegram, Google Sheets</option>
+    <option value="ASSISTANT — ШІ-асистент і сценарії">ASSISTANT — ШІ-асистент і сценарії</option>
+    <option value="SYSTEM — база, admin, інтеграції">SYSTEM — база, admin, інтеграції</option>
+  </select>
+</div>
+
+<div class="field">
+  <label for="budget">Орієнтовний бюджет</label>
+  <select id="budget" name="budget">
+    <option value="">Обговорити після розбору</option>
+    <option value="до $300">до $300</option>
+    <option value="$300–700">$300–700</option>
+    <option value="$700–1500">$700–1500</option>
+    <option value="$1500+">$1500+</option>
+  </select>
+</div>
+
+<div class="field">
+  <label for="mainChannel">Основний канал заявок</label>
+  <select id="mainChannel" name="mainChannel">
+    <option value="">Оберіть канал</option>
+    <option value="Сайт">Сайт</option>
+    <option value="Telegram">Telegram</option>
+    <option value="Instagram">Instagram</option>
+    <option value="Дзвінки">Дзвінки</option>
+    <option value="Кілька каналів">Кілька каналів</option>
+  </select>
+</div>
+
+<div class="field full">
+  <label>Що потрібно автоматизувати?</label>
+  <div class="checkbox-grid">
+    <label><input type="checkbox" name="automationNeeds" value="Відповіді на типові питання"> <span>Відповіді на типові питання</span></label>
+    <label><input type="checkbox" name="automationNeeds" value="Збір заявок"> <span>Збір заявок</span></label>
+    <label><input type="checkbox" name="automationNeeds" value="Telegram-сповіщення"> <span>Telegram-сповіщення</span></label>
+    <label><input type="checkbox" name="automationNeeds" value="Google Sheets / CRM"> <span>Google Sheets / CRM</span></label>
+  </div>
+</div>
+<div class="field full"><label for="message">Короткий опис задачі</label><textarea id="message" name="message" required minlength="8" placeholder="Наприклад: потрібен ШІ-асистент для запису клієнтів, відповідей на питання та Telegram-сповіщень команді."></textarea></div></div><button class="btn btn-primary form-submit" type="submit">Надіслати заявку</button><div class="form-message" id="formMessage" role="status" aria-live="polite"></div></form><aside class="form-card reveal contact-aside">
 
   <h3>Контакти</h3>
 
@@ -91,35 +138,20 @@
     <section class="section bottom-cta"><div class="container"><div class="panel reveal"><div class="section-label">Почати просто</div><h2>Надішліть заявку — далі ми підкажемо перший практичний крок.</h2><p class="section-description">Після розбору буде зрозуміло, чи потрібен асистент на сайт, Telegram-бот, таблиця заявок або повноцінна база.</p></div></div></section>
   </main>
   <footer class="footer">
-
     <div class="container footer-inner">
-
       <div class="footer-brand">
-
         <img src="assets/icons/icon-512.png" alt="" />
-
         <div>
-
           <strong>Avant AI Studio</strong>
-
           <span>ШІ-асистенти для заявок, консультацій і клієнтського сервісу.</span>
-
         </div>
-
       </div>
-
       <div class="footer-contacts" aria-label="Контакти">
-
         <a href="mailto:vovaazazz5@gmail.com">✉️ Email: vovaazazz5@gmail.com</a>
-
         <a href="https://t.me/BahaRabbit" target="_blank" rel="noopener">💬 Telegram: @BahaRabbit</a>
-
         <span>📍 Київ / онлайн</span>
-
       </div>
-
     </div>
-
   </footer>
   <script src="assets/js/app.js"></script>
   <script src="assets/js/form-fix.js"></script>
