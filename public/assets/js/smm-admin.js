@@ -13,6 +13,9 @@
   const analysisFilter = document.getElementById('smmAnalysisFilter');
   const contactFilter = document.getElementById('smmContactFilter');
   const sendFilter = document.getElementById('smmSendFilter');
+  const sortModeSelect = document.getElementById('smmSortMode');
+  const errorPositionSelect = document.getElementById('smmErrorPosition');
+  const sentPositionSelect = document.getElementById('smmSentPosition');
   const viewModeSelect = document.getElementById('smmViewMode');
   const resetFiltersBtn = document.getElementById('smmResetFiltersBtn');
   const filterCount = document.getElementById('smmFilterCount');
@@ -172,6 +175,14 @@
     return Array.isArray(target.phones) && target.phones.length > 0;
   }
 
+  function targetHasError(target) {
+    return target.analysis_status === 'failed' || Boolean(target.error_message);
+  }
+
+  function targetDisplayName(target) {
+    return String(target.company_name || target.normalized_url || target.url || `ID ${target.id}`);
+  }
+
   function targetSearchHaystack(target) {
     return normalizeFilterText([
       target.company_name,
@@ -191,7 +202,10 @@
       query: normalizeFilterText(searchInput?.value || ''),
       analysis: analysisFilter?.value || 'all',
       contact: contactFilter?.value || 'all',
-      send: sendFilter?.value || 'all'
+      send: sendFilter?.value || 'all',
+      sort: sortModeSelect?.value || 'newest',
+      errors: errorPositionSelect?.value || 'bottom',
+      sent: sentPositionSelect?.value || 'bottom'
     };
   }
 
@@ -236,6 +250,114 @@
     });
   }
 
+  function compareText(a = '', b = '') {
+    return String(a || '').localeCompare(String(b || ''), 'uk', { sensitivity: 'base' });
+  }
+
+  function compareDateDesc(a, b, field = 'updated_at') {
+    const dateA = new Date(a[field] || a.updated_at || a.created_at || 0).getTime();
+    const dateB = new Date(b[field] || b.updated_at || b.created_at || 0).getTime();
+    return dateB - dateA;
+  }
+
+  function getContactRank(target, mode) {
+    const hasTelegram = targetHasTelegram(target);
+    const hasPhone = targetHasPhone(target);
+
+    if (mode === 'contact_phone_first') {
+      if (hasPhone && !hasTelegram) return 10;
+      if (hasTelegram) return 20;
+      return 30;
+    }
+
+    if (mode === 'contact_none_first') {
+      if (!hasTelegram && !hasPhone) return 10;
+      if (hasTelegram) return 20;
+      if (hasPhone) return 30;
+      return 40;
+    }
+
+    if (hasTelegram) return 10;
+    if (hasPhone) return 20;
+    return 30;
+  }
+
+  function getAnalysisRank(target) {
+    const map = {
+      analyzed: 10,
+      pending: 20,
+      analyzing: 30,
+      failed: 40
+    };
+
+    return map[target.analysis_status || 'pending'] || 50;
+  }
+
+  function getSendRank(target) {
+    const map = {
+      not_sent: 10,
+      manual_required: 20,
+      no_telegram: 30,
+      skipped: 40,
+      sent: 50
+    };
+
+    return map[target.send_status || 'not_sent'] || 60;
+  }
+
+  function getSortedTargets(items) {
+    const filters = getCurrentFilters();
+
+    return [...items].sort((a, b) => {
+      if (filters.errors !== 'normal') {
+        const errorA = targetHasError(a) ? 1 : 0;
+        const errorB = targetHasError(b) ? 1 : 0;
+
+        if (errorA !== errorB) {
+          return filters.errors === 'top' ? errorB - errorA : errorA - errorB;
+        }
+      }
+
+      if (filters.sent !== 'normal') {
+        const sentA = (a.send_status || 'not_sent') === 'sent' ? 1 : 0;
+        const sentB = (b.send_status || 'not_sent') === 'sent' ? 1 : 0;
+
+        if (sentA !== sentB) {
+          return filters.sent === 'top' ? sentB - sentA : sentA - sentB;
+        }
+      }
+
+      if (filters.sort === 'oldest') {
+        return new Date(a.created_at || 0) - new Date(b.created_at || 0);
+      }
+
+      if (filters.sort === 'name_az') {
+        return compareText(targetDisplayName(a), targetDisplayName(b));
+      }
+
+      if (filters.sort === 'name_za') {
+        return compareText(targetDisplayName(b), targetDisplayName(a));
+      }
+
+      if (filters.sort === 'contact_tg_first' || filters.sort === 'contact_phone_first' || filters.sort === 'contact_none_first') {
+        const rankDiff = getContactRank(a, filters.sort) - getContactRank(b, filters.sort);
+        if (rankDiff !== 0) return rankDiff;
+      }
+
+      if (filters.sort === 'analysis_status') {
+        const rankDiff = getAnalysisRank(a) - getAnalysisRank(b);
+        if (rankDiff !== 0) return rankDiff;
+      }
+
+      if (filters.sort === 'send_status') {
+        const rankDiff = getSendRank(a) - getSendRank(b);
+        if (rankDiff !== 0) return rankDiff;
+      }
+
+      return compareDateDesc(a, b);
+    });
+  }
+
   function renderFilterCount(visibleTargets) {
     if (!filterCount) return;
 
@@ -246,6 +368,9 @@
     if (filters.analysis !== 'all') active.push(`аналіз: ${filters.analysis}`);
     if (filters.contact !== 'all') active.push(`контакт: ${filters.contact}`);
     if (filters.send !== 'all') active.push(`статус: ${filters.send}`);
+    if (filters.sort !== 'newest') active.push(`сортування: ${filters.sort}`);
+    if (filters.errors !== 'bottom') active.push(`помилки: ${filters.errors}`);
+    if (filters.sent !== 'bottom') active.push(`sent: ${filters.sent}`);
 
     filterCount.textContent = active.length
       ? `Показано ${visibleTargets.length} із ${targets.length} • ${active.join(' • ')}`
@@ -322,7 +447,7 @@
   function renderTargets() {
     renderSummary();
 
-    const visibleTargets = getFilteredTargets();
+    const visibleTargets = getSortedTargets(getFilteredTargets());
     renderFilterCount(visibleTargets);
 
     if (!targets.length) {
@@ -584,7 +709,10 @@
       q: searchInput?.value || '',
       analysis: analysisFilter?.value || 'all',
       contact: contactFilter?.value || 'all',
-      send: sendFilter?.value || 'all'
+      send: sendFilter?.value || 'all',
+      sort: sortModeSelect?.value || 'newest',
+      errors: errorPositionSelect?.value || 'bottom',
+      sent: sentPositionSelect?.value || 'bottom'
     };
 
     localStorage.setItem('avantSmmFilters', JSON.stringify(state));
@@ -601,6 +729,9 @@
       if (analysisFilter) analysisFilter.value = state.analysis || 'all';
       if (contactFilter) contactFilter.value = state.contact || 'all';
       if (sendFilter) sendFilter.value = state.send || 'all';
+      if (sortModeSelect) sortModeSelect.value = state.sort || 'newest';
+      if (errorPositionSelect) errorPositionSelect.value = state.errors || 'bottom';
+      if (sentPositionSelect) sentPositionSelect.value = state.sent || 'bottom';
     } catch {
       localStorage.removeItem('avantSmmFilters');
     }
@@ -617,12 +748,18 @@
   analysisFilter?.addEventListener('change', handleFilterChange);
   contactFilter?.addEventListener('change', handleFilterChange);
   sendFilter?.addEventListener('change', handleFilterChange);
+  sortModeSelect?.addEventListener('change', handleFilterChange);
+  errorPositionSelect?.addEventListener('change', handleFilterChange);
+  sentPositionSelect?.addEventListener('change', handleFilterChange);
 
   resetFiltersBtn?.addEventListener('click', () => {
     if (searchInput) searchInput.value = '';
     if (analysisFilter) analysisFilter.value = 'all';
     if (contactFilter) contactFilter.value = 'all';
     if (sendFilter) sendFilter.value = 'all';
+    if (sortModeSelect) sortModeSelect.value = 'newest';
+    if (errorPositionSelect) errorPositionSelect.value = 'bottom';
+    if (sentPositionSelect) sentPositionSelect.value = 'bottom';
 
     localStorage.removeItem('avantSmmFilters');
     renderTargets();
