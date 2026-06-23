@@ -236,3 +236,76 @@ function setupAdmin() {
 document.querySelectorAll('[data-lang]').forEach((btn) => btn.addEventListener('click', () => setLanguage(btn.dataset.lang)));
 document.querySelectorAll('[data-nav]').forEach((a) => a.classList.toggle('active', a.dataset.nav === page));
 setupMenu(); setupReveal(); setupCanvas(); setupCursorGlow(); setupContactForm(); setupAdmin(); setLanguage(currentLang);
+
+
+/* Theme switcher + loss calculator */
+(() => {
+  const root = document.documentElement;
+  const savedTheme = localStorage.getItem('avant-theme') || 'dark';
+
+  const setTheme = (theme) => {
+    root.setAttribute('data-theme', theme);
+    localStorage.setItem('avant-theme', theme);
+
+    document.querySelectorAll('.lamp-toggle').forEach((btn) => {
+      const isLight = theme === 'light';
+      btn.classList.toggle('is-light', isLight);
+      btn.setAttribute('aria-pressed', String(isLight));
+      btn.setAttribute('aria-label', isLight ? 'Увімкнути темну тему' : 'Увімкнути світлу тему');
+    });
+  };
+
+  setTheme(savedTheme);
+
+  document.addEventListener('click', (event) => {
+    const button = event.target.closest('.lamp-toggle');
+    if (!button) return;
+
+    button.classList.remove('pull');
+    void button.offsetWidth;
+    button.classList.add('pull');
+
+    const current = root.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+    setTheme(current === 'light' ? 'dark' : 'light');
+  });
+
+  const leadsInput = document.getElementById('calcLeads');
+  const missedInput = document.getElementById('calcMissed');
+  const checkInput = document.getElementById('calcCheck');
+
+  if (!leadsInput || !missedInput || !checkInput) return;
+
+  const monthlyLossEl = document.getElementById('monthlyLoss');
+  const yearlyLossEl = document.getElementById('yearlyLoss');
+  const lostLeadsEl = document.getElementById('lostLeads');
+  const meterFill = document.getElementById('lossMeterFill');
+
+  const formatMoney = (value) => {
+    return new Intl.NumberFormat('uk-UA', {
+      maximumFractionDigits: 0
+    }).format(Math.round(value)) + ' грн';
+  };
+
+  const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
+  const calculateLoss = () => {
+    const leads = clamp(Number(leadsInput.value) || 0, 0, 100000);
+    const missed = clamp(Number(missedInput.value) || 0, 0, 100);
+    const avgCheck = clamp(Number(checkInput.value) || 0, 0, 100000000);
+
+    const lostLeads = Math.round(leads * missed / 100);
+    const monthlyLoss = lostLeads * avgCheck;
+    const yearlyLoss = monthlyLoss * 12;
+
+    monthlyLossEl.textContent = formatMoney(monthlyLoss);
+    yearlyLossEl.textContent = formatMoney(yearlyLoss);
+    lostLeadsEl.textContent = new Intl.NumberFormat('uk-UA').format(lostLeads);
+    meterFill.style.width = `${Math.max(4, missed)}%`;
+  };
+
+  [leadsInput, missedInput, checkInput].forEach((input) => {
+    input.addEventListener('input', calculateLoss);
+  });
+
+  calculateLoss();
+})();

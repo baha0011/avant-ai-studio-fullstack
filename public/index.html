@@ -26,7 +26,11 @@
       <a href="process.html" data-nav="process">Процес</a>
       <a class="nav-cta" href="contact.html" data-nav="contact">Залишити заявку</a>
     </nav>
-    <div class="header-actions"><button class="menu-toggle" type="button" aria-controls="mobileMenu" aria-expanded="false" aria-label="Відкрити меню"><span></span></button></div>
+    <div class="header-actions"><button class="lamp-toggle" type="button" aria-label="Переключити тему" aria-pressed="false">
+        <span class="lamp-shade"></span>
+        <span class="lamp-bulb"></span>
+        <span class="lamp-chain"></span>
+      </button><button class="menu-toggle" type="button" aria-controls="mobileMenu" aria-expanded="false" aria-label="Відкрити меню"><span></span></button></div>
   </header>
 
   <div class="mobile-panel" id="mobileMenu">
@@ -56,6 +60,63 @@
           <div class="assistant-top"><div class="assistant-title"><div class="avatar avatar-image"><img src="assets/icons/icon-512.png" alt="" /></div><div><strong>Клієнтський асистент</strong><span>Працює на сайті або в Telegram</span></div></div><div class="status-pill">Online</div></div>
           <div class="chat-flow"><div class="message">Клієнт питає про послугу, ціну або доступний час.</div><div class="message ai">Асистент відповідає, уточнює деталі та збирає контакт.</div><div class="message">Заявка автоматично потрапляє команді.</div><div class="message ai">Менеджер бачить заявку в таблиці та швидко зв’язується з клієнтом.</div></div>
           <div class="stat-grid"><div class="stat-card"><strong>24/7</strong><span>відповіді клієнтам</span></div><div class="stat-card"><strong>0</strong><span>втрачених заявок</span></div><div class="stat-card"><strong>TG</strong><span>сповіщення команді</span></div><div class="stat-card"><strong>CRM</strong><span>таблиця або база</span></div></div>
+        </div>
+      </div>
+    </section>
+    <section class="section loss-section" id="loss-calculator">
+      <div class="container">
+        <div class="section-head reveal">
+          <div class="section-label">Калькулятор втрат</div>
+          <h2>Порахуйте, скільки заявок і грошей бізнес може втрачати через повільні відповіді.</h2>
+          <p class="section-description">Введіть приблизні цифри — калькулятор покаже, скільки потенційного доходу може губитися щомісяця, якщо клієнти не отримують швидку відповідь.</p>
+        </div>
+
+        <div class="loss-calculator reveal">
+          <div class="loss-form">
+            <div class="calc-field">
+              <label for="calcLeads">Заявок на місяць</label>
+              <input id="calcLeads" type="number" min="1" value="40" inputmode="numeric">
+            </div>
+
+            <div class="calc-field">
+              <label for="calcMissed">Скільки % губиться</label>
+              <input id="calcMissed" type="number" min="1" max="100" value="25" inputmode="numeric">
+            </div>
+
+            <div class="calc-field">
+              <label for="calcCheck">Середній чек, грн</label>
+              <input id="calcCheck" type="number" min="1" value="3000" inputmode="numeric">
+            </div>
+
+            <div class="loss-hint">
+              <span>💡</span>
+              <p>Навіть 5–10 пропущених діалогів на місяць можуть коштувати бізнесу більше, ніж запуск простого ШІ-асистента.</p>
+            </div>
+          </div>
+
+          <div class="loss-result">
+            <div class="loss-meter">
+              <div class="loss-meter-fill" id="lossMeterFill"></div>
+            </div>
+
+            <div class="loss-number">
+              <span>Орієнтовні втрати на місяць</span>
+              <strong id="monthlyLoss">0 грн</strong>
+            </div>
+
+            <div class="loss-breakdown">
+              <div>
+                <span>Втрачено заявок</span>
+                <strong id="lostLeads">0</strong>
+              </div>
+              <div>
+                <span>Втрати на рік</span>
+                <strong id="yearlyLoss">0 грн</strong>
+              </div>
+            </div>
+
+            <a class="btn btn-primary loss-cta" href="contact.html">Порахувати мій сценарій</a>
+          </div>
         </div>
       </div>
     </section>
