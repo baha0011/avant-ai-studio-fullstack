@@ -4360,3 +4360,260 @@ body[data-page="admin"].admin-performance-mode .logo img {
     scroll-behavior: auto !important;
   }
 }
+
+/* Separate SMM CRM */
+.smm-page .crm-shell {
+  min-height: 640px;
+}
+
+.smm-workspace {
+  display: grid;
+  gap: 18px;
+}
+
+.smm-add-form {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) auto;
+  gap: 14px;
+  align-items: end;
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 24px;
+  padding: 18px;
+  background: rgba(255,255,255,.045);
+}
+
+.smm-add-form label,
+.smm-message-label {
+  display: grid;
+  gap: 8px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.smm-add-form input {
+  width: 100%;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 15px;
+  padding: 13px 14px;
+  background: rgba(255,255,255,.07);
+  color: var(--text);
+  outline: none;
+}
+
+.smm-summary {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.smm-targets {
+  display: grid;
+  gap: 16px;
+}
+
+.smm-target-card {
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 26px;
+  padding: 20px;
+  background:
+    radial-gradient(circle at 10% 8%, rgba(185,243,255,.08), transparent 36%),
+    rgba(255,255,255,.045);
+}
+
+.smm-target-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.smm-url-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.smm-target-head a {
+  display: inline-flex;
+  margin-top: 6px;
+  color: var(--muted);
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.smm-statuses {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.smm-badge,
+.smm-sent-chip {
+  display: inline-flex;
+  width: fit-content;
+  border: 1px solid rgba(185,243,255,.18);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: .72rem;
+  font-weight: 900;
+  color: var(--muted);
+  background: rgba(255,255,255,.06);
+}
+
+.smm-badge.analyzed,
+.smm-badge.sent {
+  color: #7CFFB2;
+  border-color: rgba(124,255,178,.26);
+  background: rgba(124,255,178,.08);
+}
+
+.smm-badge.manual_required,
+.smm-badge.prepared {
+  color: #FFE9A8;
+  border-color: rgba(255,233,168,.26);
+  background: rgba(255,233,168,.08);
+}
+
+.smm-badge.failed,
+.smm-badge.no_telegram {
+  color: #FF9AA7;
+  border-color: rgba(255,154,167,.26);
+  background: rgba(255,154,167,.08);
+}
+
+.smm-sent-chip {
+  color: #7CFFB2;
+}
+
+.smm-report-grid {
+  display: grid;
+  grid-template-columns: minmax(280px, .9fr) minmax(320px, 1.1fr);
+  gap: 16px;
+  margin: 14px 0;
+}
+
+.smm-report-grid section {
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 20px;
+  padding: 16px;
+  background: rgba(0,0,0,.10);
+}
+
+.smm-report-grid h3 {
+  margin-top: 0;
+}
+
+.smm-report-grid dl {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.smm-report-grid dl div {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 10px;
+}
+
+.smm-report-grid dt {
+  color: var(--muted);
+}
+
+.smm-report-grid dd {
+  margin: 0;
+  word-break: break-word;
+}
+
+.smm-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.smm-toggle input {
+  width: 20px;
+  height: 20px;
+  accent-color: #b9f3ff;
+}
+
+.smm-message-label textarea {
+  min-height: 180px;
+  resize: vertical;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 18px;
+  padding: 14px;
+  background: rgba(255,255,255,.06);
+  color: var(--text);
+  line-height: 1.55;
+}
+
+.smm-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.smm-error {
+  margin: 14px 0 0;
+  color: #FF9AA7;
+}
+
+.smm-access-warning {
+  border: 1px solid rgba(255,154,167,.28);
+  border-radius: 24px;
+  padding: 24px;
+  background: rgba(255,154,167,.08);
+}
+
+html[data-theme="light"] .smm-add-form,
+html[data-theme="light"] .smm-target-card,
+html[data-theme="light"] .smm-report-grid section {
+  background: rgba(255,255,255,.86);
+  border-color: rgba(15,23,42,.10);
+}
+
+html[data-theme="light"] .smm-add-form input,
+html[data-theme="light"] .smm-message-label textarea {
+  background: rgba(255,255,255,.92);
+  border-color: rgba(15,23,42,.12);
+}
+
+@media (max-width: 980px) {
+  .smm-add-form,
+  .smm-report-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .smm-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .smm-target-head {
+    display: grid;
+  }
+
+  .smm-statuses {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 620px) {
+  .smm-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .smm-report-grid dl div {
+    grid-template-columns: 1fr;
+  }
+
+  .smm-card-actions {
+    display: grid;
+  }
+}

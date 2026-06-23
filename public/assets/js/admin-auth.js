@@ -10,6 +10,7 @@
   const currentUser = document.getElementById('adminCurrentUser');
   const logoutBtn = document.getElementById('adminLogoutBtn');
   const manageUsersBtn = document.getElementById('manageUsersBtn');
+  const smmCrmBtn = document.getElementById('smmCrmBtn');
   const usersModal = document.getElementById('adminUsersModal');
   const usersClose = document.getElementById('adminUsersClose');
   const usersList = document.getElementById('adminUsersList');
@@ -70,6 +71,12 @@
       const canManageUsers = ['super_admin', 'admin'].includes(user.role);
       manageUsersBtn.hidden = !canManageUsers;
       manageUsersBtn.style.display = canManageUsers ? '' : 'none';
+    }
+
+    if (smmCrmBtn) {
+      const canUseSmm = user.role === 'super_admin';
+      smmCrmBtn.hidden = !canUseSmm;
+      smmCrmBtn.style.display = canUseSmm ? '' : 'none';
     }
 
     applyRoleUi(user.role);

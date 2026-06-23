@@ -48,6 +48,17 @@ import {
   sendTelegramLead
 } from './telegram.js';
 import { cleanText, validateLead } from './validators.js';
+import {
+  addSmmSendLog,
+  createSmmTarget,
+  deleteSmmTarget,
+  getSmmTargetById,
+  listSmmSendLogs,
+  listSmmTargets,
+  updateSmmTarget
+} from './smmDb.js';
+import { analyzeWebsiteTarget } from './smmAnalyzer.js';
+import { getManualTelegramUrl, sendSmmTelegramMessage } from './smmTelegram.js';
 import { buildLeadAiInsights, SALES_STAGE_META } from './crmAi.js';
 
 dotenv.config();
@@ -634,6 +645,293 @@ app.post('/api/telegram/webhook/:secret', async (req, res) => {
     return res.status(400).json({ ok: false, error: error.message });
   }
 });
+
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+app.get('/api/smm/targets', requireAdminSession, requireSuperAdmin, async (req, res) => {
+  try {
+    const targets = await listSmmTargets();
+    res.json({ ok: true, targets });
+  } catch (error) {
+    console.error('[SMM targets]', error);
+    res.status(500).json({ ok: false, error: error.message || 'Failed to load SMM targets' });
+  }
+});
+
+app.post('/api/smm/targets', requireAdminSession, requireSuperAdmin, async (req, res) => {
+  try {
+    const target = await createSmmTarget(req.body.url);
+    res.status(201).json({ ok: true, target });
+  } catch (error) {
+    console.error('[SMM create target]', error);
+    res.status(400).json({ ok: false, error: error.message || 'Failed to add website' });
+  }
+});
+
+app.delete('/api/smm/targets/:id', requireAdminSession, requireSuperAdmin, async (req, res) => {
+  try {
+    await deleteSmmTarget(req.params.id);
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('[SMM delete target]', error);
+    res.status(400).json({ ok: false, error: error.message || 'Failed to delete website' });
+  }
+});
+
+app.post('/api/smm/targets/:id/analyze', requireAdminSession, requireSuperAdmin, async (req, res) => {
+  try {
+    const target = await getSmmTargetById(req.params.id);
+
+    if (!target) {
+      return res.status(404).json({ ok: false, error: 'Target not found' });
+    }
+
+    await updateSmmTarget(target.id, {
+      analysis_status: 'analyzing',
+      error_message: ''
+    });
+
+    const analysis = await analyzeWebsiteTarget(target.url);
+    const updated = await updateSmmTarget(target.id, analysis);
+
+    res.json({ ok: true, target: updated });
+  } catch (error) {
+    console.error('[SMM analyze target]', error);
+
+    await updateSmmTarget(req.params.id, {
+      analysis_status: 'failed',
+      send_status: 'failed',
+      error_message: error.message || 'Analyze failed'
+    }).catch(() => null);
+
+    res.status(400).json({ ok: false, error: error.message || 'Analyze failed' });
+  }
+});
+
+app.post('/api/smm/analyze-all', requireAdminSession, requireSuperAdmin, async (req, res) => {
+  const summary = {
+    analyzed: 0,
+    failed: 0,
+    skipped: 0
+  };
+
+  try {
+    const targets = await listSmmTargets();
+    const queue = targets.filter((target) => ['pending', 'failed'].includes(target.analysis_status));
+
+    for (const target of queue) {
+      try {
+        await updateSmmTarget(target.id, {
+          analysis_status: 'analyzing',
+          error_message: ''
+        });
+
+        const analysis = await analyzeWebsiteTarget(target.url);
+        await updateSmmTarget(target.id, analysis);
+        summary.analyzed += 1;
+      } catch (error) {
+        summary.failed += 1;
+
+        await updateSmmTarget(target.id, {
+          analysis_status: 'failed',
+          send_status: 'failed',
+          error_message: error.message || 'Analyze failed'
+        }).catch(() => null);
+      }
+
+      await sleep(900);
+    }
+
+    res.json({ ok: true, summary });
+  } catch (error) {
+    console.error('[SMM analyze all]', error);
+    res.status(500).json({ ok: false, error: error.message || 'Analyze all failed', summary });
+  }
+});
+
+app.patch('/api/smm/targets/:id/send-enabled', requireAdminSession, requireSuperAdmin, async (req, res) => {
+  try {
+    const target = await updateSmmTarget(req.params.id, {
+      send_enabled: Boolean(req.body.send_enabled)
+    });
+
+    res.json({ ok: true, target });
+  } catch (error) {
+    console.error('[SMM send enabled]', error);
+    res.status(400).json({ ok: false, error: error.message || 'Failed to update send toggle' });
+  }
+});
+
+app.patch('/api/smm/targets/:id/message', requireAdminSession, requireSuperAdmin, async (req, res) => {
+  try {
+    const message = cleanText(req.body.message_uk || req.body.message || '', 4000);
+
+    if (message.length < 10) {
+      return res.status(400).json({ ok: false, error: 'Message is too short' });
+    }
+
+    const target = await updateSmmTarget(req.params.id, {
+      message_uk: message
+    });
+
+    res.json({ ok: true, target });
+  } catch (error) {
+    console.error('[SMM message update]', error);
+    res.status(400).json({ ok: false, error: error.message || 'Failed to update message' });
+  }
+});
+
+app.post('/api/smm/start', requireAdminSession, requireSuperAdmin, async (req, res) => {
+  const maxPerRun = Math.min(Math.max(Number(process.env.SMM_MAX_SEND_PER_RUN || 10), 1), 30);
+  const delayMs = Math.min(Math.max(Number(process.env.SMM_SEND_DELAY_MS || 4000), 500), 30000);
+  const repeat = Boolean(req.body.repeat);
+
+  const summary = {
+    sent: 0,
+    manualRequired: 0,
+    failed: 0,
+    skipped: 0,
+    processed: 0
+  };
+
+  try {
+    const targets = await listSmmTargets();
+    const queue = targets
+      .filter((target) => target.send_enabled)
+      .filter((target) => target.message_uk)
+      .filter((target) => repeat || target.send_status !== 'sent')
+      .slice(0, maxPerRun);
+
+    for (const target of queue) {
+      summary.processed += 1;
+
+      const contacts = Array.isArray(target.telegram_contacts) ? target.telegram_contacts : [];
+      const contact = contacts[0] || '';
+
+      if (!contact) {
+        summary.skipped += 1;
+
+        await updateSmmTarget(target.id, {
+          send_status: 'skipped',
+          error_message: 'No Telegram contact'
+        });
+
+        await addSmmSendLog({
+          targetId: target.id,
+          contact: '',
+          status: 'skipped',
+          message: target.message_uk,
+          errorMessage: 'No Telegram contact',
+          sentBy: req.adminUser.id
+        }).catch(() => null);
+
+        continue;
+      }
+
+      const result = await sendSmmTelegramMessage(contact, target.message_uk);
+
+      if (result.status === 'sent') {
+        summary.sent += 1;
+
+        await updateSmmTarget(target.id, {
+          send_status: 'sent',
+          sent_count: Number(target.sent_count || 0) + 1,
+          last_sent_at: new Date().toISOString(),
+          error_message: ''
+        });
+      } else if (result.status === 'manual_required') {
+        summary.manualRequired += 1;
+
+        await updateSmmTarget(target.id, {
+          send_status: 'manual_required',
+          error_message: result.reason || 'Manual sending required',
+          meta_json: {
+            ...(target.meta_json || {}),
+            manualTelegramUrl: result.manualUrl || getManualTelegramUrl(contact)
+          }
+        });
+      } else if (result.status === 'skipped') {
+        summary.skipped += 1;
+
+        await updateSmmTarget(target.id, {
+          send_status: 'skipped',
+          error_message: result.reason || 'Skipped'
+        });
+      } else {
+        summary.failed += 1;
+
+        await updateSmmTarget(target.id, {
+          send_status: 'failed',
+          error_message: result.error || 'Telegram failed'
+        });
+      }
+
+      await addSmmSendLog({
+        targetId: target.id,
+        contact,
+        status: result.status,
+        message: target.message_uk,
+        errorMessage: result.error || result.reason || '',
+        sentBy: req.adminUser.id
+      }).catch(() => null);
+
+      await sleep(delayMs);
+    }
+
+    res.json({ ok: true, summary });
+  } catch (error) {
+    console.error('[SMM start]', error);
+    res.status(500).json({ ok: false, error: error.message || 'SMM start failed', summary });
+  }
+});
+
+app.post('/api/smm/targets/:id/manual-sent', requireAdminSession, requireSuperAdmin, async (req, res) => {
+  try {
+    const target = await getSmmTargetById(req.params.id);
+
+    if (!target) {
+      return res.status(404).json({ ok: false, error: 'Target not found' });
+    }
+
+    const contacts = Array.isArray(target.telegram_contacts) ? target.telegram_contacts : [];
+    const contact = contacts[0] || '';
+
+    const updated = await updateSmmTarget(target.id, {
+      send_status: 'sent',
+      sent_count: Number(target.sent_count || 0) + 1,
+      last_sent_at: new Date().toISOString(),
+      error_message: ''
+    });
+
+    await addSmmSendLog({
+      targetId: target.id,
+      contact,
+      status: 'manual_sent',
+      message: target.message_uk || '',
+      errorMessage: '',
+      sentBy: req.adminUser.id
+    }).catch(() => null);
+
+    res.json({ ok: true, target: updated });
+  } catch (error) {
+    console.error('[SMM manual sent]', error);
+    res.status(400).json({ ok: false, error: error.message || 'Failed to mark as sent' });
+  }
+});
+
+app.get('/api/smm/targets/:id/logs', requireAdminSession, requireSuperAdmin, async (req, res) => {
+  try {
+    const logs = await listSmmSendLogs(req.params.id);
+    res.json({ ok: true, logs });
+  } catch (error) {
+    console.error('[SMM logs]', error);
+    res.status(500).json({ ok: false, error: error.message || 'Failed to load logs' });
+  }
+});
+
 
 app.use((req, res) => {
   res.status(404).sendFile(path.join(publicDir, '404.html'));
