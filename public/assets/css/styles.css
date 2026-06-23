@@ -531,6 +531,148 @@ html[data-theme="light"] .btn-primary {
   color: #07101f;
 }
 
+
+html[data-theme="light"] {
+  --bg: #fcfaf6;
+  --bg2: #f5efe6;
+  --surface: rgba(255, 252, 247, .92);
+  --surface2: rgba(248, 243, 236, .96);
+  --surface3: rgba(241, 233, 223, .98);
+  --text: #1f2430;
+  --muted: #505866;
+  --muted2: #727b8a;
+  --line: rgba(74, 62, 50, .12);
+  --accent: #6f5cff;
+  --accent2: #58b9e8;
+  --accent3: #2f89c5;
+  --dark: #fffdf9;
+  --shadow: 0 24px 60px rgba(126, 111, 91, .12);
+}
+
+html[data-theme="light"] body {
+  background:
+    radial-gradient(circle at 12% 10%, rgba(160, 140, 255, .12), transparent 30%),
+    radial-gradient(circle at 88% 10%, rgba(88, 185, 232, .10), transparent 28%),
+    radial-gradient(circle at 50% 100%, rgba(255, 205, 160, .10), transparent 30%),
+    linear-gradient(180deg, #fffdf9 0%, #faf6ef 52%, #f7f1e7 100%);
+  color: var(--text);
+}
+
+html[data-theme="light"] .noise {
+  opacity: .025;
+}
+
+html[data-theme="light"] .header,
+html[data-theme="light"] .mobile-panel {
+  background: rgba(255, 251, 246, .88);
+  border-color: rgba(74, 62, 50, .10);
+  box-shadow: 0 12px 30px rgba(126, 111, 91, .08);
+}
+
+html[data-theme="light"] .logo,
+html[data-theme="light"] .nav a,
+html[data-theme="light"] .mobile-nav a,
+html[data-theme="light"] h1,
+html[data-theme="light"] h2,
+html[data-theme="light"] h3,
+html[data-theme="light"] strong {
+  color: var(--text);
+}
+
+html[data-theme="light"] .lead,
+html[data-theme="light"] .section-description,
+html[data-theme="light"] .muted,
+html[data-theme="light"] p,
+html[data-theme="light"] li,
+html[data-theme="light"] .message,
+html[data-theme="light"] .contact-item,
+html[data-theme="light"] .footer-brand span {
+  color: var(--muted);
+}
+
+html[data-theme="light"] .panel,
+html[data-theme="light"] .card,
+html[data-theme="light"] .form-card,
+html[data-theme="light"] .loss-calculator,
+html[data-theme="light"] .loss-result {
+  background:
+    linear-gradient(180deg, rgba(255, 253, 249, .96), rgba(248, 242, 234, .92));
+  border-color: rgba(74, 62, 50, .10);
+  box-shadow: 0 20px 50px rgba(126, 111, 91, .10);
+}
+
+html[data-theme="light"] .hero-points li,
+html[data-theme="light"] .chip,
+html[data-theme="light"] .contact-item,
+html[data-theme="light"] .integration-node,
+html[data-theme="light"] .flow-step,
+html[data-theme="light"] .stat-card,
+html[data-theme="light"] .loss-breakdown div,
+html[data-theme="light"] .footer-contacts a,
+html[data-theme="light"] .footer-contacts span {
+  background: rgba(255, 249, 242, .92);
+  border-color: rgba(74, 62, 50, .10);
+  color: var(--text);
+}
+
+html[data-theme="light"] .message.ai {
+  background: linear-gradient(135deg, rgba(111, 92, 255, .12), rgba(88, 185, 232, .12));
+  color: var(--text);
+  border-color: rgba(111, 92, 255, .12);
+}
+
+html[data-theme="light"] .btn-primary {
+  color: #ffffff;
+  box-shadow: 0 18px 36px rgba(111, 92, 255, .18);
+}
+
+html[data-theme="light"] .btn-secondary {
+  background: rgba(255, 250, 244, .88);
+  color: var(--text);
+  border-color: rgba(74, 62, 50, .12);
+}
+
+html[data-theme="light"] .btn-secondary:hover {
+  background: rgba(249, 242, 233, .96);
+}
+
+html[data-theme="light"] input,
+html[data-theme="light"] textarea,
+html[data-theme="light"] select {
+  background: rgba(255, 252, 247, .96);
+  border-color: rgba(74, 62, 50, .12);
+  color: var(--text);
+}
+
+html[data-theme="light"] input::placeholder,
+html[data-theme="light"] textarea::placeholder {
+  color: #8b93a0;
+}
+
+html[data-theme="light"] .section-label,
+html[data-theme="light"] label,
+html[data-theme="light"] .loss-number span,
+html[data-theme="light"] .loss-breakdown span {
+  color: #5f6775;
+}
+
+html[data-theme="light"] .loss-meter {
+  background: rgba(74, 62, 50, .08);
+}
+
+html[data-theme="light"] .footer {
+  border-top-color: rgba(74, 62, 50, .10);
+}
+
+html[data-theme="light"] .footer-contacts a:hover {
+  background: rgba(245, 238, 228, .98);
+  color: var(--text);
+}
+
+html[data-theme="light"] .cursor-glow {
+  opacity: .18;
+}
+
 .lamp-toggle {
   position: relative;
   width: 46px;
