@@ -19,6 +19,7 @@ import {
 
 import {
   addIntegrationLog,
+  assignLeadToAdmin,
   countAdminUsers,
   createAdminSession,
   createAdminUser,
@@ -36,6 +37,7 @@ import {
   listLeads,
   updateAdminUser,
   updateLeadIntegrationStatus,
+  updateLeadSalesStage,
   updateLeadStatus
 } from './db.js';
 import { appendLeadToSheet, isSheetsEnabled, updateLeadStatusInSheet } from './googleSheets.js';
@@ -46,6 +48,7 @@ import {
   sendTelegramLead
 } from './telegram.js';
 import { cleanText, validateLead } from './validators.js';
+import { buildLeadAiInsights, SALES_STAGE_META } from './crmAi.js';
 
 dotenv.config();
 
@@ -423,7 +426,7 @@ app.get('/api/leads', requireAdminSession, async (req, res) => {
   try {
     const isManager = req.adminUser?.role === 'manager';
 
-    const [stats, leads] = await Promise.all([
+    const [stats, allLeads] = await Promise.all([
       isManager ? Promise.resolve(null) : getStats(),
       listLeads({
         limit: req.query.limit || 100,
@@ -431,6 +434,16 @@ app.get('/api/leads', requireAdminSession, async (req, res) => {
         q: req.query.q || ''
       })
     ]);
+
+    const leads = isManager
+      ? allLeads.filter((lead) => {
+          const crm = lead.meta_json?.crm || {};
+          const assignee = crm.assigned_to || {};
+          const isOwn = String(assignee.id || '') === String(req.adminUser.id || '');
+          const isOpenPool = lead.status === 'new' && !assignee.id;
+          return isOwn || isOpenPool;
+        })
+      : allLeads;
 
     res.json({ ok: true, stats, leads });
   } catch (error) {
@@ -466,6 +479,66 @@ app.post('/api/leads/:id/notes', requireAdminSession, async (req, res) => {
     res.status(500).json({ ok: false, error: 'Failed to save manager note' });
   }
 });
+
+
+app.post('/api/leads/:id/assign', requireAdminSession, async (req, res) => {
+  try {
+    const before = await getLeadById(req.params.id);
+    const lead = await assignLeadToAdmin(req.params.id, req.adminUser);
+
+    if (before.status !== lead.status) {
+      await syncSheetStatus(lead, lead.status).catch(() => null);
+    }
+
+    await addIntegrationLog(
+      lead.id,
+      'crm_action',
+      'assigned',
+      `Assigned to ${req.adminUser.name || req.adminUser.email || 'CRM user'}`
+    ).catch(() => null);
+
+    res.json({ ok: true, lead });
+  } catch (error) {
+    console.error('[Assign lead]', error);
+    res.status(400).json({ ok: false, error: error.message || 'Failed to assign lead' });
+  }
+});
+
+app.patch('/api/leads/:id/stage', requireAdminSession, async (req, res) => {
+  try {
+    const stage = String(req.body.stage || '').trim();
+
+    if (!Object.prototype.hasOwnProperty.call(SALES_STAGE_META, stage)) {
+      return res.status(400).json({ ok: false, error: 'Unsupported sales stage' });
+    }
+
+    const lead = await updateLeadSalesStage(req.params.id, stage);
+
+    await addIntegrationLog(
+      lead.id,
+      'crm_action',
+      'stage_changed',
+      `Sales stage changed to: ${SALES_STAGE_META[stage]}`
+    ).catch(() => null);
+
+    res.json({ ok: true, lead });
+  } catch (error) {
+    console.error('[Lead stage]', error);
+    res.status(400).json({ ok: false, error: error.message || 'Failed to update stage' });
+  }
+});
+
+app.get('/api/leads/:id/ai', requireAdminSession, async (req, res) => {
+  try {
+    const lead = await getLeadById(req.params.id);
+    const insights = buildLeadAiInsights(lead);
+    res.json({ ok: true, insights });
+  } catch (error) {
+    console.error('[Lead AI insights]', error);
+    res.status(400).json({ ok: false, error: error.message || 'Failed to build AI insights' });
+  }
+});
+
 
 app.patch('/api/leads/:id/status', requireAdminSession, async (req, res) => {
   try {

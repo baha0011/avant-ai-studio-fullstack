@@ -373,4 +373,106 @@ export async function deleteExpiredAdminSessions() {
 }
 
 
+function normalizeMetaJson(value) {
+  if (!value) return {};
+  if (typeof value === 'object' && !Array.isArray(value)) return value;
+
+  try {
+    return JSON.parse(value);
+  } catch {
+    return {};
+  }
+}
+
+function normalizeAssignee(user = {}) {
+  return {
+    id: user.id,
+    email: user.email || '',
+    name: user.name || user.email || 'CRM user',
+    role: user.role || 'admin'
+  };
+}
+
+export function getLeadCrmData(lead = {}) {
+  const meta = normalizeMetaJson(lead.meta_json);
+  return meta.crm && typeof meta.crm === 'object' ? meta.crm : {};
+}
+
+export async function updateLeadCrmMeta(id, crmPatch = {}, options = {}) {
+  const lead = await getLeadById(id);
+  const meta = normalizeMetaJson(lead.meta_json);
+  const currentCrm = meta.crm && typeof meta.crm === 'object' ? meta.crm : {};
+  const now = new Date().toISOString();
+
+  const crm = {
+    ...currentCrm,
+    ...crmPatch,
+    updated_at: now
+  };
+
+  const update = {
+    meta_json: {
+      ...meta,
+      crm
+    },
+    updated_at: now
+  };
+
+  if (options.status) {
+    update.status = options.status;
+  }
+
+  const { data, error } = await supabase
+    .from('leads')
+    .update(update)
+    .eq('id', id)
+    .select('*')
+    .single();
+
+  if (error) throw error;
+  return enrichLead(data);
+}
+
+export async function assignLeadToAdmin(id, adminUser = {}) {
+  const lead = await getLeadById(id);
+  const crm = getLeadCrmData(lead);
+  const now = new Date().toISOString();
+
+  return updateLeadCrmMeta(
+    id,
+    {
+      assigned_to: normalizeAssignee(adminUser),
+      assigned_at: now,
+      sales_stage: crm.sales_stage || 'contacted'
+    },
+    {
+      status: lead.status === 'new' ? 'in_progress' : undefined
+    }
+  );
+}
+
+const ALLOWED_SALES_STAGES = new Set([
+  'new',
+  'contacted',
+  'diagnostics',
+  'proposal',
+  'decision',
+  'paid',
+  'closed',
+  'rejected'
+]);
+
+export async function updateLeadSalesStage(id, stage) {
+  const value = String(stage || '').trim();
+
+  if (!ALLOWED_SALES_STAGES.has(value)) {
+    throw new Error('Unsupported sales stage');
+  }
+
+  return updateLeadCrmMeta(id, {
+    sales_stage: value,
+    sales_stage_updated_at: new Date().toISOString()
+  });
+}
+
 initDb();
