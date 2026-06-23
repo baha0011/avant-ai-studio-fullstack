@@ -3672,3 +3672,8 @@ body[data-page="admin"].admin-crm-mode[data-admin-role="manager"] .crm-mobile-li
     grid-template-columns: 1fr !important;
   }
 }
+
+/* Hide footer on CRM admin page */
+body[data-page="admin"] .footer {
+  display: none !important;
+}
