@@ -5295,3 +5295,200 @@ html[data-theme="light"] .smm-filter-field select {
     width: 100%;
   }
 }
+
+/* SMM CRM filters — stable clean layout fix */
+body.smm-page .smm-filterbar,
+body.smm-page .smm-filterbar-advanced {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+  align-items: end !important;
+  overflow: hidden !important;
+  padding: 16px !important;
+}
+
+body.smm-page .smm-filterbar-advanced > * {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+body.smm-page .smm-filter-field,
+body.smm-page .smm-view-label {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  display: grid !important;
+  gap: 7px !important;
+}
+
+body.smm-page .smm-filter-search {
+  grid-column: span 2 !important;
+  min-width: 0 !important;
+}
+
+body.smm-page .smm-filter-field input,
+body.smm-page .smm-filter-field select,
+body.smm-page .smm-view-label select,
+body.smm-page #smmSearchInput,
+body.smm-page #smmAnalysisFilter,
+body.smm-page #smmContactFilter,
+body.smm-page #smmSendFilter,
+body.smm-page #smmSortMode,
+body.smm-page #smmErrorPosition,
+body.smm-page #smmSentPosition,
+body.smm-page #smmViewMode {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  height: 42px !important;
+  box-sizing: border-box !important;
+  border: 1px solid rgba(255,255,255,.12) !important;
+  border-radius: 14px !important;
+  padding: 0 12px !important;
+  background: rgba(255,255,255,.07) !important;
+  color: var(--text) !important;
+  outline: none !important;
+}
+
+body.smm-page .smm-filter-reset {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  height: 42px !important;
+  box-sizing: border-box !important;
+  border-radius: 14px !important;
+  padding: 0 14px !important;
+  white-space: nowrap !important;
+}
+
+body.smm-page .smm-filter-count {
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-height: 40px !important;
+  box-sizing: border-box !important;
+  justify-content: flex-start !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+}
+
+html[data-theme="light"] body.smm-page .smm-filter-field input,
+html[data-theme="light"] body.smm-page .smm-filter-field select,
+html[data-theme="light"] body.smm-page .smm-view-label select {
+  background: rgba(255,255,255,.94) !important;
+  border-color: rgba(15,23,42,.12) !important;
+}
+
+/* Compact list alignment — keep columns inside container */
+body.smm-page .smm-compact-list {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  --smm-compact-grid: minmax(240px, 1.35fr) minmax(150px, .7fr) minmax(170px, .8fr) minmax(280px, .95fr) !important;
+}
+
+body.smm-page .smm-compact-head,
+body.smm-page .smm-compact-row {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  grid-template-columns: var(--smm-compact-grid) !important;
+  min-width: 0 !important;
+}
+
+body.smm-page .smm-compact-main,
+body.smm-page .smm-compact-contact,
+body.smm-page .smm-compact-status,
+body.smm-page .smm-compact-actions {
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+body.smm-page .smm-compact-actions {
+  display: grid !important;
+  grid-template-columns: minmax(92px, 1fr) minmax(92px, 1fr) minmax(72px, .7fr) !important;
+  gap: 8px !important;
+}
+
+body.smm-page .smm-compact-actions .btn {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Responsive filter breakpoints */
+@media (max-width: 1280px) {
+  body.smm-page .smm-filterbar,
+  body.smm-page .smm-filterbar-advanced {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  body.smm-page .smm-filter-search {
+    grid-column: 1 / -1 !important;
+  }
+
+  body.smm-page .smm-compact-list {
+    --smm-compact-grid: minmax(240px, 1fr) minmax(150px, .7fr) !important;
+  }
+
+  body.smm-page .smm-compact-head span:nth-child(3),
+  body.smm-page .smm-compact-head span:nth-child(4) {
+    display: none !important;
+  }
+
+  body.smm-page .smm-compact-status,
+  body.smm-page .smm-compact-actions {
+    grid-column: 1 / -1 !important;
+  }
+
+  body.smm-page .smm-compact-actions {
+    justify-content: start !important;
+    grid-template-columns: repeat(3, minmax(90px, 150px)) !important;
+  }
+}
+
+@media (max-width: 860px) {
+  body.smm-page .smm-filterbar,
+  body.smm-page .smm-filterbar-advanced {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  body.smm-page .smm-filter-search {
+    grid-column: 1 / -1 !important;
+  }
+}
+
+@media (max-width: 620px) {
+  body.smm-page .smm-filterbar,
+  body.smm-page .smm-filterbar-advanced {
+    grid-template-columns: 1fr !important;
+    padding: 14px !important;
+  }
+
+  body.smm-page .smm-filter-search {
+    grid-column: auto !important;
+  }
+
+  body.smm-page .smm-compact-list {
+    --smm-compact-grid: 1fr !important;
+  }
+
+  body.smm-page .smm-compact-head {
+    display: none !important;
+  }
+
+  body.smm-page .smm-compact-status,
+  body.smm-page .smm-compact-actions {
+    grid-column: auto !important;
+  }
+
+  body.smm-page .smm-compact-actions {
+    grid-template-columns: 1fr !important;
+  }
+}
