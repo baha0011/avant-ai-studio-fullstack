@@ -9,15 +9,18 @@
   const analyzeAllBtn = document.getElementById('analyzeAllSmmBtn');
   const summaryWrap = document.getElementById('smmSummary');
   const heroCount = document.getElementById('smmHeroCount');
-  const statusFilter = document.getElementById('smmStatusFilter');
+  const searchInput = document.getElementById('smmSearchInput');
+  const analysisFilter = document.getElementById('smmAnalysisFilter');
+  const contactFilter = document.getElementById('smmContactFilter');
+  const sendFilter = document.getElementById('smmSendFilter');
   const viewModeSelect = document.getElementById('smmViewMode');
+  const resetFiltersBtn = document.getElementById('smmResetFiltersBtn');
   const filterCount = document.getElementById('smmFilterCount');
 
   if (!root || !workspace || !listWrap) return;
 
   let currentUser = null;
   let targets = [];
-  let currentFilter = 'all';
   let currentViewMode = localStorage.getItem('avantSmmViewMode') || 'expanded';
 
   function escapeHtml(value = '') {
@@ -157,39 +160,96 @@
     return `<span class="smm-badge ${escapeHtml(status || 'unknown')}">${escapeHtml(status || 'unknown')}</span>`;
   }
 
+  function normalizeFilterText(value = '') {
+    return String(value || '').toLowerCase().trim();
+  }
+
+  function targetHasTelegram(target) {
+    return Array.isArray(target.telegram_contacts) && target.telegram_contacts.length > 0;
+  }
+
+  function targetHasPhone(target) {
+    return Array.isArray(target.phones) && target.phones.length > 0;
+  }
+
+  function targetSearchHaystack(target) {
+    return normalizeFilterText([
+      target.company_name,
+      target.normalized_url,
+      target.url,
+      target.business_type,
+      target.description,
+      target.offer_summary,
+      ...(Array.isArray(target.telegram_contacts) ? target.telegram_contacts : []),
+      ...(Array.isArray(target.phones) ? target.phones : []),
+      ...(Array.isArray(target.emails) ? target.emails : [])
+    ].filter(Boolean).join(' '));
+  }
+
+  function getCurrentFilters() {
+    return {
+      query: normalizeFilterText(searchInput?.value || ''),
+      analysis: analysisFilter?.value || 'all',
+      contact: contactFilter?.value || 'all',
+      send: sendFilter?.value || 'all'
+    };
+  }
+
   function getFilteredTargets() {
-    if (currentFilter === 'all') return targets;
+    const filters = getCurrentFilters();
 
-    if (currentFilter === 'analyzed') {
-      return targets.filter((target) => target.analysis_status === 'analyzed');
-    }
+    return targets.filter((target) => {
+      const hasTelegram = targetHasTelegram(target);
+      const hasPhone = targetHasPhone(target);
+      const sendStatus = target.send_status || 'not_sent';
+      const analysisStatus = target.analysis_status || 'pending';
 
-    if (['pending', 'analyzing', 'failed'].includes(currentFilter)) {
-      return targets.filter((target) => target.analysis_status === currentFilter);
-    }
+      if (filters.query && !targetSearchHaystack(target).includes(filters.query)) {
+        return false;
+      }
 
-    if (['no_telegram', 'manual_required', 'sent', 'prepared', 'skipped'].includes(currentFilter)) {
-      return targets.filter((target) => target.send_status === currentFilter);
-    }
+      if (filters.analysis !== 'all' && analysisStatus !== filters.analysis) {
+        return false;
+      }
 
-    return targets;
+      if (filters.contact === 'telegram' && !hasTelegram) {
+        return false;
+      }
+
+      if (filters.contact === 'phone_only' && (hasTelegram || !hasPhone)) {
+        return false;
+      }
+
+      if (filters.contact === 'no_telegram' && hasTelegram) {
+        return false;
+      }
+
+      if (filters.contact === 'no_contact' && (hasTelegram || hasPhone)) {
+        return false;
+      }
+
+      if (filters.send !== 'all' && sendStatus !== filters.send) {
+        return false;
+      }
+
+      return true;
+    });
   }
 
   function renderFilterCount(visibleTargets) {
     if (!filterCount) return;
 
-    const labelMap = {
-      all: 'Всі сайти',
-      analyzed: 'Успішно проаналізовані',
-      pending: 'Очікують аналізу',
-      analyzing: 'Аналізуються',
-      failed: 'Помилка аналізу',
-      no_telegram: 'Без Telegram',
-      manual_required: 'Manual required',
-      sent: 'Sent'
-    };
+    const filters = getCurrentFilters();
+    const active = [];
 
-    filterCount.textContent = `${labelMap[currentFilter] || 'Фільтр'}: ${visibleTargets.length} із ${targets.length}`;
+    if (filters.query) active.push(`пошук: "${filters.query}"`);
+    if (filters.analysis !== 'all') active.push(`аналіз: ${filters.analysis}`);
+    if (filters.contact !== 'all') active.push(`контакт: ${filters.contact}`);
+    if (filters.send !== 'all') active.push(`статус: ${filters.send}`);
+
+    filterCount.textContent = active.length
+      ? `Показано ${visibleTargets.length} із ${targets.length} • ${active.join(' • ')}`
+      : `Показано ${visibleTargets.length} із ${targets.length}`;
   }
 
   function renderSummary() {
@@ -213,6 +273,13 @@
   function renderCompactTargets(visibleTargets) {
     listWrap.innerHTML = `
       <div class="smm-compact-list">
+        <div class="smm-compact-head">
+          <span>Компанія</span>
+          <span>Контакт</span>
+          <span>Статус</span>
+          <span>Дії</span>
+        </div>
+
         ${visibleTargets.map((target) => {
           const contact = getPrimaryContact(target);
           const sentCount = Number(target.sent_count || 0);
@@ -221,13 +288,13 @@
           return `
             <article class="smm-compact-row" data-smm-id="${escapeHtml(target.id)}">
               <div class="smm-compact-main">
-                <strong>${escapeHtml(company)}</strong>
+                <strong title="${escapeHtml(company)}">${escapeHtml(company)}</strong>
                 <a href="${escapeHtml(target.normalized_url || target.url || '#')}" target="_blank" rel="noopener">${escapeHtml(target.normalized_url || target.url || '')}</a>
               </div>
 
               <div class="smm-compact-contact ${escapeHtml(contact.type)}">
                 <span>${contact.type === 'telegram' ? 'Telegram' : contact.type === 'phone' ? 'Номер' : 'Контакт'}</span>
-                <strong>${escapeHtml(contact.label)}</strong>
+                <strong title="${escapeHtml(contact.label)}">${escapeHtml(contact.label)}</strong>
               </div>
 
               <div class="smm-compact-status">
@@ -237,13 +304,13 @@
               </div>
 
               <div class="smm-compact-actions">
-                <button class="btn btn-secondary" type="button" data-smm-copy="${escapeHtml(target.id)}">📋 Копіювати текст</button>
+                <button class="btn btn-secondary smm-copy-btn" type="button" data-smm-copy="${escapeHtml(target.id)}">📋 Копіювати</button>
                 ${
                   contact.href
-                    ? `<a class="btn btn-primary" href="${escapeHtml(contact.href)}" target="_blank" rel="noopener">${escapeHtml(contact.button)}</a>`
-                    : `<button class="btn btn-secondary" type="button" disabled>Немає контакту</button>`
+                    ? `<a class="btn btn-primary smm-write-btn" href="${escapeHtml(contact.href)}" target="_blank" rel="noopener">${contact.type === 'telegram' ? '💬 Написати' : '📞 Номер'}</a>`
+                    : `<button class="btn btn-secondary smm-write-btn" type="button" disabled>Немає</button>`
                 }
-                <button class="btn btn-secondary" type="button" data-smm-manual-sent="${escapeHtml(target.id)}">✅ sent</button>
+                <button class="btn btn-secondary smm-sent-btn" type="button" data-smm-manual-sent="${escapeHtml(target.id)}">✅ sent</button>
               </div>
             </article>
           `;
@@ -484,7 +551,8 @@
 
   async function copyMessage(id, button) {
     const textarea = document.querySelector(`[data-smm-message="${CSS.escape(String(id))}"]`);
-    const text = textarea?.value || '';
+    const target = targets.find((item) => String(item.id) === String(id));
+    const text = textarea?.value || target?.message_uk || '';
     const manualText = makeManualTelegramText(text);
 
     if (!manualText.trim()) {
@@ -511,8 +579,52 @@
     viewModeSelect.value = currentViewMode;
   }
 
-  statusFilter?.addEventListener('change', () => {
-    currentFilter = statusFilter.value || 'all';
+  function saveFilterState() {
+    const state = {
+      q: searchInput?.value || '',
+      analysis: analysisFilter?.value || 'all',
+      contact: contactFilter?.value || 'all',
+      send: sendFilter?.value || 'all'
+    };
+
+    localStorage.setItem('avantSmmFilters', JSON.stringify(state));
+  }
+
+  function restoreFilterState() {
+    const raw = localStorage.getItem('avantSmmFilters');
+    if (!raw) return;
+
+    try {
+      const state = JSON.parse(raw);
+
+      if (searchInput) searchInput.value = state.q || '';
+      if (analysisFilter) analysisFilter.value = state.analysis || 'all';
+      if (contactFilter) contactFilter.value = state.contact || 'all';
+      if (sendFilter) sendFilter.value = state.send || 'all';
+    } catch {
+      localStorage.removeItem('avantSmmFilters');
+    }
+  }
+
+  function handleFilterChange() {
+    saveFilterState();
+    renderTargets();
+  }
+
+  restoreFilterState();
+
+  searchInput?.addEventListener('input', handleFilterChange);
+  analysisFilter?.addEventListener('change', handleFilterChange);
+  contactFilter?.addEventListener('change', handleFilterChange);
+  sendFilter?.addEventListener('change', handleFilterChange);
+
+  resetFiltersBtn?.addEventListener('click', () => {
+    if (searchInput) searchInput.value = '';
+    if (analysisFilter) analysisFilter.value = 'all';
+    if (contactFilter) contactFilter.value = 'all';
+    if (sendFilter) sendFilter.value = 'all';
+
+    localStorage.removeItem('avantSmmFilters');
     renderTargets();
   });
 
