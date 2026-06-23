@@ -1,6 +1,8 @@
 const SHEET_NAME = 'Leads';
 const TIMEZONE = 'Europe/Kyiv';
 const DATE_FORMAT = 'dd.MM.yyyy HH:mm';
+const MESSAGE_COLUMN_WIDTH = 273;
+const MESSAGE_ROW_HEIGHT = 28;
 
 const HEADERS = [
   'Created At',
@@ -86,21 +88,38 @@ function formatSheet(sheet) {
   sheet.getRange(1, 1, 1, sheet.getLastColumn())
     .setFontWeight('bold')
     .setBackground('#111827')
-    .setFontColor('#ffffff');
+    .setFontColor('#ffffff')
+    .setVerticalAlignment('middle');
+
+  sheet.autoResizeColumns(1, Math.min(sheet.getLastColumn(), HEADERS.length));
 
   if (map['Created At'] && sheet.getLastRow() >= 2) {
     sheet
       .getRange(2, map['Created At'], sheet.getLastRow() - 1, 1)
-      .setNumberFormat(DATE_FORMAT);
+      .setNumberFormat(DATE_FORMAT)
+      .setVerticalAlignment('middle');
   }
 
   if (map['Status'] && sheet.getLastRow() >= 2) {
     sheet
       .getRange(2, map['Status'], sheet.getLastRow() - 1, 1)
-      .setHorizontalAlignment('center');
+      .setHorizontalAlignment('center')
+      .setVerticalAlignment('middle');
   }
 
-  sheet.autoResizeColumns(1, Math.min(sheet.getLastColumn(), HEADERS.length));
+  if (map['Message']) {
+    sheet.setColumnWidth(map['Message'], MESSAGE_COLUMN_WIDTH);
+
+    if (sheet.getLastRow() >= 2) {
+      const range = sheet.getRange(2, map['Message'], sheet.getLastRow() - 1, 1);
+
+      range
+        .setWrapStrategy(SpreadsheetApp.WrapStrategy.CLIP)
+        .setVerticalAlignment('middle');
+
+      sheet.setRowHeights(2, sheet.getLastRow() - 1, MESSAGE_ROW_HEIGHT);
+    }
+  }
 }
 
 function normalizeIsoDate(value) {
@@ -111,9 +130,6 @@ function normalizeIsoDate(value) {
   }
 
   const raw = String(value).trim();
-
-  // Supabase can return microseconds: 2026-06-23T08:31:11.837616+00:00
-  // JS Date expects milliseconds, so we trim extra digits.
   const normalized = raw.replace(/(\.\d{3})\d+/, '$1');
   const parsed = new Date(normalized);
 
@@ -122,6 +138,15 @@ function normalizeIsoDate(value) {
   }
 
   return new Date();
+}
+
+function prepareMessageForSheet(value) {
+  return String(value || '')
+    .replace(/\r\n/g, ' ')
+    .replace(/\r/g, ' ')
+    .replace(/\n/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 function getValue(lead, keys, fallback) {
@@ -151,7 +176,7 @@ function appendLead(lead) {
   row[map['Lead Quality'] - 1] = getValue(lead, ['lead_score_label', 'lead_score_title'], '');
   row[map['Source'] - 1] = source.utm_source || getValue(lead, ['source'], 'website');
   row[map['Page'] - 1] = source.page || getValue(lead, ['page'], '');
-  row[map['Message'] - 1] = getValue(lead, ['message'], '');
+  row[map['Message'] - 1] = prepareMessageForSheet(getValue(lead, ['message'], ''));
   row[map['Language'] - 1] = getValue(lead, ['language'], 'uk');
   row[map['Sheet Status'] - 1] = getValue(lead, ['sheet_status'], '');
   row[map['Telegram Status'] - 1] = getValue(lead, ['telegram_status'], '');
@@ -208,7 +233,6 @@ function updateStatus(publicId, status) {
   return { ok: false, error: `Lead ${publicId} not found in sheet` };
 }
 
-// Run this manually once in Apps Script to fix old ISO timestamps.
 function fixExistingCreatedAtDates() {
   const sheet = getSheet();
   const map = getHeaderMap(sheet);
@@ -222,12 +246,42 @@ function fixExistingCreatedAtDates() {
 
   const range = sheet.getRange(2, map['Created At'], lastRow - 1, 1);
   const values = range.getValues();
-
   const fixed = values.map(([value]) => [normalizeIsoDate(value)]);
 
   range.setValues(fixed);
   range.setNumberFormat(DATE_FORMAT);
 
+  formatSheet(sheet);
+}
+
+function fixMessageColumnView() {
+  const sheet = getSheet();
+  const map = getHeaderMap(sheet);
+
+  if (!map['Message']) {
+    throw new Error('Message column not found');
+  }
+
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return;
+
+  const range = sheet.getRange(2, map['Message'], lastRow - 1, 1);
+  const values = range.getValues();
+  const fixed = values.map(([value]) => [prepareMessageForSheet(value)]);
+
+  range.setValues(fixed);
+  range
+    .setWrapStrategy(SpreadsheetApp.WrapStrategy.CLIP)
+    .setVerticalAlignment('middle');
+
+  sheet.setColumnWidth(map['Message'], MESSAGE_COLUMN_WIDTH);
+  sheet.setRowHeights(2, lastRow - 1, MESSAGE_ROW_HEIGHT);
+
+  formatSheet(sheet);
+}
+
+function applySheetFormattingOnly() {
+  const sheet = getSheet();
   formatSheet(sheet);
 }
 

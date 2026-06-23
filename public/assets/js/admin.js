@@ -125,6 +125,44 @@
     if (token) localStorage.setItem('avantAdminToken', token);
   }
 
+  async function copyText(value, button = null) {
+    const text = String(value || '').trim();
+    if (!text) return;
+
+    try {
+      await navigator.clipboard.writeText(text);
+
+      if (button) {
+        const oldText = button.textContent;
+        button.textContent = '✓';
+        button.classList.add('copied');
+
+        setTimeout(() => {
+          button.textContent = oldText;
+          button.classList.remove('copied');
+        }, 900);
+      }
+    } catch {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.setAttribute('readonly', '');
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      textarea.remove();
+
+      if (button) {
+        const oldText = button.textContent;
+        button.textContent = '✓';
+        setTimeout(() => {
+          button.textContent = oldText;
+        }, 900);
+      }
+    }
+  }
+
   async function api(path, options = {}) {
     const response = await fetch(path, {
       ...options,
@@ -284,7 +322,10 @@
           <td>
             <div class="crm-lead-id">
               ${scoreBadge(lead)}
-              <strong>${escapeHtml(lead.public_id)}</strong>
+              <div class="crm-id-line">
+                <strong>${escapeHtml(lead.public_id)}</strong>
+                <button class="copy-id-btn" type="button" data-copy-id="${escapeHtml(lead.public_id)}" title="Скопіювати ID">⧉</button>
+              </div>
             </div>
           </td>
 
@@ -377,6 +418,13 @@
         updateStatus(button.dataset.statusAction, button.dataset.next);
       });
     });
+
+    document.querySelectorAll('[data-copy-id]').forEach((button) => {
+      button.addEventListener('click', (event) => {
+        event.stopPropagation();
+        copyText(button.dataset.copyId, button);
+      });
+    });
   }
 
   async function updateStatus(id, status) {
@@ -410,7 +458,10 @@
       <div class="crm-drawer-head">
         <div>
           ${scoreBadge(lead)}
-          <h2>${escapeHtml(lead.public_id)}</h2>
+          <div class="crm-drawer-id-line">
+            <h2>${escapeHtml(lead.public_id)}</h2>
+            <button class="copy-id-btn" type="button" data-copy-id="${escapeHtml(lead.public_id)}" title="Скопіювати ID">⧉</button>
+          </div>
           <p>${escapeHtml(formatDate(lead.created_at))}</p>
         </div>
         ${statusBadge(lead.status)}
@@ -473,6 +524,13 @@
 
     drawerBody.querySelectorAll('[data-status-action]').forEach((button) => {
       button.addEventListener('click', () => updateStatus(button.dataset.statusAction, button.dataset.next));
+    });
+
+    drawerBody.querySelectorAll('[data-copy-id]').forEach((button) => {
+      button.addEventListener('click', (event) => {
+        event.stopPropagation();
+        copyText(button.dataset.copyId, button);
+      });
     });
   }
 

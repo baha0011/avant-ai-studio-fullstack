@@ -2931,3 +2931,98 @@ html[data-theme="light"] .crm-pipeline span {
     border-radius: 24px;
   }
 }
+
+/* CRM admin workspace usability upgrade */
+.crm-container {
+  width: min(1880px, calc(100vw - 28px));
+  max-width: none;
+}
+
+.crm-section .crm-shell {
+  width: 100%;
+}
+
+.crm-topbar {
+  grid-template-columns: minmax(320px, 1fr) auto auto auto;
+}
+
+.crm-sheet-link {
+  white-space: nowrap;
+}
+
+.crm-id-line,
+.crm-drawer-id-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.crm-drawer-id-line {
+  margin-top: 10px;
+}
+
+.crm-drawer-id-line h2 {
+  margin: 0;
+}
+
+.copy-id-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255,255,255,.065);
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 900;
+  transition: transform .18s ease, color .18s ease, border-color .18s ease, background .18s ease;
+}
+
+.copy-id-btn:hover,
+.copy-id-btn.copied {
+  transform: translateY(-1px);
+  color: var(--text);
+  border-color: rgba(185,243,255,.35);
+  background: rgba(35,214,255,.12);
+}
+
+.crm-table {
+  min-width: 1280px;
+}
+
+.crm-table th:nth-child(1),
+.crm-table td:nth-child(1) {
+  min-width: 230px;
+}
+
+.crm-table th:nth-child(3),
+.crm-table td:nth-child(3) {
+  min-width: 300px;
+}
+
+.crm-table th:nth-child(7),
+.crm-table td:nth-child(7) {
+  min-width: 220px;
+}
+
+html[data-theme="light"] .copy-id-btn {
+  background: rgba(255,249,242,.92);
+  border-color: rgba(74,62,50,.12);
+}
+
+@media (max-width: 860px) {
+  .crm-container {
+    width: min(100%, calc(100vw - 18px));
+  }
+
+  .crm-topbar {
+    grid-template-columns: 1fr;
+  }
+
+  .crm-sheet-link {
+    width: 100%;
+    justify-content: center;
+  }
+}
