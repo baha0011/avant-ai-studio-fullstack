@@ -658,7 +658,6 @@
           </label>
 
           <div class="smm-card-actions">
-            <button class="btn btn-secondary" type="button" data-smm-open="${escapeHtml(target.id)}" data-smm-open-expanded="1">🗂 Картка</button>
             <button class="btn btn-secondary" type="button" data-smm-open="${escapeHtml(target.id)}">🗂 Картка</button>
             <button class="btn btn-secondary" type="button" data-smm-analyze="${escapeHtml(target.id)}">🔍 Аналіз</button>
             <button class="btn btn-secondary" type="button" data-smm-save-message="${escapeHtml(target.id)}">💾 Зберегти текст</button>
