@@ -1,5 +1,13 @@
 const MAX_HTML_BYTES = 1500000;
 const FETCH_TIMEOUT_MS = 15000;
+const AVANT_SITE_URL = process.env.PUBLIC_URL || 'https://avant-ai-studio.onrender.com';
+
+function telegramHtml(value = '') {
+  return String(value || '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;');
+}
 
 function clean(value = '') {
   return String(value || '')
@@ -203,15 +211,18 @@ function buildOffer({ businessType, title, description }) {
 }
 
 function buildMessageUk({ companyName, businessType, offerSummary }) {
-  const name = companyName || 'вашу компанію';
+  const name = telegramHtml(companyName || 'вашу компанію');
+  const safeBusinessType = telegramHtml(businessType || 'бізнес');
+  const safeOfferSummary = telegramHtml(offerSummary || '');
+  const siteLink = `<a href="${telegramHtml(AVANT_SITE_URL)}">Avant AI Studio</a>`;
 
   return [
     `Вітаю! Побачив сайт ${name} і вирішив написати з короткою ідеєю для автоматизації.`,
     '',
-    'Ми в Avant AI Studio робимо AI-асистентів для бізнесу: заявки, консультації, Telegram, CRM, Google Sheets і автоматичну передачу звернень менеджеру.',
+    `Ми в ${siteLink} робимо AI-асистентів для бізнесу: заявки, консультації, Telegram, CRM, Google Sheets і автоматичну передачу звернень менеджеру.`,
     '',
-    `Для вашої сфери (${businessType}) можна зробити:`,
-    `— ${offerSummary}`,
+    `Для вашої сфери (${safeBusinessType}) можна зробити:`,
+    `— ${safeOfferSummary}`,
     '— автоматичний збір заявок із сайту або Telegram;',
     '— швидкі відповіді на часті питання клієнтів;',
     '— повідомлення адміну в Telegram і збереження всіх звернень у CRM.',
