@@ -72,16 +72,48 @@
       </div>
     </section>
 
+    <section class="section admin-login-section" id="adminLoginPanel">
+      <div class="container">
+        <div class="admin-login-card reveal">
+          <div>
+            <div class="eyebrow"><span class="eyebrow-dot"></span><span>Secure admin login</span></div>
+            <h2>Вхід в CRM</h2>
+            <p class="lead">Увійдіть через email і пароль. Доступ до заявок мають тільки активні користувачі.</p>
+          </div>
+
+          <form class="admin-login-form" id="adminLoginForm">
+            <label>
+              Email
+              <input type="email" id="adminEmail" autocomplete="username" placeholder="vovaazazz5@gmail.com" required>
+            </label>
+
+            <label>
+              Password
+              <input type="password" id="adminPassword" autocomplete="current-password" placeholder="••••••••" required>
+            </label>
+
+            <button class="btn btn-primary" type="submit">Увійти</button>
+            <p class="admin-login-error" id="adminLoginError" role="alert"></p>
+          </form>
+        </div>
+      </div>
+    </section>
+
     <section class="section crm-section">
       <div class="container crm-container" id="adminCrmRoot">
         <div class="crm-shell reveal">
           <div class="crm-topbar">
-            <div class="crm-token">
+            <div class="crm-token admin-token-legacy">
               <label for="adminToken">ADMIN_TOKEN</label>
               <input id="adminToken" type="password" placeholder="Вставте ADMIN_TOKEN">
             </div>
 
-            <button class="btn btn-secondary" id="saveToken" type="button">Зберегти</button>
+            <div class="admin-session-bar" id="adminSessionBar" hidden>
+              <span id="adminCurrentUser">—</span>
+              <button class="btn btn-secondary" id="manageUsersBtn" type="button" hidden>👥 Користувачі</button>
+              <button class="btn btn-secondary" id="adminLogoutBtn" type="button">Вийти</button>
+            </div>
+            <button class="btn btn-secondary admin-token-legacy" id="saveToken" type="button">Зберегти</button>
             <button class="btn btn-primary" id="loadLeads" type="button">Оновити CRM</button>
             <button class="btn btn-secondary crm-sheet-link" id="exportCsvBtn" type="button">⬇️ CSV</button>
             <button class="btn btn-secondary crm-sheet-link" id="summaryReportBtn" type="button">📄 Звіт</button>
@@ -145,6 +177,29 @@
     </section>
   </main>
 
+  <div class="admin-users-modal" id="adminUsersModal" aria-hidden="true">
+    <div class="admin-users-panel">
+      <button class="crm-drawer-close" id="adminUsersClose" type="button" aria-label="Закрити">×</button>
+      <div class="admin-users-head">
+        <h2>Користувачі CRM</h2>
+        <p>Суперкористувач може додавати нових адмінів, змінювати роль, імʼя, пароль і доступ.</p>
+      </div>
+
+      <form class="admin-user-create" id="adminUserCreateForm">
+        <input type="text" id="newAdminName" placeholder="Імʼя">
+        <input type="email" id="newAdminEmail" placeholder="Email" required>
+        <input type="password" id="newAdminPassword" placeholder="Пароль мін. 8 символів" required>
+        <select id="newAdminRole">
+          <option value="admin">admin</option>
+          <option value="super_admin">super_admin</option>
+        </select>
+        <button class="btn btn-primary" type="submit">Додати</button>
+      </form>
+
+      <div class="admin-users-list" id="adminUsersList"></div>
+    </div>
+  </div>
+
   <div class="crm-drawer" id="leadDrawer" aria-hidden="true">
     <div class="crm-drawer-panel">
       <button class="crm-drawer-close" id="leadDrawerClose" type="button" aria-label="Закрити">×</button>
@@ -170,6 +225,7 @@
   </footer>
 
   <script src="assets/js/app.js"></script>
+  <script src="assets/js/admin-auth.js"></script>
   <script src="assets/js/admin.js"></script>
 </body>
 </html>

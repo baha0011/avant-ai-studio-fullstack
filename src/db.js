@@ -228,4 +228,139 @@ export async function getStats() {
   };
 }
 
+
+export async function countAdminUsers() {
+  const { count, error } = await supabase
+    .from('admin_users')
+    .select('id', { count: 'exact', head: true });
+
+  if (error) throw error;
+  return count || 0;
+}
+
+export async function getAdminUserByEmail(email) {
+  const { data, error } = await supabase
+    .from('admin_users')
+    .select('*')
+    .eq('email', email)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data || null;
+}
+
+export async function getAdminUserById(id) {
+  const { data, error } = await supabase
+    .from('admin_users')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data || null;
+}
+
+export async function createAdminUser({ email, name = '', role = 'admin', passwordHash, isActive = true }) {
+  const { data, error } = await supabase
+    .from('admin_users')
+    .insert({
+      email,
+      name,
+      role,
+      password_hash: passwordHash,
+      is_active: isActive
+    })
+    .select('*')
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function listAdminUsers() {
+  const { data, error } = await supabase
+    .from('admin_users')
+    .select('id, email, name, role, is_active, created_at, updated_at')
+    .order('created_at', { ascending: true });
+
+  if (error) throw error;
+  return data || [];
+}
+
+export async function updateAdminUser(id, patch = {}) {
+  const update = {
+    updated_at: new Date().toISOString()
+  };
+
+  if (patch.email !== undefined) update.email = patch.email;
+  if (patch.name !== undefined) update.name = patch.name;
+  if (patch.role !== undefined) update.role = patch.role;
+  if (patch.isActive !== undefined) update.is_active = patch.isActive;
+  if (patch.passwordHash !== undefined) update.password_hash = patch.passwordHash;
+
+  const { data, error } = await supabase
+    .from('admin_users')
+    .update(update)
+    .eq('id', id)
+    .select('id, email, name, role, is_active, created_at, updated_at')
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function createAdminSession(userId, tokenHash, expiresAt) {
+  const { data, error } = await supabase
+    .from('admin_sessions')
+    .insert({
+      user_id: userId,
+      token_hash: tokenHash,
+      expires_at: expiresAt
+    })
+    .select('*')
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function getAdminSessionByTokenHash(tokenHash) {
+  const { data: session, error } = await supabase
+    .from('admin_sessions')
+    .select('*')
+    .eq('token_hash', tokenHash)
+    .gt('expires_at', new Date().toISOString())
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!session) return null;
+
+  const user = await getAdminUserById(session.user_id);
+
+  if (!user || !user.is_active) {
+    return null;
+  }
+
+  return { session, user };
+}
+
+export async function deleteAdminSessionByTokenHash(tokenHash) {
+  const { error } = await supabase
+    .from('admin_sessions')
+    .delete()
+    .eq('token_hash', tokenHash);
+
+  if (error) throw error;
+}
+
+export async function deleteExpiredAdminSessions() {
+  const { error } = await supabase
+    .from('admin_sessions')
+    .delete()
+    .lte('expires_at', new Date().toISOString());
+
+  if (error) throw error;
+}
+
+
 initDb();
