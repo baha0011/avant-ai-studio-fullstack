@@ -2,12 +2,6 @@ const MAX_HTML_BYTES = 1500000;
 const FETCH_TIMEOUT_MS = 15000;
 const AVANT_SITE_URL = process.env.PUBLIC_URL || 'https://avant-ai-studio.onrender.com';
 
-function telegramHtml(value = '') {
-  return String(value || '')
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;');
-}
 
 function clean(value = '') {
   return String(value || '')
@@ -211,9 +205,9 @@ function buildOffer({ businessType, title, description }) {
 }
 
 function buildMessageUk({ companyName, businessType, offerSummary }) {
-  const safeBusinessType = telegramHtml(businessType || 'бізнес');
-  const safeOfferSummary = telegramHtml(offerSummary || '');
-  const siteLink = `<a href="${telegramHtml(AVANT_SITE_URL)}">Avant AI Studio</a>`;
+  const safeBusinessType = businessType || 'бізнес';
+  const safeOfferSummary = offerSummary || '';
+  const siteLink = `Avant AI Studio — ${AVANT_SITE_URL}`;
 
   return [
     'Вітаю! Побачив ваш сайт і вирішив написати з короткою ідеєю для автоматизації.',
