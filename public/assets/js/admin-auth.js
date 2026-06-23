@@ -82,6 +82,18 @@
   function applyRoleUi(role) {
     const isManager = role === 'manager';
 
+    const roleSelect = document.getElementById('newAdminRole');
+    const superOption = roleSelect?.querySelector('option[value="super_admin"]');
+
+    if (superOption) {
+      superOption.hidden = role !== 'super_admin';
+      superOption.disabled = role !== 'super_admin';
+
+      if (roleSelect.value === 'super_admin' && role !== 'super_admin') {
+        roleSelect.value = 'admin';
+      }
+    }
+
     const stats = document.getElementById('adminStats');
     const pipeline = document.getElementById('crmPipeline');
     const exportCsv = document.getElementById('exportCsvBtn');
@@ -178,6 +190,10 @@
 
       usersList.innerHTML = users.map((user) => {
         const isSelf = currentAdmin && Number(currentAdmin.id) === Number(user.id);
+        const actorIsSuperAdmin = currentAdmin?.role === 'super_admin';
+        const targetIsSuperAdmin = user.role === 'super_admin';
+        const canEdit = actorIsSuperAdmin || !targetIsSuperAdmin;
+        const canDelete = actorIsSuperAdmin && !isSelf;
 
         return `
           <article class="admin-user-row" data-user-id="${user.id}">
@@ -186,24 +202,24 @@
               <span>ID ${user.id} · ${escapeHtml(user.created_at || '')}${isSelf ? ' · це ви' : ''}</span>
             </div>
 
-            <input type="text" data-field="name" value="${escapeHtml(user.name || '')}" placeholder="Імʼя">
+            <input type="text" data-field="name" value="${escapeHtml(user.name || '')}" placeholder="Імʼя" ${canEdit ? '' : 'disabled'}>
 
-            <select data-field="role">
+            <select data-field="role" ${canEdit ? '' : 'disabled'}>
               <option value="manager" ${user.role === 'manager' ? 'selected' : ''}>manager</option>
               <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>admin</option>
-              <option value="super_admin" ${user.role === 'super_admin' ? 'selected' : ''}>super_admin</option>
+              <option value="super_admin" ${user.role === 'super_admin' ? 'selected' : ''} ${actorIsSuperAdmin ? '' : 'disabled'}>super_admin</option>
             </select>
 
             <label class="admin-active-check">
-              <input type="checkbox" data-field="is_active" ${user.is_active ? 'checked' : ''}>
+              <input type="checkbox" data-field="is_active" ${user.is_active ? 'checked' : ''} ${canEdit ? '' : 'disabled'}>
               active
             </label>
 
-            <input type="password" data-field="password" placeholder="Новий пароль, якщо треба">
+            <input type="password" data-field="password" placeholder="${canEdit ? 'Новий пароль, якщо треба' : 'Тільки super_admin може змінити'}" ${canEdit ? '' : 'disabled'}>
 
             <div class="admin-user-actions">
-              <button class="btn btn-secondary" type="button" data-save-user="${user.id}">Зберегти</button>
-              <button class="btn btn-danger" type="button" data-delete-user="${user.id}" ${isSelf ? 'disabled' : ''}>Видалити</button>
+              <button class="btn btn-secondary" type="button" data-save-user="${user.id}" ${canEdit ? '' : 'disabled'}>Зберегти</button>
+              <button class="btn btn-danger" type="button" data-delete-user="${user.id}" ${canDelete ? '' : 'disabled'}>Видалити</button>
             </div>
           </article>
         `;

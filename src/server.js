@@ -27,6 +27,7 @@ import {
   deleteExpiredAdminSessions,
   getAdminSessionByTokenHash,
   getAdminUserByEmail,
+  getAdminUserById,
   getLeadById,
   getLeadLogs,
   getStats,
@@ -239,6 +240,10 @@ app.post('/api/admin/users', requireAdminSession, requireUserManagerAccess, asyn
     const name = String(req.body.name || '').trim().slice(0, 120);
     const role = ['super_admin', 'admin', 'manager'].includes(req.body.role) ? req.body.role : 'admin';
 
+    if (role === 'super_admin' && req.adminUser?.role !== 'super_admin') {
+      return res.status(403).json({ ok: false, error: 'Only super admin can create another super admin' });
+    }
+
     if (!email || !password || password.length < 8) {
       return res.status(400).json({ ok: false, error: 'Email and password min 8 chars are required' });
     }
@@ -260,6 +265,35 @@ app.post('/api/admin/users', requireAdminSession, requireUserManagerAccess, asyn
 
 app.patch('/api/admin/users/:id', requireAdminSession, requireUserManagerAccess, async (req, res) => {
   try {
+    const targetUser = await getAdminUserById(req.params.id);
+
+    if (!targetUser) {
+      return res.status(404).json({ ok: false, error: 'User not found' });
+    }
+
+    const actorIsSuperAdmin = req.adminUser?.role === 'super_admin';
+    const targetIsSuperAdmin = targetUser.role === 'super_admin';
+    const isSelf = Number(req.adminUser?.id) === Number(targetUser.id);
+
+    // Admin can manage admin/manager, but cannot change any super_admin field.
+    if (targetIsSuperAdmin && !actorIsSuperAdmin) {
+      return res.status(403).json({ ok: false, error: 'Only super admin can edit a super admin' });
+    }
+
+    // Only super_admin can assign/promote someone to super_admin.
+    if (req.body.role === 'super_admin' && !actorIsSuperAdmin) {
+      return res.status(403).json({ ok: false, error: 'Only super admin can assign super admin role' });
+    }
+
+    // Protect current super_admin from accidentally locking themselves out.
+    if (isSelf && actorIsSuperAdmin && req.body.role && req.body.role !== 'super_admin') {
+      return res.status(400).json({ ok: false, error: 'You cannot demote your own super admin account' });
+    }
+
+    if (isSelf && req.body.is_active === false) {
+      return res.status(400).json({ ok: false, error: 'You cannot deactivate your own account' });
+    }
+
     const patch = {};
 
     if (req.body.email !== undefined) patch.email = normalizeEmail(req.body.email);
