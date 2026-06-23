@@ -952,3 +952,39 @@ html[data-theme="light"] .loss-number strong {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* Light theme heading readability fix */
+html[data-theme="light"] h1,
+html[data-theme="light"] h2,
+html[data-theme="light"] h3 {
+  color: #141925;
+}
+
+html[data-theme="light"] .gradient-text {
+  background: none;
+  color: #141925;
+  -webkit-text-fill-color: #141925;
+}
+
+html[data-theme="light"] .page-hero .gradient-text,
+html[data-theme="light"] .hero .gradient-text,
+html[data-theme="light"] .bottom-cta .gradient-text {
+  background: none;
+  color: #101521;
+  -webkit-text-fill-color: #101521;
+}
+
+html[data-theme="light"] .section-head h2,
+html[data-theme="light"] .bottom-cta h2 {
+  color: #141925;
+  -webkit-text-fill-color: #141925;
+}
+
+html[data-theme="light"] .lead {
+  color: #465061;
+}
+
+html[data-theme="light"] .section-description {
+  color: #535c6d;
+}
