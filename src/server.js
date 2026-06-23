@@ -58,7 +58,6 @@ import {
   updateSmmTarget
 } from './smmDb.js';
 import { analyzeWebsiteTarget } from './smmAnalyzer.js';
-import { getManualTelegramUrl, sendSmmTelegramMessage } from './smmTelegram.js';
 import { buildLeadAiInsights, SALES_STAGE_META } from './crmAi.js';
 
 dotenv.config();
@@ -781,110 +780,6 @@ app.patch('/api/smm/targets/:id/message', requireAdminSession, requireSuperAdmin
   } catch (error) {
     console.error('[SMM message update]', error);
     res.status(400).json({ ok: false, error: error.message || 'Failed to update message' });
-  }
-});
-
-app.post('/api/smm/start', requireAdminSession, requireSuperAdmin, async (req, res) => {
-  const maxPerRun = Math.min(Math.max(Number(process.env.SMM_MAX_SEND_PER_RUN || 10), 1), 30);
-  const delayMs = Math.min(Math.max(Number(process.env.SMM_SEND_DELAY_MS || 4000), 500), 30000);
-  const repeat = Boolean(req.body.repeat);
-
-  const summary = {
-    sent: 0,
-    manualRequired: 0,
-    failed: 0,
-    skipped: 0,
-    processed: 0
-  };
-
-  try {
-    const targets = await listSmmTargets();
-    const queue = targets
-      .filter((target) => target.send_enabled)
-      .filter((target) => target.message_uk)
-      .filter((target) => repeat || target.send_status !== 'sent')
-      .slice(0, maxPerRun);
-
-    for (const target of queue) {
-      summary.processed += 1;
-
-      const contacts = Array.isArray(target.telegram_contacts) ? target.telegram_contacts : [];
-      const contact = contacts[0] || '';
-
-      if (!contact) {
-        summary.skipped += 1;
-
-        await updateSmmTarget(target.id, {
-          send_status: 'skipped',
-          error_message: 'No Telegram contact'
-        });
-
-        await addSmmSendLog({
-          targetId: target.id,
-          contact: '',
-          status: 'skipped',
-          message: target.message_uk,
-          errorMessage: 'No Telegram contact',
-          sentBy: req.adminUser.id
-        }).catch(() => null);
-
-        continue;
-      }
-
-      const result = await sendSmmTelegramMessage(contact, target.message_uk);
-
-      if (result.status === 'sent') {
-        summary.sent += 1;
-
-        await updateSmmTarget(target.id, {
-          send_status: 'sent',
-          sent_count: Number(target.sent_count || 0) + 1,
-          last_sent_at: new Date().toISOString(),
-          error_message: ''
-        });
-      } else if (result.status === 'manual_required') {
-        summary.manualRequired += 1;
-
-        await updateSmmTarget(target.id, {
-          send_status: 'manual_required',
-          error_message: result.reason || 'Manual sending required',
-          meta_json: {
-            ...(target.meta_json || {}),
-            manualTelegramUrl: result.manualUrl || getManualTelegramUrl(contact)
-          }
-        });
-      } else if (result.status === 'skipped') {
-        summary.skipped += 1;
-
-        await updateSmmTarget(target.id, {
-          send_status: 'skipped',
-          error_message: result.reason || 'Skipped'
-        });
-      } else {
-        summary.failed += 1;
-
-        await updateSmmTarget(target.id, {
-          send_status: 'failed',
-          error_message: result.error || 'Telegram failed'
-        });
-      }
-
-      await addSmmSendLog({
-        targetId: target.id,
-        contact,
-        status: result.status,
-        message: target.message_uk,
-        errorMessage: result.error || result.reason || '',
-        sentBy: req.adminUser.id
-      }).catch(() => null);
-
-      await sleep(delayMs);
-    }
-
-    res.json({ ok: true, summary });
-  } catch (error) {
-    console.error('[SMM start]', error);
-    res.status(500).json({ ok: false, error: error.message || 'SMM start failed', summary });
   }
 });
 

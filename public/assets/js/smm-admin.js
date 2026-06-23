@@ -7,7 +7,6 @@
   const listWrap = document.getElementById('smmTargets');
   const loadBtn = document.getElementById('loadLeads');
   const analyzeAllBtn = document.getElementById('analyzeAllSmmBtn');
-  const startBtn = document.getElementById('startSmmBtn');
   const summaryWrap = document.getElementById('smmSummary');
   const heroCount = document.getElementById('smmHeroCount');
 
@@ -66,7 +65,6 @@
       workspace.hidden = !allowed;
       accessWarning.hidden = allowed;
       analyzeAllBtn.hidden = !allowed;
-      startBtn.hidden = !allowed;
       loadBtn.hidden = !allowed;
 
       return allowed;
@@ -290,32 +288,6 @@
       analyzeAllBtn.textContent = '🔍 Аналізувати всі';
     }
   }
-
-  async function startSmm() {
-    const ok = confirm('Почати SMM outreach по увімкнених компаніях?');
-    if (!ok) return;
-
-    startBtn.disabled = true;
-    startBtn.textContent = 'Працюємо...';
-
-    try {
-      const data = await api('/api/smm/start', {
-        method: 'POST',
-        body: JSON.stringify({})
-      });
-
-      const s = data.summary || {};
-      alert(`SMM готово. sent: ${s.sent}, manual: ${s.manualRequired}, failed: ${s.failed}, skipped: ${s.skipped}`);
-      await loadTargets();
-    } catch (error) {
-      alert(error.message);
-      await loadTargets();
-    } finally {
-      startBtn.disabled = false;
-      startBtn.textContent = '🚀 Почати SMM';
-    }
-  }
-
   async function setSendEnabled(id, checked) {
     try {
       await api(`/api/smm/targets/${id}/send-enabled`, {
@@ -399,7 +371,6 @@
   addForm?.addEventListener('submit', addTarget);
   loadBtn?.addEventListener('click', loadTargets);
   analyzeAllBtn?.addEventListener('click', analyzeAll);
-  startBtn?.addEventListener('click', startSmm);
 
   document.addEventListener('click', async (event) => {
     const analyze = event.target.closest('[data-smm-analyze]');
