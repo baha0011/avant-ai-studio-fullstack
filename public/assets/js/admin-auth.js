@@ -1,6 +1,7 @@
 (function () {
   const loginPanel = document.getElementById('adminLoginPanel');
   const crmRoot = document.getElementById('adminCrmRoot');
+  const crmHero = document.querySelector('.crm-hero');
   const loginForm = document.getElementById('adminLoginForm');
   const emailInput = document.getElementById('adminEmail');
   const passwordInput = document.getElementById('adminPassword');
@@ -18,20 +19,42 @@
 
   let currentAdmin = null;
 
+  function escapeHtml(value = '') {
+    return String(value)
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;');
+  }
+
   function setError(message = '') {
     if (errorBox) errorBox.textContent = message;
   }
 
   function setLocked() {
+    currentAdmin = null;
+    window.AVANT_ADMIN_USER = null;
+
+    document.body.dataset.adminRole = '';
     loginPanel.hidden = false;
     crmRoot.style.display = 'none';
+
+    if (crmHero) crmHero.hidden = true;
     if (sessionBar) sessionBar.hidden = true;
   }
 
   function setUnlocked(user) {
     currentAdmin = user;
+    window.AVANT_ADMIN_USER = user;
+
+    document.body.dataset.adminRole = user.role || '';
+
     loginPanel.hidden = true;
     crmRoot.style.display = '';
+
+    if (crmHero) {
+      crmHero.hidden = user.role === 'manager';
+    }
 
     if (sessionBar) sessionBar.hidden = false;
 
@@ -43,9 +66,26 @@
       manageUsersBtn.hidden = user.role !== 'super_admin';
     }
 
+    applyRoleUi(user.role);
+
     setTimeout(() => {
       document.getElementById('loadLeads')?.click();
     }, 50);
+  }
+
+  function applyRoleUi(role) {
+    const isManager = role === 'manager';
+
+    const stats = document.getElementById('adminStats');
+    const pipeline = document.getElementById('crmPipeline');
+    const exportCsv = document.getElementById('exportCsvBtn');
+    const summaryReport = document.getElementById('summaryReportBtn');
+    const googleSheet = document.getElementById('openGoogleSheet');
+    const heroCard = document.querySelector('.crm-hero-card');
+
+    [stats, pipeline, exportCsv, summaryReport, googleSheet, heroCard].forEach((el) => {
+      if (el) el.hidden = isManager;
+    });
   }
 
   async function api(path, options = {}) {
@@ -130,33 +170,45 @@
       const data = await api('/api/admin/users');
       const users = data.users || [];
 
-      usersList.innerHTML = users.map((user) => `
-        <article class="admin-user-row" data-user-id="${user.id}">
-          <div class="admin-user-main">
-            <strong>${escapeHtml(user.email)}</strong>
-            <span>ID ${user.id} · ${escapeHtml(user.created_at || '')}</span>
-          </div>
+      usersList.innerHTML = users.map((user) => {
+        const isSelf = currentAdmin && Number(currentAdmin.id) === Number(user.id);
 
-          <input type="text" data-field="name" value="${escapeHtml(user.name || '')}" placeholder="Імʼя">
+        return `
+          <article class="admin-user-row" data-user-id="${user.id}">
+            <div class="admin-user-main">
+              <strong>${escapeHtml(user.email)}</strong>
+              <span>ID ${user.id} · ${escapeHtml(user.created_at || '')}${isSelf ? ' · це ви' : ''}</span>
+            </div>
 
-          <select data-field="role">
-            <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>admin</option>
-            <option value="super_admin" ${user.role === 'super_admin' ? 'selected' : ''}>super_admin</option>
-          </select>
+            <input type="text" data-field="name" value="${escapeHtml(user.name || '')}" placeholder="Імʼя">
 
-          <label class="admin-active-check">
-            <input type="checkbox" data-field="is_active" ${user.is_active ? 'checked' : ''}>
-            active
-          </label>
+            <select data-field="role">
+              <option value="manager" ${user.role === 'manager' ? 'selected' : ''}>manager</option>
+              <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>admin</option>
+              <option value="super_admin" ${user.role === 'super_admin' ? 'selected' : ''}>super_admin</option>
+            </select>
 
-          <input type="password" data-field="password" placeholder="Новий пароль, якщо треба">
+            <label class="admin-active-check">
+              <input type="checkbox" data-field="is_active" ${user.is_active ? 'checked' : ''}>
+              active
+            </label>
 
-          <button class="btn btn-secondary" type="button" data-save-user="${user.id}">Зберегти</button>
-        </article>
-      `).join('');
+            <input type="password" data-field="password" placeholder="Новий пароль, якщо треба">
+
+            <div class="admin-user-actions">
+              <button class="btn btn-secondary" type="button" data-save-user="${user.id}">Зберегти</button>
+              <button class="btn btn-danger" type="button" data-delete-user="${user.id}" ${isSelf ? 'disabled' : ''}>Видалити</button>
+            </div>
+          </article>
+        `;
+      }).join('');
 
       usersList.querySelectorAll('[data-save-user]').forEach((button) => {
         button.addEventListener('click', () => saveUser(button.dataset.saveUser));
+      });
+
+      usersList.querySelectorAll('[data-delete-user]').forEach((button) => {
+        button.addEventListener('click', () => deleteUser(button.dataset.deleteUser));
       });
     } catch (error) {
       usersList.innerHTML = `<p class="admin-login-error">${escapeHtml(error.message)}</p>`;
@@ -169,7 +221,7 @@
     const name = document.getElementById('newAdminName')?.value?.trim() || '';
     const email = document.getElementById('newAdminEmail')?.value?.trim() || '';
     const password = document.getElementById('newAdminPassword')?.value || '';
-    const role = document.getElementById('newAdminRole')?.value || 'admin';
+    const role = document.getElementById('newAdminRole')?.value || 'manager';
 
     if (!email || password.length < 8) {
       alert('Email і пароль мінімум 8 символів.');
@@ -213,12 +265,22 @@
     }
   }
 
-  function escapeHtml(value = '') {
-    return String(value)
-      .replaceAll('&', '&amp;')
-      .replaceAll('<', '&lt;')
-      .replaceAll('>', '&gt;')
-      .replaceAll('"', '&quot;');
+  async function deleteUser(id) {
+    const row = usersList.querySelector(`[data-user-id="${id}"]`);
+    const email = row?.querySelector('.admin-user-main strong')?.textContent || `ID ${id}`;
+
+    const ok = confirm(`Видалити користувача ${email}? Це також видалить його сесії.`);
+    if (!ok) return;
+
+    try {
+      await api(`/api/admin/users/${id}`, {
+        method: 'DELETE'
+      });
+
+      await loadUsers();
+    } catch (error) {
+      alert(error.message);
+    }
   }
 
   loginForm.addEventListener('submit', login);

@@ -39,6 +39,10 @@
     other: 'Інший бізнес'
   };
 
+  function isManagerRole() {
+    return window.AVANT_ADMIN_USER?.role === 'manager' || document.body.dataset.adminRole === 'manager';
+  }
+
   function escapeHtml(value = '') {
     return String(value)
       .replaceAll('&', '&amp;')
@@ -243,6 +247,16 @@
   }
 
   function renderStats() {
+    if (isManagerRole()) {
+      if (statsWrap) statsWrap.hidden = true;
+      if (pipeline) pipeline.hidden = true;
+      if (heroCount) heroCount.textContent = '—';
+      return;
+    }
+
+    if (statsWrap) statsWrap.hidden = false;
+    if (pipeline) pipeline.hidden = false;
+
     const score = countByScore();
     const total = stats.total || 0;
     if (heroCount) heroCount.textContent = String(total);

@@ -3351,3 +3351,45 @@ html[data-theme="light"] .admin-user-row {
     grid-template-columns: 1fr;
   }
 }
+
+/* Admin users: delete button and roles */
+.btn-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 0 16px;
+  border: 1px solid rgba(255, 95, 95, .34);
+  border-radius: 999px;
+  background: rgba(255, 95, 95, .12);
+  color: #ffb3b3;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.btn-danger:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+.admin-user-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+body[data-admin-role="manager"] .crm-hero,
+body[data-admin-role="manager"] #adminStats,
+body[data-admin-role="manager"] #crmPipeline,
+body[data-admin-role="manager"] #exportCsvBtn,
+body[data-admin-role="manager"] #summaryReportBtn,
+body[data-admin-role="manager"] #openGoogleSheet {
+  display: none !important;
+}
+
+@media (max-width: 1080px) {
+  .admin-user-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+}

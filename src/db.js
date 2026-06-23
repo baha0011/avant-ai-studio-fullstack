@@ -309,6 +309,16 @@ export async function updateAdminUser(id, patch = {}) {
   return data;
 }
 
+export async function deleteAdminUser(id) {
+  const { error } = await supabase
+    .from('admin_users')
+    .delete()
+    .eq('id', id);
+
+  if (error) throw error;
+  return true;
+}
+
 export async function createAdminSession(userId, tokenHash, expiresAt) {
   const { data, error } = await supabase
     .from('admin_sessions')

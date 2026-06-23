@@ -23,6 +23,7 @@ import {
   createAdminSession,
   createAdminUser,
   deleteAdminSessionByTokenHash,
+  deleteAdminUser,
   deleteExpiredAdminSessions,
   getAdminSessionByTokenHash,
   getAdminUserByEmail,
@@ -228,7 +229,7 @@ app.post('/api/admin/users', requireAdminSession, requireSuperAdmin, async (req,
     const email = normalizeEmail(req.body.email || '');
     const password = String(req.body.password || '');
     const name = String(req.body.name || '').trim().slice(0, 120);
-    const role = req.body.role === 'super_admin' ? 'super_admin' : 'admin';
+    const role = ['super_admin', 'admin', 'manager'].includes(req.body.role) ? req.body.role : 'admin';
 
     if (!email || !password || password.length < 8) {
       return res.status(400).json({ ok: false, error: 'Email and password min 8 chars are required' });
@@ -255,7 +256,7 @@ app.patch('/api/admin/users/:id', requireAdminSession, requireSuperAdmin, async 
 
     if (req.body.email !== undefined) patch.email = normalizeEmail(req.body.email);
     if (req.body.name !== undefined) patch.name = String(req.body.name || '').trim().slice(0, 120);
-    if (req.body.role !== undefined) patch.role = req.body.role === 'super_admin' ? 'super_admin' : 'admin';
+    if (req.body.role !== undefined) patch.role = ['super_admin', 'admin', 'manager'].includes(req.body.role) ? req.body.role : 'admin';
     if (req.body.is_active !== undefined) patch.isActive = Boolean(req.body.is_active);
 
     if (req.body.password) {
@@ -271,6 +272,26 @@ app.patch('/api/admin/users/:id', requireAdminSession, requireSuperAdmin, async 
   } catch (error) {
     console.error('[Update admin user]', error);
     res.status(400).json({ ok: false, error: error.message || 'Failed to update user' });
+  }
+});
+
+app.delete('/api/admin/users/:id', requireAdminSession, requireSuperAdmin, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+
+    if (!Number.isFinite(id)) {
+      return res.status(400).json({ ok: false, error: 'Invalid user id' });
+    }
+
+    if (id === Number(req.adminUser.id)) {
+      return res.status(400).json({ ok: false, error: 'You cannot delete yourself' });
+    }
+
+    await deleteAdminUser(id);
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('[Delete admin user]', error);
+    res.status(400).json({ ok: false, error: error.message || 'Failed to delete user' });
   }
 });
 
@@ -358,8 +379,10 @@ app.post('/api/leads', async (req, res) => {
 
 app.get('/api/leads', requireAdminSession, async (req, res) => {
   try {
+    const isManager = req.adminUser?.role === 'manager';
+
     const [stats, leads] = await Promise.all([
-      getStats(),
+      isManager ? Promise.resolve(null) : getStats(),
       listLeads({
         limit: req.query.limit || 100,
         status: req.query.status || null,
