@@ -2358,3 +2358,11 @@ html[data-theme="light"] .audit-tags span {
     padding: 22px;
   }
 }
+
+/* Thank-you page text alignment fix */
+.thankyou-card .lead {
+  max-width: 760px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
