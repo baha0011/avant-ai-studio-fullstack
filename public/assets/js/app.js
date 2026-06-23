@@ -463,3 +463,31 @@ setupMenu(); setupReveal(); setupCanvas(); setupCursorGlow(); setupContactForm()
     quizResultNote.textContent = savedQuiz;
   }
 })();
+
+/* Premium theme icon sync */
+(function () {
+  function syncThemeIcon() {
+    const icon = document.querySelector('.theme-toggle-icon');
+    if (!icon) return;
+
+    const theme = document.documentElement.getAttribute('data-theme') || 'dark';
+
+    icon.src = theme === 'light'
+      ? 'assets/icons/theme-sun.png'
+      : 'assets/icons/theme-moon.png';
+  }
+
+  syncThemeIcon();
+
+  const observer = new MutationObserver(syncThemeIcon);
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-theme']
+  });
+
+  document.addEventListener('click', function (event) {
+    if (event.target.closest('.theme-toggle')) {
+      setTimeout(syncThemeIcon, 0);
+    }
+  });
+})();
