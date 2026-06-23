@@ -445,6 +445,7 @@ setupMenu(); setupReveal(); setupCanvas(); setupCursorGlow(); setupContactForm()
 
       const saved = `${result.title}. ${result.text}`;
       localStorage.setItem('avantQuizResult', saved);
+      localStorage.setItem('avantQuizCompleted', '1');
 
       if (contactBtn) {
         contactBtn.addEventListener('click', () => {
@@ -473,10 +474,14 @@ setupMenu(); setupReveal(); setupCanvas(); setupCursorGlow(); setupContactForm()
   const quizResultField = document.getElementById('quizResultField');
   const quizResultNote = document.getElementById('quizResultNote');
   const savedQuiz = localStorage.getItem('avantQuizResult');
+  const quizCompleted = localStorage.getItem('avantQuizCompleted') === '1';
 
-  if (quizResultField && quizResultNote && savedQuiz) {
+  if (quizResultField && quizResultNote && savedQuiz && quizCompleted) {
     quizResultField.hidden = false;
     quizResultNote.textContent = savedQuiz;
+  } else if (quizResultField && quizResultNote) {
+    quizResultField.hidden = true;
+    quizResultNote.textContent = '';
   }
 })();
 
