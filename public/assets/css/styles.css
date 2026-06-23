@@ -3435,3 +3435,122 @@ body[data-page="admin"].admin-login-mode .footer {
     padding: 22px;
   }
 }
+
+/* Admin manager layout fix */
+body[data-page="admin"].admin-crm-mode[data-admin-role="manager"] main {
+  display: block;
+  min-height: auto;
+}
+
+body[data-page="admin"].admin-crm-mode[data-admin-role="manager"] .crm-section {
+  padding-top: 96px;
+}
+
+body[data-page="admin"].admin-crm-mode[data-admin-role="manager"] .crm-shell {
+  margin-top: 0;
+}
+
+body[data-page="admin"].admin-crm-mode[data-admin-role="manager"] .crm-controls {
+  margin-top: 0;
+}
+
+body[data-page="admin"].admin-crm-mode[data-admin-role="manager"] .crm-table-wrap {
+  margin-top: 18px;
+}
+
+/* Wider admin users side panel */
+.admin-users-panel {
+  width: min(1540px, calc(100vw - 28px));
+  right: 14px;
+  top: 14px;
+  bottom: 14px;
+  padding: 28px;
+}
+
+.admin-user-create {
+  grid-template-columns:
+    minmax(240px, 1fr)
+    minmax(300px, 1.25fr)
+    minmax(300px, 1.25fr)
+    minmax(170px, .55fr)
+    auto;
+  align-items: center;
+}
+
+.admin-user-row {
+  grid-template-columns:
+    minmax(280px, 1.25fr)
+    minmax(260px, 1fr)
+    minmax(170px, .55fr)
+    minmax(110px, .35fr)
+    minmax(300px, 1.2fr)
+    auto;
+  align-items: center;
+}
+
+.admin-user-row input[data-field="name"],
+.admin-user-row input[data-field="password"],
+.admin-user-create input[type="text"],
+.admin-user-create input[type="email"],
+.admin-user-create input[type="password"] {
+  min-width: 0;
+  width: 100%;
+}
+
+.admin-user-actions {
+  min-width: 220px;
+  justify-content: flex-end;
+}
+
+.admin-users-list {
+  gap: 12px;
+}
+
+@media (max-width: 1280px) {
+  .admin-users-panel {
+    width: calc(100vw - 24px);
+    right: 12px;
+    left: 12px;
+  }
+
+  .admin-user-create {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .admin-user-create button {
+    grid-column: 1 / -1;
+  }
+
+  .admin-user-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .admin-user-main,
+  .admin-user-actions {
+    grid-column: 1 / -1;
+  }
+
+  .admin-user-actions {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 720px) {
+  body[data-page="admin"].admin-crm-mode[data-admin-role="manager"] .crm-section {
+    padding-top: 54px;
+  }
+
+  .admin-users-panel {
+    width: calc(100vw - 16px);
+    right: 8px;
+    left: 8px;
+    top: 8px;
+    bottom: 8px;
+    padding: 20px;
+  }
+
+  .admin-user-create,
+  .admin-user-row {
+    grid-template-columns: 1fr;
+  }
+}
