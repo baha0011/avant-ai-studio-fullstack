@@ -491,3 +491,37 @@ setupMenu(); setupReveal(); setupCanvas(); setupCursorGlow(); setupContactForm()
     }
   });
 })();
+
+/* Final SVG theme icon sync */
+(function () {
+  function syncThemeIconFinal() {
+    const icons = document.querySelectorAll('.theme-toggle-icon');
+    if (!icons.length) return;
+
+    const theme = document.documentElement.getAttribute('data-theme') || 'dark';
+    const src = theme === 'light'
+      ? 'assets/icons/theme-sun.svg'
+      : 'assets/icons/theme-moon.svg';
+
+    icons.forEach((icon) => {
+      if (!icon.getAttribute('src')?.endsWith(src)) {
+        icon.setAttribute('src', src);
+      }
+    });
+  }
+
+  syncThemeIconFinal();
+
+  const observer = new MutationObserver(syncThemeIconFinal);
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-theme']
+  });
+
+  document.addEventListener('DOMContentLoaded', syncThemeIconFinal);
+  document.addEventListener('click', function (event) {
+    if (event.target.closest('.theme-toggle, .lamp-toggle')) {
+      setTimeout(syncThemeIconFinal, 20);
+    }
+  });
+})();

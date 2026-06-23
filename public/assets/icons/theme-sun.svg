@@ -1,0 +1,32 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="sunGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 1 0 0 0 0 0.67 0 0 0 0 0.13 0 0 0 0.75 0"/>
+      <feBlend in="SourceGraphic"/>
+    </filter>
+    <linearGradient id="sunGrad" x1="42" y1="33" x2="86" y2="95" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF8D8"/>
+      <stop offset="1" stop-color="#FFC53D"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="19" y1="18" x2="110" y2="110" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFE9A8"/>
+      <stop offset="1" stop-color="#F1A91D"/>
+    </linearGradient>
+  </defs>
+
+  <circle cx="64" cy="64" r="49" stroke="url(#gold)" stroke-width="4" filter="url(#sunGlow)"/>
+
+  <g stroke="url(#gold)" stroke-width="7" stroke-linecap="round" filter="url(#sunGlow)">
+    <path d="M64 23V34"/>
+    <path d="M64 94V105"/>
+    <path d="M23 64H34"/>
+    <path d="M94 64H105"/>
+    <path d="M35 35L43 43"/>
+    <path d="M85 85L93 93"/>
+    <path d="M93 35L85 43"/>
+    <path d="M43 85L35 93"/>
+  </g>
+
+  <circle cx="64" cy="64" r="27" fill="url(#sunGrad)" stroke="#F0AE24" stroke-width="4" filter="url(#sunGlow)"/>
+</svg>

@@ -3771,3 +3771,90 @@ html[data-theme="light"] .theme-toggle-icon {
     height: 34px;
   }
 }
+
+/* Final premium theme toggle with SVG icons */
+.theme-toggle.lamp-toggle {
+  width: 54px !important;
+  height: 54px !important;
+  min-width: 54px !important;
+  min-height: 54px !important;
+  border: 1px solid rgba(185,243,255,.22) !important;
+  border-radius: 18px !important;
+  background:
+    radial-gradient(circle at 35% 25%, rgba(185,243,255,.16), transparent 38%),
+    rgba(255,255,255,.065) !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  cursor: pointer !important;
+  padding: 7px !important;
+  overflow: visible !important;
+  box-shadow:
+    0 14px 34px rgba(0,0,0,.18),
+    inset 0 1px 0 rgba(255,255,255,.10) !important;
+  transition:
+    transform .2s ease,
+    box-shadow .25s ease,
+    border-color .25s ease,
+    background .25s ease !important;
+}
+
+.theme-toggle.lamp-toggle:hover {
+  transform: translateY(-2px) scale(1.035) !important;
+  border-color: rgba(185,243,255,.42) !important;
+  box-shadow:
+    0 18px 42px rgba(0,0,0,.24),
+    0 0 24px rgba(95,119,255,.18),
+    inset 0 1px 0 rgba(255,255,255,.16) !important;
+}
+
+.theme-toggle .theme-toggle-icon {
+  width: 40px !important;
+  height: 40px !important;
+  display: block !important;
+  object-fit: contain !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: none !important;
+  user-select: none !important;
+  filter: drop-shadow(0 0 10px rgba(132,132,255,.32)) !important;
+  transition: transform .24s ease, opacity .2s ease, filter .24s ease !important;
+}
+
+.theme-toggle.lamp-toggle:hover .theme-toggle-icon {
+  transform: rotate(-8deg) scale(1.06) !important;
+}
+
+html[data-theme="light"] .theme-toggle.lamp-toggle {
+  background:
+    radial-gradient(circle at 35% 25%, rgba(255,209,91,.24), transparent 40%),
+    rgba(255,250,243,.96) !important;
+  border-color: rgba(196,147,43,.20) !important;
+  box-shadow:
+    0 14px 32px rgba(164,140,108,.16),
+    inset 0 1px 0 rgba(255,255,255,.75) !important;
+}
+
+html[data-theme="light"] .theme-toggle .theme-toggle-icon {
+  filter: drop-shadow(0 0 10px rgba(255,186,45,.30)) !important;
+}
+
+.theme-toggle .lamp-shade,
+.theme-toggle .lamp-bulb,
+.theme-toggle .lamp-chain {
+  display: none !important;
+}
+
+@media (max-width: 720px) {
+  .theme-toggle.lamp-toggle {
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    min-height: 48px !important;
+    border-radius: 16px !important;
+  }
+
+  .theme-toggle .theme-toggle-icon {
+    width: 35px !important;
+    height: 35px !important;
+  }
+}
