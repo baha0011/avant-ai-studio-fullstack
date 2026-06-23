@@ -570,24 +570,44 @@
 
   async function renderLeadLogs(id) {
     const logsWrap = drawerBody.querySelector('#leadLogs');
-    if (!logsWrap) return;
+    const commentsWrap = drawerBody.querySelector('#crmComments');
 
-    logsWrap.innerHTML = '<p class="muted">Завантажуємо історію...</p>';
+    if (logsWrap) logsWrap.innerHTML = '<p class="muted">Завантажуємо історію...</p>';
+    if (commentsWrap) commentsWrap.innerHTML = '<p class="muted">Завантажуємо коментарі...</p>';
 
     try {
       const data = await api(`/api/leads/${id}/logs`);
       const logs = data.logs || [];
 
-      if (!logs.length) {
-        logsWrap.innerHTML = '<p class="muted">Історія поки порожня.</p>';
-        return;
+      const commentLogs = logs.filter((log) => log.channel === 'manager_note');
+      const actionLogs = logs.filter((log) => log.channel !== 'manager_note');
+
+      if (commentsWrap) {
+        if (!commentLogs.length) {
+          commentsWrap.innerHTML = '<p class="muted">Коментарів поки немає.</p>';
+        } else {
+          commentsWrap.innerHTML = commentLogs.map(renderLogItem).join('');
+        }
       }
 
-      logsWrap.innerHTML = logs.map(renderLogItem).join('');
+      if (logsWrap) {
+        if (!actionLogs.length) {
+          logsWrap.innerHTML = '<p class="muted">Історія дій поки порожня.</p>';
+        } else {
+          logsWrap.innerHTML = actionLogs.map(renderLogItem).join('');
+        }
+      }
     } catch (error) {
-      logsWrap.innerHTML = `<p class="muted">Не вдалося завантажити історію: ${escapeHtml(error.message)}</p>`;
+      if (logsWrap) {
+        logsWrap.innerHTML = `<p class="muted">Не вдалося завантажити історію: ${escapeHtml(error.message)}</p>`;
+      }
+
+      if (commentsWrap) {
+        commentsWrap.innerHTML = `<p class="muted">Не вдалося завантажити коментарі: ${escapeHtml(error.message)}</p>`;
+      }
     }
   }
+
 
   function openAuditReport(lead) {
     const details = lead.lead_details || {};
@@ -848,16 +868,21 @@
           </dl>
         </section>
 
-        <section class="crm-info-block full crm-comments-workspace">
-          <div class="crm-comment-editor">
-            <h3>Коментар менеджера</h3>
-            <p class="muted">Окреме робоче поле для нотаток по ліду. В історії буде видно, хто залишив коментар.</p>
+        <section class="crm-info-block full crm-comments-split">
+          <div class="crm-comments-left">
+            <h3>Коментарі</h3>
+            <p class="muted">Окреме місце тільки для коментарів по ліду. Тут видно автора, роль і час.</p>
+
             <textarea id="managerNote" class="crm-note-textarea" placeholder="Наприклад: написав клієнту, чекаю відповідь, бюджет підтвердив..."></textarea>
             <button class="btn btn-primary crm-note-save" type="button" id="saveManagerNoteBtn">Зберегти коментар</button>
+
+            <div class="crm-comments-list" id="crmComments">
+              <p class="muted">Завантажуємо коментарі...</p>
+            </div>
           </div>
 
-          <div class="crm-comment-history">
-            <h3>Історія дій і коментарів</h3>
+          <div class="crm-history-right">
+            <h3>Історія дій</h3>
             <div class="crm-logs" id="leadLogs">
               <p class="muted">Завантажуємо історію...</p>
             </div>

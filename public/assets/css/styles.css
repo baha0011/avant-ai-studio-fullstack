@@ -4157,3 +4157,124 @@ html[data-theme="light"] .crm-comment-log {
     max-height: none;
   }
 }
+
+/* CRM comments are separated from action history */
+.crm-comments-split {
+  display: grid !important;
+  grid-template-columns: minmax(420px, .95fr) minmax(520px, 1.05fr) !important;
+  gap: 18px !important;
+  align-items: stretch !important;
+}
+
+.crm-comments-left,
+.crm-history-right {
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 22px;
+  padding: 18px;
+  background:
+    radial-gradient(circle at 12% 10%, rgba(185,243,255,.075), transparent 34%),
+    rgba(0,0,0,.12);
+}
+
+.crm-comments-left {
+  min-height: 620px;
+}
+
+.crm-history-right {
+  min-height: 620px;
+}
+
+.crm-comments-left h3,
+.crm-history-right h3 {
+  margin-top: 0;
+}
+
+.crm-comments-left .crm-note-textarea {
+  min-height: 240px !important;
+  margin-top: 12px;
+}
+
+.crm-comments-left .crm-note-save {
+  margin-top: 12px;
+}
+
+.crm-comments-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.crm-history-right .crm-logs {
+  max-height: 540px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.crm-comment-history,
+.crm-comment-editor,
+.crm-comments-workspace {
+  display: contents !important;
+}
+
+.crm-comment-log {
+  border-color: rgba(185,243,255,.18) !important;
+  background:
+    linear-gradient(135deg, rgba(185,243,255,.075), rgba(255,255,255,.035)) !important;
+}
+
+.crm-comment-log-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.crm-comment-log-head strong {
+  color: var(--text);
+}
+
+.crm-comment-log-head span {
+  border: 1px solid rgba(185,243,255,.20);
+  border-radius: 999px;
+  padding: 4px 8px;
+  color: var(--muted);
+  font-size: .72rem;
+}
+
+.crm-comment-author-email {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  opacity: .82;
+}
+
+.crm-comment-log p {
+  white-space: pre-wrap;
+  line-height: 1.55;
+}
+
+html[data-theme="light"] .crm-comments-left,
+html[data-theme="light"] .crm-history-right,
+html[data-theme="light"] .crm-comment-log {
+  background: rgba(255,255,255,.88) !important;
+  border-color: rgba(15,23,42,.10) !important;
+}
+
+@media (max-width: 1100px) {
+  .crm-comments-split {
+    grid-template-columns: 1fr !important;
+  }
+
+  .crm-comments-left,
+  .crm-history-right {
+    min-height: auto;
+  }
+
+  .crm-comments-list,
+  .crm-history-right .crm-logs {
+    max-height: none;
+  }
+}
