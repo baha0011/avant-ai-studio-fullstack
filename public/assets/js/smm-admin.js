@@ -9,11 +9,14 @@
   const analyzeAllBtn = document.getElementById('analyzeAllSmmBtn');
   const summaryWrap = document.getElementById('smmSummary');
   const heroCount = document.getElementById('smmHeroCount');
+  const statusFilter = document.getElementById('smmStatusFilter');
+  const filterCount = document.getElementById('smmFilterCount');
 
   if (!root || !workspace || !listWrap) return;
 
   let currentUser = null;
   let targets = [];
+  let currentFilter = 'all';
 
   function escapeHtml(value = '') {
     return String(value)
@@ -112,6 +115,41 @@
     return `<span class="smm-badge ${escapeHtml(status || 'unknown')}">${escapeHtml(status || 'unknown')}</span>`;
   }
 
+  function getFilteredTargets() {
+    if (currentFilter === 'all') return targets;
+
+    if (currentFilter === 'analyzed') {
+      return targets.filter((target) => target.analysis_status === 'analyzed');
+    }
+
+    if (['pending', 'analyzing', 'failed'].includes(currentFilter)) {
+      return targets.filter((target) => target.analysis_status === currentFilter);
+    }
+
+    if (['no_telegram', 'manual_required', 'sent', 'prepared', 'skipped'].includes(currentFilter)) {
+      return targets.filter((target) => target.send_status === currentFilter);
+    }
+
+    return targets;
+  }
+
+  function renderFilterCount(visibleTargets) {
+    if (!filterCount) return;
+
+    const labelMap = {
+      all: 'Всі сайти',
+      analyzed: 'Успішно проаналізовані',
+      pending: 'Очікують аналізу',
+      analyzing: 'Аналізуються',
+      failed: 'Помилка аналізу',
+      no_telegram: 'Без Telegram',
+      manual_required: 'Manual required',
+      sent: 'Sent'
+    };
+
+    filterCount.textContent = `${labelMap[currentFilter] || 'Фільтр'}: ${visibleTargets.length} із ${targets.length}`;
+  }
+
   function renderSummary() {
     const total = targets.length;
     const analyzed = targets.filter((target) => target.analysis_status === 'analyzed').length;
@@ -133,12 +171,20 @@
   function renderTargets() {
     renderSummary();
 
+    const visibleTargets = getFilteredTargets();
+    renderFilterCount(visibleTargets);
+
     if (!targets.length) {
       listWrap.innerHTML = '<p class="crm-empty">Сайти ще не додані.</p>';
       return;
     }
 
-    listWrap.innerHTML = targets.map((target) => {
+    if (!visibleTargets.length) {
+      listWrap.innerHTML = '<p class="crm-empty">За цим фільтром сайтів немає.</p>';
+      return;
+    }
+
+    listWrap.innerHTML = visibleTargets.map((target) => {
       const tg = firstTelegram(target);
       const tgUrl = telegramUrl(tg);
       const emails = Array.isArray(target.emails) ? target.emails : [];
@@ -371,6 +417,11 @@
   addForm?.addEventListener('submit', addTarget);
   loadBtn?.addEventListener('click', loadTargets);
   analyzeAllBtn?.addEventListener('click', analyzeAll);
+
+  statusFilter?.addEventListener('change', () => {
+    currentFilter = statusFilter.value || 'all';
+    renderTargets();
+  });
 
   document.addEventListener('click', async (event) => {
     const analyze = event.target.closest('[data-smm-analyze]');

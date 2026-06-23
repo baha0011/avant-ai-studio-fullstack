@@ -109,6 +109,24 @@
 
             <div class="smm-summary" id="smmSummary"></div>
 
+            <div class="smm-filterbar">
+              <label>
+                Фільтр SMM CRM
+                <select id="smmStatusFilter">
+                  <option value="all">Всі сайти</option>
+                  <option value="analyzed">✅ Успішно проаналізовані</option>
+                  <option value="pending">Очікують аналізу</option>
+                  <option value="analyzing">Аналізуються</option>
+                  <option value="failed">Помилка аналізу</option>
+                  <option value="no_telegram">Без Telegram</option>
+                  <option value="manual_required">Manual required</option>
+                  <option value="sent">Sent</option>
+                </select>
+              </label>
+
+              <div class="smm-filter-count" id="smmFilterCount">—</div>
+            </div>
+
             <div class="smm-targets" id="smmTargets">
               <p class="crm-empty">Сайти ще не додані.</p>
             </div>
