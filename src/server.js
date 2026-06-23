@@ -484,7 +484,28 @@ app.post('/api/leads/:id/notes', requireAdminSession, async (req, res) => {
 app.post('/api/leads/:id/assign', requireAdminSession, async (req, res) => {
   try {
     const before = await getLeadById(req.params.id);
-    const lead = await assignLeadToAdmin(req.params.id, req.adminUser);
+    const actor = req.adminUser;
+    const requestedUserId = req.body.user_id || req.body.userId || req.body.assignee_id || req.body.assigneeId;
+
+    let targetUser = actor;
+
+    if (requestedUserId) {
+      const canAssignOthers = ['super_admin', 'admin'].includes(actor?.role);
+
+      if (!canAssignOthers) {
+        return res.status(403).json({ ok: false, error: 'Only admin can assign leads to another user' });
+      }
+
+      const foundUser = await getAdminUserById(requestedUserId);
+
+      if (!foundUser || !foundUser.is_active) {
+        return res.status(404).json({ ok: false, error: 'Assignee not found or inactive' });
+      }
+
+      targetUser = foundUser;
+    }
+
+    const lead = await assignLeadToAdmin(req.params.id, targetUser);
 
     if (before.status !== lead.status) {
       await syncSheetStatus(lead, lead.status).catch(() => null);
@@ -494,7 +515,7 @@ app.post('/api/leads/:id/assign', requireAdminSession, async (req, res) => {
       lead.id,
       'crm_action',
       'assigned',
-      `Assigned to ${req.adminUser.name || req.adminUser.email || 'CRM user'}`
+      `Assigned to ${targetUser.name || targetUser.email || 'CRM user'} by ${actor.name || actor.email || 'CRM user'}`
     ).catch(() => null);
 
     res.json({ ok: true, lead });

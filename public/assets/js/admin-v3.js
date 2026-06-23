@@ -17,9 +17,18 @@
     rejected: 'Відмова'
   };
 
+  const STATUSES = {
+    new: 'new · Нова',
+    in_progress: 'in_progress · В роботі',
+    closed: 'closed · Закрита',
+    cancelled: 'cancelled · Скасована'
+  };
+
   let currentUser = window.AVANT_ADMIN_USER || null;
   let leadsCache = [];
+  let assigneesCache = [];
   let refreshPromise = null;
+  let usersPromise = null;
   let enhanceTimer = null;
 
   function escapeHtml(value = '') {
@@ -72,6 +81,10 @@
     return crmMeta(lead).sales_stage || (lead.status === 'new' ? 'new' : 'contacted');
   }
 
+  function isAdminRole() {
+    return ['super_admin', 'admin'].includes(currentUser?.role);
+  }
+
   function isAssignedToCurrentUser(lead) {
     const assignee = crmMeta(lead).assigned_to || {};
     return currentUser && String(assignee.id || '') === String(currentUser.id || '');
@@ -85,7 +98,7 @@
     if (!assignee.id) return true;
     if (isAssignedToCurrentUser(lead)) return false;
 
-    return currentUser.role === 'admin' || currentUser.role === 'super_admin';
+    return isAdminRole();
   }
 
   async function loadMe() {
@@ -96,6 +109,30 @@
     } catch {
       currentUser = window.AVANT_ADMIN_USER || null;
     }
+  }
+
+  async function loadAssignees() {
+    if (!isAdminRole()) {
+      assigneesCache = [];
+      return assigneesCache;
+    }
+
+    if (usersPromise) return usersPromise;
+
+    usersPromise = api('/api/admin/users')
+      .then((data) => {
+        assigneesCache = (data.users || []).filter((user) => user.is_active);
+        return assigneesCache;
+      })
+      .catch(() => {
+        assigneesCache = [];
+        return assigneesCache;
+      })
+      .finally(() => {
+        usersPromise = null;
+      });
+
+    return usersPromise;
   }
 
   async function refreshLeadsCache() {
@@ -125,6 +162,38 @@
     `;
   }
 
+  function statusSelectHtml(lead, compact = false) {
+    const current = lead.status || 'new';
+
+    return `
+      <select class="${compact ? 'crm-status-select compact' : 'crm-status-select'}" data-v3-status="${escapeHtml(lead.id)}">
+        ${Object.entries(STATUSES).map(([value, label]) => `
+          <option value="${escapeHtml(value)}" ${value === current ? 'selected' : ''}>${escapeHtml(label)}</option>
+        `).join('')}
+      </select>
+    `;
+  }
+
+  function assigneeSelectHtml(lead) {
+    const currentAssignee = crmMeta(lead).assigned_to || {};
+    const currentId = String(currentAssignee.id || '');
+
+    if (!isAdminRole()) {
+      return `<strong>${escapeHtml(assigneeLabel(lead) || 'Не призначено')}</strong>`;
+    }
+
+    return `
+      <select class="crm-assignee-select" data-v3-assignee="${escapeHtml(lead.id)}">
+        <option value="">Не призначено</option>
+        ${assigneesCache.map((user) => {
+          const selected = String(user.id) === currentId ? 'selected' : '';
+          const name = user.name || user.email || `User ${user.id}`;
+          return `<option value="${escapeHtml(user.id)}" ${selected}>${escapeHtml(name)} · ${escapeHtml(user.role)}</option>`;
+        }).join('')}
+      </select>
+    `;
+  }
+
   function enhanceRows() {
     document.querySelectorAll('[data-open-button]').forEach((openBtn) => {
       const id = openBtn.dataset.openButton;
@@ -142,6 +211,11 @@
       chip.className = 'crm-v3-chip';
       chip.textContent = assignee ? `👤 ${assignee}` : `🧭 ${stage}`;
       actions.appendChild(chip);
+
+      const statusWrap = document.createElement('span');
+      statusWrap.className = 'crm-v3-row-status';
+      statusWrap.innerHTML = statusSelectHtml(lead, true);
+      actions.appendChild(statusWrap);
 
       if (canTakeLead(lead)) {
         const btn = document.createElement('button');
@@ -170,7 +244,7 @@
         </div>
 
         <div>
-          <span class="crm-v3-chip reply">Suggested Reply</span>
+          <span class="crm-v3-chip reply">Suggested Reply · українською</span>
           <textarea class="crm-ai-reply" readonly>${escapeHtml(insights.suggestedReply || '')}</textarea>
           <div class="crm-ai-actions">
             <button class="btn btn-secondary" type="button" data-v3-copy-reply>Скопіювати відповідь</button>
@@ -237,14 +311,20 @@
       <div class="crm-v3-grid">
         <div class="crm-v3-card">
           <span>Відповідальний</span>
-          <strong>${escapeHtml(assignee || 'Не призначено')}</strong>
-          <small>${assignee ? 'Заявка вже у роботі' : 'Можна взяти заявку в роботу'}</small>
+          ${assigneeSelectHtml(lead)}
+          <small>${isAdminRole() ? 'Admin / super_admin може призначити або переназначити відповідального' : assignee ? 'Заявка вже у роботі' : 'Можна взяти заявку в роботу'}</small>
+        </div>
+
+        <div class="crm-v3-card">
+          <span>Статус заявки</span>
+          ${statusSelectHtml(lead)}
+          <small>Технічний CRM-статус заявки</small>
         </div>
 
         <div class="crm-v3-card">
           <span>Етап воронки</span>
           ${stageSelectHtml(lead)}
-          <small>Окремо від технічного статусу заявки</small>
+          <small>Продажний етап: діагностика, пропозиція, оплата тощо</small>
         </div>
       </div>
 
@@ -254,7 +334,7 @@
       </div>
 
       <div class="crm-ai-box" id="crmV3AiBox">
-        <p class="muted">Натисніть “AI Summary / Reply”, щоб отримати короткий підсумок, наступну дію і готовий текст відповіді.</p>
+        <p class="muted">Натисніть “AI Summary / Reply”, щоб отримати короткий підсумок, наступну дію і готовий текст відповіді українською.</p>
       </div>
     `;
 
@@ -272,7 +352,7 @@
     enhanceTimer = setTimeout(async () => {
       try {
         await loadMe();
-        await refreshLeadsCache();
+        await Promise.all([refreshLeadsCache(), loadAssignees()]);
         enhanceRows();
         enhanceDrawer();
       } catch {
@@ -282,7 +362,7 @@
     }, 180);
   }
 
-  async function assignLead(id) {
+  async function assignLead(id, userId = '') {
     const button = document.querySelector(`[data-v3-assign="${CSS.escape(String(id))}"]`);
 
     if (button) {
@@ -291,16 +371,20 @@
     }
 
     try {
+      const body = userId ? { user_id: userId } : {};
+
       await api(`/api/leads/${id}/assign`, {
         method: 'POST',
-        body: JSON.stringify({})
+        body: JSON.stringify(body)
       });
 
+      leadsCache = [];
       await refreshLeadsCache();
+
       document.getElementById('loadLeads')?.click();
       setTimeout(scheduleEnhance, 500);
     } catch (error) {
-      alert(`Не вдалося взяти заявку: ${error.message}`);
+      alert(`Не вдалося призначити заявку: ${error.message}`);
       if (button) {
         button.disabled = false;
         button.textContent = 'Взяти в роботу';
@@ -315,10 +399,27 @@
         body: JSON.stringify({ stage })
       });
 
+      leadsCache = [];
       await refreshLeadsCache();
       scheduleEnhance();
     } catch (error) {
       alert(`Не вдалося змінити етап: ${error.message}`);
+    }
+  }
+
+  async function updateStatus(id, status) {
+    try {
+      await api(`/api/leads/${id}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status })
+      });
+
+      leadsCache = [];
+      await refreshLeadsCache();
+      document.getElementById('loadLeads')?.click();
+      setTimeout(scheduleEnhance, 500);
+    } catch (error) {
+      alert(`Не вдалося змінити статус: ${error.message}`);
     }
   }
 
@@ -349,10 +450,22 @@
   });
 
   document.addEventListener('change', async (event) => {
-    const select = event.target.closest('[data-v3-stage]');
-    if (!select) return;
+    const stageSelect = event.target.closest('[data-v3-stage]');
+    if (stageSelect) {
+      await updateStage(stageSelect.dataset.v3Stage, stageSelect.value);
+      return;
+    }
 
-    await updateStage(select.dataset.v3Stage, select.value);
+    const statusSelect = event.target.closest('[data-v3-status]');
+    if (statusSelect) {
+      await updateStatus(statusSelect.dataset.v3Status, statusSelect.value);
+      return;
+    }
+
+    const assigneeSelect = event.target.closest('[data-v3-assignee]');
+    if (assigneeSelect) {
+      await assignLead(assigneeSelect.dataset.v3Assignee, assigneeSelect.value);
+    }
   });
 
   document.getElementById('loadLeads')?.addEventListener('click', () => {
