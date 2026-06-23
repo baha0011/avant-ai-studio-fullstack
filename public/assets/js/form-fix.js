@@ -133,8 +133,7 @@
       mainChannel ? `Основний канал: ${mainChannel}` : '',
       automationNeeds.length ? `Автоматизувати: ${automationNeeds.join(', ')}` : '',
       baseMessage ? `Опис: ${baseMessage}` : ''
-    ].filter(Boolean).join('
-');
+    ].filter(Boolean).join('\n');
 
     const payload = {
       name: clean(formData.get('name')),
