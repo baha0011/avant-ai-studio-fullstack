@@ -10,19 +10,175 @@ function escapeHtml(value = '') {
     .replaceAll('"', '&quot;');
 }
 
-export function buildLeadMessage(lead) {
+function clean(value = '') {
+  return String(value || '').trim().replace(/\s+/g, ' ');
+}
+
+function truncate(value = '', max = 1400) {
+  const text = String(value || '').trim();
+  if (text.length <= max) return text;
+  return `${text.slice(0, max - 1).trim()}…`;
+}
+
+function normalizeNiche(niche = '') {
+  const map = {
+    clinic: 'Клініка / стоматологія',
+    beauty: 'Салон краси',
+    education: 'Онлайн-школа',
+    service: 'Сервісна компанія',
+    sales: 'Відділ продажів',
+    other: 'Інший бізнес'
+  };
+
+  return map[niche] || niche || 'Не вказано';
+}
+
+function formatDate(value) {
+  if (!value) return 'Не вказано';
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+
+  return new Intl.DateTimeFormat('uk-UA', {
+    timeZone: 'Europe/Kyiv',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  }).format(date);
+}
+
+function parseLeadDetails(message = '') {
+  const details = {};
+  const descriptionLines = [];
+
+  const labels = {
+    'Результат квизу': 'quiz',
+    'Формат': 'format',
+    'Бюджет': 'budget',
+    'Основний канал': 'channel',
+    'Автоматизувати': 'automation',
+    'Опис': 'description'
+  };
+
+  const lines = String(message || '')
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  for (const line of lines) {
+    const match = line.match(/^([^:]+):\s*(.*)$/);
+    if (!match) {
+      descriptionLines.push(line);
+      continue;
+    }
+
+    const rawKey = match[1].trim();
+    const value = match[2].trim();
+    const key = labels[rawKey];
+
+    if (key && value) {
+      if (key === 'description') {
+        descriptionLines.push(value);
+      } else {
+        details[key] = value;
+      }
+    } else {
+      descriptionLines.push(line);
+    }
+  }
+
+  return {
+    ...details,
+    description: descriptionLines.join('\n').trim() || String(message || '').trim()
+  };
+}
+
+function formatContact(contact = '') {
+  const value = clean(contact);
+  if (!value) return 'Не вказано';
+
+  if (value.startsWith('@') && /^@[a-zA-Z0-9_]{5,32}$/.test(value)) {
+    const username = value.slice(1);
+    return `<a href="https://t.me/${escapeHtml(username)}">${escapeHtml(value)}</a>`;
+  }
+
+  return `<code>${escapeHtml(value)}</code>`;
+}
+
+function row(label, value, { code = false } = {}) {
+  const safeValue = clean(value) || 'Не вказано';
+  return `├ <b>${escapeHtml(label)}:</b> ${code ? `<code>${escapeHtml(safeValue)}</code>` : escapeHtml(safeValue)}`;
+}
+
+function finalRow(label, value, { code = false } = {}) {
+  const safeValue = clean(value) || 'Не вказано';
+  return `└ <b>${escapeHtml(label)}:</b> ${code ? `<code>${escapeHtml(safeValue)}</code>` : escapeHtml(safeValue)}`;
+}
+
+function optionalProjectRows(details) {
+  const rows = [];
+
+  if (details.quiz) rows.push(row('Квиз', details.quiz));
+  if (details.format) rows.push(row('Формат', details.format));
+  if (details.budget) rows.push(row('Бюджет', details.budget));
+  if (details.channel) rows.push(row('Канал', details.channel));
+  if (details.automation) rows.push(row('Автоматизація', details.automation));
+
+  if (!rows.length) {
+    return [
+      '⚙️ <b>ДЕТАЛІ ПРОЄКТУ</b>',
+      '└ Поки що без додаткових параметрів'
+    ];
+  }
+
+  rows[rows.length - 1] = rows[rows.length - 1].replace(/^├/, '└');
+
   return [
-    '🚀 <b>New request — Avant AI Studio</b>',
+    '⚙️ <b>ДЕТАЛІ ПРОЄКТУ</b>',
+    ...rows
+  ];
+}
+
+function formatDescription(description = '') {
+  const safe = escapeHtml(truncate(description || 'Без опису'));
+  return [
+    '📝 <b>ОПИС ЗАДАЧІ</b>',
+    '┌────────────────',
+    safe
+      .split('\n')
+      .map((line) => `│ ${line}`)
+      .join('\n'),
+    '└────────────────'
+  ];
+}
+
+export function buildLeadMessage(lead) {
+  const details = parseLeadDetails(lead.message);
+
+  return [
+    '🟦 <b>AVANT AI STUDIO</b>',
+    '┏━━━━━━━━━━━━━━━━━━━━',
+    '┃ 🆕 <b>НОВА ЗАЯВКА</b>',
+    `┃ ID: <code>${escapeHtml(lead.public_id || '—')}</code>`,
+    '┗━━━━━━━━━━━━━━━━━━━━',
     '',
-    `🆔 <b>ID:</b> ${escapeHtml(lead.public_id)}`,
-    `👤 <b>Name:</b> ${escapeHtml(lead.name)}`,
-    `📞 <b>Contact:</b> ${escapeHtml(lead.contact)}`,
-    `🏷 <b>Niche:</b> ${escapeHtml(lead.niche)}`,
-    `🌐 <b>Language:</b> ${escapeHtml(lead.language)}`,
+    '👤 <b>КЛІЄНТ</b>',
+    row('Імʼя', lead.name),
+    `├ <b>Контакт:</b> ${formatContact(lead.contact)}`,
+    row('Ніша', normalizeNiche(lead.niche)),
+    finalRow('Мова', lead.language || 'uk'),
     '',
-    `📝 <b>Task:</b>\n${escapeHtml(lead.message)}`,
+    ...optionalProjectRows(details),
     '',
-    `⏱ <b>Created:</b> ${escapeHtml(lead.created_at)}`
+    ...formatDescription(details.description),
+    '',
+    '⏱ <b>СТВОРЕНО</b>',
+    `└ ${escapeHtml(formatDate(lead.created_at))}`,
+    '',
+    '━━━━━━━━━━━━━━━━━━━━',
+    '💬 <i>Відповісти клієнту бажано якнайшвидше.</i>'
   ].join('\n');
 }
 
