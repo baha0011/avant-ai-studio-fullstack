@@ -4617,3 +4617,51 @@ html[data-theme="light"] .smm-message-label textarea {
     display: grid;
   }
 }
+
+/* Compact top buttons on separate SMM CRM */
+.smm-page .crm-topbar {
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.smm-page .admin-session-bar {
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.smm-page .crm-topbar .btn,
+.smm-page .admin-session-bar .btn {
+  padding: 8px 11px !important;
+  min-height: 34px !important;
+  border-radius: 12px !important;
+  font-size: 0.78rem !important;
+  line-height: 1.1 !important;
+  white-space: nowrap;
+}
+
+.smm-page #adminCurrentUser {
+  font-size: 0.78rem;
+}
+
+.smm-page .crm-topbar {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 900px) {
+  .smm-page .crm-topbar,
+  .smm-page .admin-session-bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .smm-page .crm-topbar .btn,
+  .smm-page .admin-session-bar .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .smm-page #adminCurrentUser {
+    grid-column: 1 / -1;
+  }
+}
