@@ -3393,3 +3393,45 @@ body[data-admin-role="manager"] #openGoogleSheet {
     grid-template-columns: 1fr;
   }
 }
+
+/* Admin login centered layout fix */
+body[data-page="admin"].admin-login-mode main {
+  min-height: calc(100vh - 92px);
+  display: grid;
+  align-items: center;
+}
+
+body[data-page="admin"].admin-login-mode .admin-login-section {
+  min-height: calc(100vh - 180px);
+  display: grid;
+  align-items: center;
+  padding: 42px 0;
+}
+
+body[data-page="admin"].admin-login-mode .admin-login-card {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+body[data-page="admin"].admin-login-mode .crm-section {
+  display: none !important;
+}
+
+body[data-page="admin"].admin-login-mode .footer {
+  display: none;
+}
+
+@media (max-width: 860px) {
+  body[data-page="admin"].admin-login-mode main {
+    min-height: calc(100vh - 76px);
+  }
+
+  body[data-page="admin"].admin-login-mode .admin-login-section {
+    min-height: calc(100vh - 120px);
+    padding: 24px 0;
+  }
+
+  body[data-page="admin"].admin-login-mode .admin-login-card {
+    padding: 22px;
+  }
+}

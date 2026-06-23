@@ -35,6 +35,8 @@
     currentAdmin = null;
     window.AVANT_ADMIN_USER = null;
 
+    document.body.classList.add('admin-login-mode');
+    document.body.classList.remove('admin-crm-mode');
     document.body.dataset.adminRole = '';
     loginPanel.hidden = false;
     crmRoot.style.display = 'none';
@@ -47,6 +49,8 @@
     currentAdmin = user;
     window.AVANT_ADMIN_USER = user;
 
+    document.body.classList.remove('admin-login-mode');
+    document.body.classList.add('admin-crm-mode');
     document.body.dataset.adminRole = user.role || '';
 
     loginPanel.hidden = true;
