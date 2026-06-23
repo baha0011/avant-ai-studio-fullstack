@@ -5647,3 +5647,33 @@ body.smm-page .smm-compact-actions .btn {
     min-width: 78px !important;
   }
 }
+
+/* Fix compact SMM table header position */
+body.smm-page .smm-compact-head {
+  position: static !important;
+  top: auto !important;
+  z-index: auto !important;
+  display: grid !important;
+  grid-template-columns: var(--smm-compact-grid) !important;
+  align-items: center !important;
+  column-gap: 14px !important;
+  margin: 0 0 6px 0 !important;
+  padding: 8px 14px !important;
+  min-height: 34px !important;
+  line-height: 1 !important;
+  transform: none !important;
+}
+
+body.smm-page .smm-compact-head span {
+  display: flex !important;
+  align-items: center !important;
+  height: 18px !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+body.smm-page .smm-compact-list {
+  align-items: start !important;
+  gap: 8px !important;
+}
