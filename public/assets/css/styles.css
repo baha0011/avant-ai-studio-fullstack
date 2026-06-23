@@ -1994,3 +1994,367 @@ html[data-theme="light"] .checkbox-grid label {
     grid-template-columns: 1fr;
   }
 }
+
+/* Sales/CRM automation layer */
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.pricing-card {
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: var(--radiusXL);
+  background: linear-gradient(180deg, rgba(255,255,255,.105), rgba(255,255,255,.055));
+  box-shadow: var(--shadow);
+}
+
+.pricing-card.featured {
+  border-color: rgba(185,243,255,.34);
+  transform: translateY(-6px);
+}
+
+.pricing-card span {
+  display: inline-flex;
+  margin-bottom: 14px;
+  padding: 8px 11px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.07);
+  color: var(--accent3);
+  border: 1px solid var(--line);
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: .12em;
+}
+
+.pricing-card p {
+  color: var(--muted);
+  margin: 10px 0 18px;
+}
+
+.pricing-card strong {
+  display: block;
+  color: var(--text);
+}
+
+.ai-audit-report {
+  margin-top: 22px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+}
+
+.audit-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.audit-tags span {
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--accent3);
+  background: rgba(255,255,255,.06);
+  font-weight: 850;
+  font-size: 12px;
+}
+
+.thankyou-card {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 34px;
+  text-align: center;
+}
+
+.thankyou-icon {
+  width: 78px;
+  height: 78px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 18px;
+  border-radius: 26px;
+  border: 1px solid rgba(93,245,181,.24);
+  background: rgba(93,245,181,.10);
+  font-size: 34px;
+}
+
+.thankyou-id {
+  width: fit-content;
+  min-width: 280px;
+  margin: 24px auto;
+  padding: 16px 22px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: rgba(255,255,255,.065);
+}
+
+.thankyou-id span,
+.thankyou-id strong {
+  display: block;
+}
+
+.thankyou-id span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.thankyou-id strong {
+  margin-top: 5px;
+  font-size: 22px;
+}
+
+.thankyou-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin: 24px 0;
+  text-align: left;
+}
+
+.thankyou-steps div {
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: rgba(255,255,255,.055);
+}
+
+.thankyou-steps span {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  background: rgba(35,214,255,.12);
+  color: var(--accent3);
+  font-weight: 950;
+}
+
+.thankyou-steps p {
+  color: var(--muted);
+  margin-top: 7px;
+}
+
+.admin-shell {
+  padding: 22px;
+}
+
+.admin-toolbar,
+.admin-filters {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.admin-filters {
+  grid-template-columns: 220px 1fr;
+}
+
+.admin-stat-grid {
+  grid-template-columns: repeat(6, minmax(120px, 1fr));
+  margin: 18px 0;
+}
+
+.admin-board {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.admin-lead-card {
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: rgba(255,255,255,.055);
+  box-shadow: 0 18px 45px rgba(0,0,0,.12);
+}
+
+.lead-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.lead-card-top strong,
+.lead-card-top span {
+  display: block;
+}
+
+.lead-card-top span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.lead-score {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 7px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 950;
+  border: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+.lead-score.hot {
+  color: #ffdd99;
+  background: rgba(255, 166, 70, .13);
+  border-color: rgba(255, 166, 70, .25);
+}
+
+.lead-score.warm {
+  color: #ffe478;
+  background: rgba(255, 228, 120, .11);
+  border-color: rgba(255, 228, 120, .22);
+}
+
+.lead-score.cold {
+  color: var(--muted);
+  background: rgba(255,255,255,.055);
+}
+
+.lead-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.lead-card-meta span {
+  padding: 7px 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  background: rgba(255,255,255,.045);
+  font-size: 12px;
+  font-weight: 820;
+}
+
+.lead-card-message {
+  color: var(--muted);
+  min-height: 62px;
+}
+
+.lead-actions,
+.drawer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.lead-actions button {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 9px 11px;
+  background: rgba(255,255,255,.055);
+  color: var(--text);
+  font-weight: 850;
+}
+
+.lead-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: none;
+  background: rgba(0,0,0,.55);
+  backdrop-filter: blur(10px);
+}
+
+.lead-drawer.open {
+  display: block;
+}
+
+.lead-drawer-panel {
+  position: absolute;
+  right: 18px;
+  top: 18px;
+  bottom: 18px;
+  width: min(620px, calc(100vw - 36px));
+  overflow-y: auto;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background: rgba(8,11,26,.94);
+  box-shadow: var(--shadow);
+}
+
+.lead-drawer-close {
+  position: sticky;
+  top: 0;
+  margin-left: auto;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: rgba(255,255,255,.08);
+  color: var(--text);
+  font-size: 24px;
+}
+
+.drawer-head {
+  margin-bottom: 20px;
+}
+
+.drawer-section {
+  padding: 18px 0;
+  border-top: 1px solid var(--line);
+}
+
+.drawer-section p {
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+html[data-theme="light"] .pricing-card,
+html[data-theme="light"] .thankyou-card,
+html[data-theme="light"] .admin-shell,
+html[data-theme="light"] .admin-lead-card,
+html[data-theme="light"] .lead-drawer-panel,
+html[data-theme="light"] .thankyou-steps div,
+html[data-theme="light"] .thankyou-id {
+  background: linear-gradient(180deg, rgba(255,253,249,.96), rgba(248,242,234,.92));
+  border-color: rgba(74, 62, 50, .10);
+  box-shadow: 0 20px 50px rgba(126, 111, 91, .10);
+}
+
+html[data-theme="light"] .lead-card-meta span,
+html[data-theme="light"] .lead-actions button,
+html[data-theme="light"] .audit-tags span {
+  background: rgba(255,249,242,.92);
+  border-color: rgba(74, 62, 50, .10);
+  color: var(--text);
+}
+
+@media (max-width: 1040px) {
+  .pricing-grid,
+  .thankyou-steps,
+  .admin-board,
+  .admin-stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pricing-card.featured {
+    transform: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .admin-toolbar,
+  .admin-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .thankyou-card {
+    padding: 22px;
+  }
+}

@@ -1,3 +1,5 @@
+import { enrichLead } from './leadScoring.js';
+
 export function isTelegramEnabled() {
   return String(process.env.TELEGRAM_ENABLED || '').toLowerCase() === 'true';
 }
@@ -33,6 +35,17 @@ function normalizeNiche(niche = '') {
   return map[niche] || niche || 'Не вказано';
 }
 
+function formatStatus(status = '') {
+  const map = {
+    new: '🆕 new',
+    in_progress: '🔄 in_progress',
+    closed: '✅ closed',
+    cancelled: '❌ cancelled'
+  };
+
+  return map[status] || status || 'new';
+}
+
 function formatDate(value) {
   if (!value) return 'Не вказано';
 
@@ -49,50 +62,8 @@ function formatDate(value) {
   }).format(date);
 }
 
-function parseLeadDetails(message = '') {
-  const details = {};
-  const descriptionLines = [];
-
-  const labels = {
-    'Результат квизу': 'quiz',
-    'Формат': 'format',
-    'Бюджет': 'budget',
-    'Основний канал': 'channel',
-    'Автоматизувати': 'automation',
-    'Опис': 'description'
-  };
-
-  const lines = String(message || '')
-    .split('\n')
-    .map((line) => line.trim())
-    .filter(Boolean);
-
-  for (const line of lines) {
-    const match = line.match(/^([^:]+):\s*(.*)$/);
-    if (!match) {
-      descriptionLines.push(line);
-      continue;
-    }
-
-    const rawKey = match[1].trim();
-    const value = match[2].trim();
-    const key = labels[rawKey];
-
-    if (key && value) {
-      if (key === 'description') {
-        descriptionLines.push(value);
-      } else {
-        details[key] = value;
-      }
-    } else {
-      descriptionLines.push(line);
-    }
-  }
-
-  return {
-    ...details,
-    description: descriptionLines.join('\n').trim() || String(message || '').trim()
-  };
+function getPublicUrl() {
+  return String(process.env.PUBLIC_URL || '').trim().replace(/\/+$/, '');
 }
 
 function formatContact(contact = '') {
@@ -121,6 +92,7 @@ function optionalProjectRows(details) {
   const rows = [];
 
   if (details.quiz) rows.push(row('Квиз', details.quiz));
+  if (details.audit) rows.push(row('AI Audit', details.audit));
   if (details.format) rows.push(row('Формат', details.format));
   if (details.budget) rows.push(row('Бюджет', details.budget));
   if (details.channel) rows.push(row('Канал', details.channel));
@@ -141,6 +113,25 @@ function optionalProjectRows(details) {
   ];
 }
 
+function formatSourceRows(source = {}) {
+  const rows = [];
+  if (source.utm_source) rows.push(row('UTM source', source.utm_source));
+  if (source.utm_campaign) rows.push(row('Campaign', source.utm_campaign));
+  if (source.utm_medium) rows.push(row('Medium', source.utm_medium));
+  if (source.page) rows.push(row('Page', source.page));
+  if (source.referrer) rows.push(row('Referrer', truncate(source.referrer, 120)));
+
+  if (!rows.length) return [];
+
+  rows[rows.length - 1] = rows[rows.length - 1].replace(/^├/, '└');
+
+  return [
+    '',
+    '📍 <b>ДЖЕРЕЛО</b>',
+    ...rows
+  ];
+}
+
 function formatDescription(description = '') {
   const safe = escapeHtml(truncate(description || 'Без опису'));
   return [
@@ -154,23 +145,28 @@ function formatDescription(description = '') {
   ];
 }
 
-export function buildLeadMessage(lead) {
-  const details = parseLeadDetails(lead.message);
+export function buildLeadMessage(rawLead) {
+  const lead = enrichLead(rawLead);
+  const details = lead.lead_details || {};
+  const source = lead.source_details || {};
 
   return [
     '🟦 <b>AVANT AI STUDIO</b>',
     '┏━━━━━━━━━━━━━━━━━━━━',
-    '┃ 🆕 <b>НОВА ЗАЯВКА</b>',
+    '┃ 🆕 <b>ЗАЯВКА</b>',
     `┃ ID: <code>${escapeHtml(lead.public_id || '—')}</code>`,
+    `┃ ${lead.lead_score_emoji} <b>${escapeHtml(lead.lead_score_title)}</b> · ${lead.lead_score}/100`,
     '┗━━━━━━━━━━━━━━━━━━━━',
     '',
     '👤 <b>КЛІЄНТ</b>',
     row('Імʼя', lead.name),
     `├ <b>Контакт:</b> ${formatContact(lead.contact)}`,
     row('Ніша', normalizeNiche(lead.niche)),
+    row('Статус', formatStatus(lead.status)),
     finalRow('Мова', lead.language || 'uk'),
     '',
     ...optionalProjectRows(details),
+    ...formatSourceRows(source),
     '',
     ...formatDescription(details.description),
     '',
@@ -178,8 +174,26 @@ export function buildLeadMessage(lead) {
     `└ ${escapeHtml(formatDate(lead.created_at))}`,
     '',
     '━━━━━━━━━━━━━━━━━━━━',
-    '💬 <i>Відповісти клієнту бажано якнайшвидше.</i>'
+    lead.lead_score_reasons?.length
+      ? `📌 <i>Score: ${escapeHtml(lead.lead_score_reasons.join(', '))}</i>`
+      : '📌 <i>Score буде точнішим, якщо клієнт заповнить більше деталей.</i>'
   ].join('\n');
+}
+
+function buildKeyboard(lead) {
+  const publicUrl = getPublicUrl();
+  const keyboard = [
+    [
+      { text: '🔄 Взяти в роботу', callback_data: `lead_status:${lead.id}:in_progress` },
+      { text: '✅ Закрити', callback_data: `lead_status:${lead.id}:closed` }
+    ]
+  ];
+
+  if (publicUrl) {
+    keyboard.push([{ text: '📊 Відкрити admin', url: `${publicUrl}/admin.html` }]);
+  }
+
+  return { inline_keyboard: keyboard };
 }
 
 export async function sendTelegramLead(lead) {
@@ -201,7 +215,8 @@ export async function sendTelegramLead(lead) {
       chat_id: chatId,
       text: buildLeadMessage(lead),
       parse_mode: 'HTML',
-      disable_web_page_preview: true
+      disable_web_page_preview: true,
+      reply_markup: buildKeyboard(lead)
     })
   });
 
@@ -211,4 +226,40 @@ export async function sendTelegramLead(lead) {
   }
 
   return { skipped: false, messageId: data.result?.message_id || null };
+}
+
+export async function answerTelegramCallback(callbackQueryId, text, showAlert = false) {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  if (!token || !callbackQueryId) return;
+
+  await fetch(`https://api.telegram.org/bot${token}/answerCallbackQuery`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      callback_query_id: callbackQueryId,
+      text,
+      show_alert: showAlert
+    })
+  }).catch(() => null);
+}
+
+export async function editTelegramLeadMessage(lead, message) {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = message?.chat?.id;
+  const messageId = message?.message_id;
+
+  if (!token || !chatId || !messageId) return;
+
+  await fetch(`https://api.telegram.org/bot${token}/editMessageText`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      chat_id: chatId,
+      message_id: messageId,
+      text: buildLeadMessage(lead),
+      parse_mode: 'HTML',
+      disable_web_page_preview: true,
+      reply_markup: buildKeyboard(lead)
+    })
+  }).catch(() => null);
 }

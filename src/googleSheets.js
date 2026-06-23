@@ -21,11 +21,15 @@ function normalizeLead(lead) {
     source: lead.source,
     status: lead.status,
     sheet_status: lead.sheet_status,
-    telegram_status: lead.telegram_status
+    telegram_status: lead.telegram_status,
+    lead_score: lead.lead_score,
+    lead_score_label: lead.lead_score_label,
+    lead_score_title: lead.lead_score_title,
+    source_details: lead.source_details || {}
   };
 }
 
-export async function appendLeadToSheet(lead) {
+async function postToAppsScript(payload) {
   if (!isSheetsEnabled()) {
     return { skipped: true, reason: 'GOOGLE_SHEETS_ENABLED=false' };
   }
@@ -43,7 +47,7 @@ export async function appendLeadToSheet(lead) {
     },
     body: JSON.stringify({
       secret: process.env.GOOGLE_APPS_SCRIPT_SECRET || '',
-      lead: normalizeLead(lead)
+      ...payload
     })
   });
 
@@ -60,10 +64,40 @@ export async function appendLeadToSheet(lead) {
     throw new Error(data.error || `Apps Script request failed with HTTP ${response.status}`);
   }
 
+  return data;
+}
+
+export async function appendLeadToSheet(lead) {
+  const data = await postToAppsScript({
+    action: 'appendLead',
+    lead: normalizeLead(lead)
+  });
+
+  if (data.skipped) return data;
+
   return {
     skipped: false,
     row: data.row || null,
     publicId: data.publicId || lead.public_id,
+    appsScript: true
+  };
+}
+
+export async function updateLeadStatusInSheet(lead, status) {
+  const data = await postToAppsScript({
+    action: 'updateStatus',
+    publicId: lead.public_id,
+    status,
+    lead: normalizeLead({ ...lead, status })
+  });
+
+  if (data.skipped) return data;
+
+  return {
+    skipped: false,
+    row: data.row || null,
+    publicId: data.publicId || lead.public_id,
+    status,
     appsScript: true
   };
 }

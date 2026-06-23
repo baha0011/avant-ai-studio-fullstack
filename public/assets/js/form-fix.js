@@ -83,6 +83,40 @@
     return null;
   }
 
+  function captureAttribution() {
+    const params = new URLSearchParams(window.location.search);
+    const utmKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
+    const current = {};
+
+    utmKeys.forEach((key) => {
+      const value = clean(params.get(key));
+      if (value) current[key] = value;
+    });
+
+    if (Object.keys(current).length) {
+      localStorage.setItem('avantAttribution', JSON.stringify({
+        ...current,
+        landingPage: window.location.pathname,
+        capturedAt: new Date().toISOString()
+      }));
+    }
+
+    let saved = {};
+    try {
+      saved = JSON.parse(localStorage.getItem('avantAttribution') || '{}');
+    } catch {
+      saved = {};
+    }
+
+    return {
+      ...saved,
+      referrer: document.referrer || saved.referrer || '',
+      landingPage: saved.landingPage || window.location.pathname,
+      currentPage: window.location.pathname,
+      currentUrl: window.location.href
+    };
+  }
+
   async function readApiResponse(response) {
     const raw = await response.text();
     let data = {};
@@ -121,6 +155,7 @@
 
     const automationNeeds = formData.getAll('automationNeeds').map(clean).filter(Boolean);
     const quizResult = clean(localStorage.getItem('avantQuizResult'));
+    const auditReport = clean(localStorage.getItem('avantAuditReport'));
     const projectFormat = clean(formData.get('projectFormat'));
     const budget = clean(formData.get('budget'));
     const mainChannel = clean(formData.get('mainChannel'));
@@ -128,12 +163,15 @@
 
     const details = [
       quizResult ? `Результат квизу: ${quizResult}` : '',
+      auditReport ? `AI Audit Report: ${auditReport}` : '',
       projectFormat ? `Формат: ${projectFormat}` : '',
       budget ? `Бюджет: ${budget}` : '',
       mainChannel ? `Основний канал: ${mainChannel}` : '',
       automationNeeds.length ? `Автоматизувати: ${automationNeeds.join(', ')}` : '',
       baseMessage ? `Опис: ${baseMessage}` : ''
     ].filter(Boolean).join('\n');
+
+    const attribution = captureAttribution();
 
     const payload = {
       name: clean(formData.get('name')),
@@ -142,7 +180,16 @@
       message: details || baseMessage,
       language: getLang(),
       page: document.body.dataset.page || 'contact',
-      source: 'website'
+      source: attribution.utm_source || 'website',
+      meta: {
+        ...attribution,
+        quizResult,
+        auditReport,
+        projectFormat,
+        budget,
+        mainChannel,
+        automationNeeds
+      }
     };
 
     const validationError = validate(payload);
@@ -159,7 +206,14 @@
 
       const data = await submitLead(payload);
       showMessage(`${t('success')} ID: ${data.lead.publicId}`);
-      form.reset();
+
+      const params = new URLSearchParams({
+        id: data.lead.publicId,
+        score: String(data.lead.leadScore || ''),
+        quality: data.lead.leadScoreLabel || ''
+      });
+
+      window.location.href = `thank-you.html?${params.toString()}`;
     } catch (error) {
       console.error('[Lead form fixed handler]', error);
       showMessage(`${t('backend')} ${t('details')}: ${error.message}`, true);

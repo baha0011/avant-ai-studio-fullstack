@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import dotenv from 'dotenv';
 import WebSocket from 'ws';
 import { createClient } from '@supabase/supabase-js';
+import { enrichLead } from './leadScoring.js';
 
 dotenv.config();
 
@@ -74,7 +75,7 @@ export async function insertLead(payload) {
     .single();
 
   if (error) throw error;
-  return data;
+  return enrichLead(data);
 }
 
 export async function getLeadById(id) {
@@ -85,10 +86,10 @@ export async function getLeadById(id) {
     .single();
 
   if (error) throw error;
-  return data;
+  return enrichLead(data);
 }
 
-export async function listLeads({ limit = 100, status = null } = {}) {
+export async function listLeads({ limit = 100, status = null, q = '' } = {}) {
   const safeLimit = Math.min(Math.max(Number(limit) || 100, 1), 500);
   let query = supabase
     .from('leads')
@@ -100,7 +101,22 @@ export async function listLeads({ limit = 100, status = null } = {}) {
 
   const { data, error } = await query;
   if (error) throw error;
-  return data || [];
+
+  const search = String(q || '').trim().toLowerCase();
+  const rows = (data || []).map(enrichLead);
+
+  if (!search) return rows;
+
+  return rows.filter((lead) => [
+    lead.public_id,
+    lead.name,
+    lead.contact,
+    lead.niche,
+    lead.message,
+    lead.status,
+    lead.lead_score_label,
+    lead.source_details?.source
+  ].some((value) => String(value || '').toLowerCase().includes(search)));
 }
 
 export async function updateLeadIntegrationStatus(id, field, value) {
@@ -115,7 +131,7 @@ export async function updateLeadIntegrationStatus(id, field, value) {
     .single();
 
   if (error) throw error;
-  return data;
+  return enrichLead(data);
 }
 
 export async function updateLeadStatus(id, status) {
@@ -130,7 +146,7 @@ export async function updateLeadStatus(id, status) {
     .single();
 
   if (error) throw error;
-  return data;
+  return enrichLead(data);
 }
 
 export async function addIntegrationLog(leadId, channel, status, message = '') {
@@ -146,25 +162,52 @@ export async function addIntegrationLog(leadId, channel, status, message = '') {
   if (error) throw error;
 }
 
+function startOfDay(date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+function startOfWeek(date) {
+  const d = startOfDay(date);
+  const day = d.getDay() || 7;
+  d.setDate(d.getDate() - day + 1);
+  return d;
+}
+
+function startOfMonth(date) {
+  return new Date(date.getFullYear(), date.getMonth(), 1);
+}
+
 export async function getStats() {
   const { data, error } = await supabase
     .from('leads')
-    .select('status, created_at')
+    .select('status, created_at, message, contact, source, page, meta_json')
     .limit(10000);
 
   if (error) throw error;
 
-  const rows = data || [];
-  const today = new Date().toISOString().slice(0, 10);
+  const rows = (data || []).map(enrichLead);
+  const now = new Date();
+  const todayStart = startOfDay(now);
+  const weekStart = startOfWeek(now);
+  const monthStart = startOfMonth(now);
+
   const byStatusMap = rows.reduce((acc, lead) => {
     acc[lead.status] = (acc[lead.status] || 0) + 1;
     return acc;
   }, {});
 
+  const byScoreMap = rows.reduce((acc, lead) => {
+    acc[lead.lead_score_label] = (acc[lead.lead_score_label] || 0) + 1;
+    return acc;
+  }, {});
+
   return {
     total: rows.length,
-    today: rows.filter((lead) => String(lead.created_at || '').slice(0, 10) === today).length,
-    byStatus: Object.entries(byStatusMap).map(([status, count]) => ({ status, count }))
+    today: rows.filter((lead) => new Date(lead.created_at) >= todayStart).length,
+    week: rows.filter((lead) => new Date(lead.created_at) >= weekStart).length,
+    month: rows.filter((lead) => new Date(lead.created_at) >= monthStart).length,
+    byStatus: Object.entries(byStatusMap).map(([status, count]) => ({ status, count })),
+    byScore: Object.entries(byScoreMap).map(([score, count]) => ({ score, count }))
   };
 }
 

@@ -3,16 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin CRM — Avant AI Studio</title>
-  <meta name="description" content="Внутрішня CRM-панель заявок Avant AI Studio." />
+  <title>Заявку прийнято — Avant AI Studio</title>
+  <meta name="description" content="Дякуємо за заявку. Avant AI Studio перегляне задачу і підготує наступний крок." />
   <link rel="stylesheet" href="assets/css/styles.css" />
   <link rel="icon" href="assets/icons/favicon.ico?v=2" sizes="any" />
   <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32x32.png?v=2" />
   <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png?v=2" />
   <link rel="manifest" href="assets/icons/site.webmanifest?v=2" />
   <meta name="theme-color" content="#060814" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Заявку прийнято — Avant AI Studio" />
+  <meta property="og:description" content="Дякуємо за заявку. Ми переглянемо задачу і підготуємо наступний крок." />
+  <meta property="og:site_name" content="Avant AI Studio" />
+  <meta property="og:url" content="https://avant-ai-studio.onrender.com/thank-you.html" />
+  <meta property="og:image" content="https://avant-ai-studio.onrender.com/assets/icons/icon-512.png" />
+  <meta name="twitter:card" content="summary_large_image" />
 </head>
-<body data-page="admin">
+<body data-page="thank-you">
   <canvas class="canvas-bg" id="bgCanvas" aria-hidden="true"></canvas>
   <div class="noise" aria-hidden="true"></div>
   <div class="cursor-glow" aria-hidden="true"></div>
@@ -44,51 +51,33 @@
   </div>
 
   <main>
-    <section class="page-hero">
+    <section class="page-hero thankyou-hero">
       <div class="container">
-        <div class="reveal">
-          <div class="eyebrow"><span class="eyebrow-dot"></span><span>Admin CRM</span></div>
-          <h1><span class="gradient-text">Панель заявок, статусів, джерел і lead scoring.</span></h1>
-          <p class="lead">Фільтруйте заявки, шукайте клієнтів, відкривайте картку, змінюйте статус і бачте якість ліда.</p>
-        </div>
-      </div>
-    </section>
+        <div class="thankyou-card panel reveal">
+          <div class="thankyou-icon">✅</div>
+          <div class="section-label">Заявку прийнято</div>
+          <h1><span class="gradient-text">Дякуємо! Ми отримали вашу заявку.</span></h1>
+          <p class="lead">Ми переглянемо задачу, оцінимо перший практичний MVP і напишемо вам у зручний канал звʼязку.</p>
 
-    <section class="section">
-      <div class="container" id="adminV2Root">
-        <div class="admin-shell form-card reveal">
-          <div class="admin-toolbar">
-            <input id="adminToken" type="password" placeholder="ADMIN_TOKEN">
-            <button class="btn btn-secondary" id="saveToken" type="button">Зберегти токен</button>
-            <button class="btn btn-primary" id="loadLeads" type="button">Завантажити</button>
+          <div class="thankyou-id">
+            <span>ID заявки</span>
+            <strong id="thankYouLeadId">A-...</strong>
           </div>
 
-          <div class="admin-filters">
-            <select id="adminStatusFilter">
-              <option value="">Усі статуси</option>
-              <option value="new">new</option>
-              <option value="in_progress">in_progress</option>
-              <option value="closed">closed</option>
-              <option value="cancelled">cancelled</option>
-            </select>
-            <input id="adminSearch" type="search" placeholder="Пошук: імʼя, контакт, ID, джерело...">
+          <div class="thankyou-steps">
+            <div><span>1</span><strong>Перегляд заявки</strong><p>Дивимось нішу, канал заявок, бюджет і опис задачі.</p></div>
+            <div><span>2</span><strong>Короткий розбір</strong><p>Підкажемо, де губляться заявки і що автоматизувати першим.</p></div>
+            <div><span>3</span><strong>План запуску</strong><p>Запропонуємо формат: START, ASSISTANT або SYSTEM.</p></div>
           </div>
 
-          <div class="stat-grid admin-stat-grid" id="adminStats"></div>
-          <div class="admin-board" id="adminBoard">
-            <p class="muted">Введіть ADMIN_TOKEN і завантажте заявки.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="demo.html">Подивитися демо</a>
+            <a class="btn btn-secondary" href="cases.html">Переглянути кейси</a>
           </div>
         </div>
       </div>
     </section>
   </main>
-
-  <div class="lead-drawer" id="leadDrawer" aria-hidden="true">
-    <div class="lead-drawer-panel">
-      <button class="lead-drawer-close" id="leadDrawerClose" type="button">×</button>
-      <div id="leadDrawerBody"></div>
-    </div>
-  </div>
 
   <footer class="footer">
     <div class="container footer-inner">
@@ -108,6 +97,10 @@
   </footer>
 
   <script src="assets/js/app.js"></script>
-  <script src="assets/js/admin.js"></script>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    if (id) document.getElementById('thankYouLeadId').textContent = id;
+  </script>
 </body>
 </html>

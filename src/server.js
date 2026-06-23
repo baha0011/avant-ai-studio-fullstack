@@ -14,8 +14,13 @@ import {
   updateLeadIntegrationStatus,
   updateLeadStatus
 } from './db.js';
-import { appendLeadToSheet, isSheetsEnabled } from './googleSheets.js';
-import { isTelegramEnabled, sendTelegramLead } from './telegram.js';
+import { appendLeadToSheet, isSheetsEnabled, updateLeadStatusInSheet } from './googleSheets.js';
+import {
+  answerTelegramCallback,
+  editTelegramLeadMessage,
+  isTelegramEnabled,
+  sendTelegramLead
+} from './telegram.js';
 import { requireAdmin, validateLead } from './validators.js';
 
 dotenv.config();
@@ -35,6 +40,22 @@ app.use(cors());
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(publicDir));
+
+function getWebhookSecret() {
+  return String(process.env.TELEGRAM_WEBHOOK_SECRET || process.env.ADMIN_TOKEN || '').trim();
+}
+
+async function syncSheetStatus(lead, status) {
+  try {
+    const result = await updateLeadStatusInSheet(lead, status);
+    await addIntegrationLog(lead.id, 'google_sheets_status', result.skipped ? 'skipped' : 'sent', JSON.stringify(result)).catch(() => null);
+    return result;
+  } catch (error) {
+    await addIntegrationLog(lead.id, 'google_sheets_status', 'failed', error.message).catch(() => null);
+    console.error('[Google Sheets status update]', error);
+    return { skipped: false, failed: true, error: error.message };
+  }
+}
 
 app.get('/api/health', (req, res) => {
   res.json({
@@ -109,6 +130,8 @@ app.post('/api/leads', async (req, res) => {
       id: savedLead.id,
       publicId: savedLead.public_id,
       status: savedLead.status,
+      leadScore: savedLead.lead_score,
+      leadScoreLabel: savedLead.lead_score_label,
       createdAt: savedLead.created_at
     },
     integration
@@ -121,7 +144,8 @@ app.get('/api/leads', requireAdmin, async (req, res) => {
       getStats(),
       listLeads({
         limit: req.query.limit || 100,
-        status: req.query.status || null
+        status: req.query.status || null,
+        q: req.query.q || ''
       })
     ]);
 
@@ -135,9 +159,43 @@ app.get('/api/leads', requireAdmin, async (req, res) => {
 app.patch('/api/leads/:id/status', requireAdmin, async (req, res) => {
   try {
     const lead = await updateLeadStatus(req.params.id, req.body.status);
-    res.json({ ok: true, lead });
+    const sheet = await syncSheetStatus(lead, req.body.status);
+    res.json({ ok: true, lead, sheet });
   } catch (error) {
     res.status(400).json({ ok: false, error: error.message });
+  }
+});
+
+app.post('/api/telegram/webhook/:secret', async (req, res) => {
+  const expectedSecret = getWebhookSecret();
+
+  if (!expectedSecret || req.params.secret !== expectedSecret) {
+    return res.status(401).json({ ok: false, error: 'Unauthorized webhook' });
+  }
+
+  const callback = req.body?.callback_query;
+  if (!callback?.data) {
+    return res.json({ ok: true, ignored: true });
+  }
+
+  const match = String(callback.data).match(/^lead_status:([^:]+):(new|in_progress|closed|cancelled)$/);
+  if (!match) {
+    await answerTelegramCallback(callback.id, 'Невідома дія', true);
+    return res.json({ ok: true, ignored: true });
+  }
+
+  const [, leadId, status] = match;
+
+  try {
+    const lead = await updateLeadStatus(leadId, status);
+    await syncSheetStatus(lead, status);
+    await answerTelegramCallback(callback.id, `Статус оновлено: ${status}`);
+    await editTelegramLeadMessage(lead, callback.message);
+    return res.json({ ok: true, leadId, status });
+  } catch (error) {
+    console.error('[Telegram webhook]', error);
+    await answerTelegramCallback(callback.id, `Помилка: ${error.message}`, true);
+    return res.status(400).json({ ok: false, error: error.message });
   }
 });
 
