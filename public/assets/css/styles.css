@@ -4665,3 +4665,61 @@ html[data-theme="light"] .smm-message-label textarea {
     grid-column: 1 / -1;
   }
 }
+
+/* Align and normalize SMM CRM top action buttons */
+.smm-page .crm-topbar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  flex-wrap: nowrap !important;
+  gap: 10px !important;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.smm-page .admin-session-bar {
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: nowrap !important;
+  gap: 10px !important;
+}
+
+.smm-page .crm-topbar .btn,
+.smm-page .admin-session-bar .btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  min-width: 138px !important;
+  padding: 0 15px !important;
+  border-radius: 14px !important;
+  font-size: 0.84rem !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+.smm-page #adminCurrentUser {
+  display: inline-flex;
+  align-items: center;
+  height: 40px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  margin-right: 2px;
+}
+
+@media (max-width: 900px) {
+  .smm-page .crm-topbar {
+    flex-wrap: wrap !important;
+    overflow-x: visible;
+  }
+
+  .smm-page .admin-session-bar {
+    flex-wrap: wrap !important;
+  }
+
+  .smm-page .crm-topbar .btn,
+  .smm-page .admin-session-bar .btn {
+    min-width: 150px !important;
+  }
+}
