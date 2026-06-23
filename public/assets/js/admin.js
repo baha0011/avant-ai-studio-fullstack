@@ -32,6 +32,19 @@
     if (token) localStorage.setItem('avantAdminToken', token);
   }
 
+  function formatNiche(niche = '') {
+    const map = {
+      clinic: 'Клініка / стоматологія',
+      beauty: 'Салон краси',
+      education: 'Онлайн-школа',
+      service: 'Сервісна компанія',
+      sales: 'Відділ продажів',
+      other: 'Інший бізнес'
+    };
+
+    return map[niche] || niche || '—';
+  }
+
   function statusLabel(status) {
     const map = {
       new: '🆕 New',
@@ -162,7 +175,7 @@
 
         <div class="lead-card-meta">
           <span>${statusLabel(lead.status)}</span>
-          <span>${escapeHtml(lead.niche)}</span>
+          <span>${escapeHtml(formatNiche(lead.niche))}</span>
           <span>${escapeHtml(source.utm_source || source.source || 'website')}</span>
         </div>
 
@@ -235,7 +248,7 @@
         <h3>Клієнт</h3>
         <p><b>Імʼя:</b> ${escapeHtml(lead.name)}</p>
         <p><b>Контакт:</b> ${escapeHtml(lead.contact)}</p>
-        <p><b>Ніша:</b> ${escapeHtml(lead.niche)}</p>
+        <p><b>Ніша:</b> ${escapeHtml(formatNiche(lead.niche))}</p>
         <p><b>Статус:</b> ${statusLabel(lead.status)}</p>
       </div>
 

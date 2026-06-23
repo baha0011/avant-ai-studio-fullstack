@@ -1,5 +1,5 @@
 function clean(value = '') {
-  return String(value || '').trim().replace(/\s+/g, ' ');
+  return String(value || '').trim().replace(/[ \t]+/g, ' ');
 }
 
 function safeMeta(meta) {
@@ -12,45 +12,100 @@ function safeMeta(meta) {
   }
 }
 
-export function parseLeadDetails(message = '') {
-  const details = {};
-  const descriptionLines = [];
+const DETAIL_LABELS = [
+  'Результат квизу',
+  'AI Audit Report',
+  'Формат',
+  'Бюджет',
+  'Основний канал',
+  'Автоматизувати',
+  'Опис'
+];
 
-  const labels = {
-    'Результат квизу': 'quiz',
-    'AI Audit Report': 'audit',
-    'Формат': 'format',
-    'Бюджет': 'budget',
-    'Основний канал': 'channel',
-    'Автоматизувати': 'automation',
-    'Опис': 'description'
-  };
+const DETAIL_KEYS = {
+  'Результат квизу': 'quiz',
+  'AI Audit Report': 'audit',
+  'Формат': 'format',
+  'Бюджет': 'budget',
+  'Основний канал': 'channel',
+  'Автоматизувати': 'automation',
+  'Опис': 'description'
+};
 
-  String(message || '')
-    .split('\n')
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .forEach((line) => {
-      const match = line.match(/^([^:]+):\s*(.*)$/);
-      if (!match) {
-        descriptionLines.push(line);
-        return;
-      }
+function normalizeText(value = '') {
+  return String(value || '')
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n')
+    .trim();
+}
 
-      const key = labels[match[1].trim()];
-      const value = match[2].trim();
+function findDetailMatches(text) {
+  const escaped = DETAIL_LABELS.map((label) =>
+    label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  ).join('|');
 
-      if (!key || !value) {
-        descriptionLines.push(line);
-        return;
-      }
+  const regex = new RegExp(`(?:^|\\n|\\s)(${escaped}):\\s*`, 'g');
+  const matches = [];
+  let match;
 
-      if (key === 'description') descriptionLines.push(value);
-      else details[key] = value;
+  while ((match = regex.exec(text)) !== null) {
+    matches.push({
+      label: match[1],
+      key: DETAIL_KEYS[match[1]],
+      start: match.index,
+      valueStart: match.index + match[0].length
     });
+  }
 
-  details.description = descriptionLines.join('\n').trim() || String(message || '').trim();
-  return details;
+  return matches;
+}
+
+export function parseLeadDetails(message = '') {
+  const text = normalizeText(message);
+  const details = {};
+
+  if (!text) {
+    return { description: '' };
+  }
+
+  const matches = findDetailMatches(text);
+
+  if (!matches.length) {
+    return { description: text };
+  }
+
+  for (let i = 0; i < matches.length; i += 1) {
+    const current = matches[i];
+    const next = matches[i + 1];
+
+    const rawValue = text
+      .slice(current.valueStart, next ? next.start : text.length)
+      .trim();
+
+    if (!rawValue) continue;
+
+    if (current.key === 'description') {
+      details.description = rawValue;
+    } else {
+      details[current.key] = rawValue;
+    }
+  }
+
+  if (!details.description) {
+    const firstLabelStart = matches[0]?.start || 0;
+    const beforeLabels = text.slice(0, firstLabelStart).trim();
+    details.description = beforeLabels || '';
+  }
+
+  return {
+    quiz: details.quiz || '',
+    audit: details.audit || '',
+    format: details.format || '',
+    budget: details.budget || '',
+    channel: details.channel || '',
+    automation: details.automation || '',
+    description: details.description || text
+  };
 }
 
 export function computeLeadScore(lead = {}) {
@@ -89,9 +144,9 @@ export function computeLeadScore(lead = {}) {
     reasons.push('є задачі автоматизації');
   }
 
-  if (clean(details.description).length >= 80) {
+  if (clean(details.description).length >= 30) {
     score += 12;
-    reasons.push('детальний опис');
+    reasons.push('є опис задачі');
   }
 
   score = Math.min(score, 100);
