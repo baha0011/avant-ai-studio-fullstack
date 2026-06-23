@@ -67,7 +67,9 @@
     }
 
     if (manageUsersBtn) {
-      manageUsersBtn.hidden = user.role !== 'super_admin';
+      const canManageUsers = user.role === 'super_admin';
+      manageUsersBtn.hidden = !canManageUsers;
+      manageUsersBtn.style.display = canManageUsers ? '' : 'none';
     }
 
     applyRoleUi(user.role);

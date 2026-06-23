@@ -3677,3 +3677,9 @@ body[data-page="admin"].admin-crm-mode[data-admin-role="manager"] .crm-mobile-li
 body[data-page="admin"] .footer {
   display: none !important;
 }
+
+/* Hide user management for manager role */
+body[data-page="admin"][data-admin-role="manager"] #manageUsersBtn,
+body[data-page="admin"].admin-crm-mode[data-admin-role="manager"] #manageUsersBtn {
+  display: none !important;
+}
