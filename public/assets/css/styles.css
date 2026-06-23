@@ -4836,3 +4836,140 @@ html[data-theme="light"] .smm-filterbar select {
     width: fit-content;
   }
 }
+
+/* SMM CRM view modes */
+.smm-view-label {
+  display: grid;
+  gap: 8px;
+  color: var(--muted);
+  font-weight: 800;
+  min-width: min(260px, 100%);
+}
+
+.smm-view-label select {
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 14px;
+  padding: 11px 12px;
+  background: rgba(255,255,255,.07);
+  color: var(--text);
+  outline: none;
+}
+
+.smm-compact-list {
+  display: grid;
+  gap: 10px;
+}
+
+.smm-compact-row {
+  display: grid;
+  grid-template-columns: minmax(260px, 1.25fr) minmax(160px, .65fr) minmax(190px, .85fr) minmax(320px, auto);
+  gap: 12px;
+  align-items: center;
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 20px;
+  padding: 13px;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.055), rgba(255,255,255,.025)),
+    rgba(255,255,255,.035);
+}
+
+.smm-compact-main {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.smm-compact-main strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.smm-compact-main a {
+  color: var(--muted);
+  font-size: .78rem;
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.smm-compact-contact {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.smm-compact-contact span {
+  color: var(--muted);
+  font-size: .72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.smm-compact-contact strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.smm-compact-contact.telegram strong {
+  color: #7CFFB2;
+}
+
+.smm-compact-contact.phone strong {
+  color: #FFE9A8;
+}
+
+.smm-compact-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.smm-compact-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.smm-compact-actions .btn {
+  min-height: 36px !important;
+  padding: 0 11px !important;
+  border-radius: 12px !important;
+  font-size: .78rem !important;
+  white-space: nowrap;
+}
+
+html[data-theme="light"] .smm-view-label select,
+html[data-theme="light"] .smm-compact-row {
+  background: rgba(255,255,255,.90);
+  border-color: rgba(15,23,42,.10);
+}
+
+@media (max-width: 1180px) {
+  .smm-compact-row {
+    grid-template-columns: minmax(260px, 1fr) minmax(160px, .65fr);
+  }
+
+  .smm-compact-actions {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 720px) {
+  .smm-compact-row {
+    grid-template-columns: 1fr;
+  }
+
+  .smm-compact-main strong,
+  .smm-compact-main a,
+  .smm-compact-contact strong {
+    white-space: normal;
+  }
+
+  .smm-compact-actions {
+    display: grid;
+  }
+}

@@ -10,6 +10,7 @@
   const summaryWrap = document.getElementById('smmSummary');
   const heroCount = document.getElementById('smmHeroCount');
   const statusFilter = document.getElementById('smmStatusFilter');
+  const viewModeSelect = document.getElementById('smmViewMode');
   const filterCount = document.getElementById('smmFilterCount');
 
   if (!root || !workspace || !listWrap) return;
@@ -17,6 +18,7 @@
   let currentUser = null;
   let targets = [];
   let currentFilter = 'all';
+  let currentViewMode = localStorage.getItem('avantSmmViewMode') || 'expanded';
 
   function escapeHtml(value = '') {
     return String(value)
@@ -81,6 +83,46 @@
   function firstTelegram(target) {
     const contacts = Array.isArray(target.telegram_contacts) ? target.telegram_contacts : [];
     return contacts[0] || '';
+  }
+
+  function firstPhone(target) {
+    const phones = Array.isArray(target.phones) ? target.phones : [];
+    return phones[0] || '';
+  }
+
+  function cleanPhoneHref(phone = '') {
+    const value = String(phone || '').replace(/[^+\d]/g, '');
+    return value ? `tel:${value}` : '';
+  }
+
+  function getPrimaryContact(target) {
+    const tg = firstTelegram(target);
+    const phone = firstPhone(target);
+
+    if (tg) {
+      return {
+        type: 'telegram',
+        label: tg,
+        href: telegramUrl(tg),
+        button: '💬 Написати'
+      };
+    }
+
+    if (phone) {
+      return {
+        type: 'phone',
+        label: phone,
+        href: cleanPhoneHref(phone),
+        button: '📞 Номер'
+      };
+    }
+
+    return {
+      type: 'none',
+      label: '—',
+      href: '',
+      button: 'Немає контакту'
+    };
   }
 
   function makeManualTelegramText(text = '') {
@@ -168,6 +210,48 @@
     `;
   }
 
+  function renderCompactTargets(visibleTargets) {
+    listWrap.innerHTML = `
+      <div class="smm-compact-list">
+        ${visibleTargets.map((target) => {
+          const contact = getPrimaryContact(target);
+          const sentCount = Number(target.sent_count || 0);
+          const company = target.company_name || target.normalized_url || target.url || `ID ${target.id}`;
+
+          return `
+            <article class="smm-compact-row" data-smm-id="${escapeHtml(target.id)}">
+              <div class="smm-compact-main">
+                <strong>${escapeHtml(company)}</strong>
+                <a href="${escapeHtml(target.normalized_url || target.url || '#')}" target="_blank" rel="noopener">${escapeHtml(target.normalized_url || target.url || '')}</a>
+              </div>
+
+              <div class="smm-compact-contact ${escapeHtml(contact.type)}">
+                <span>${contact.type === 'telegram' ? 'Telegram' : contact.type === 'phone' ? 'Номер' : 'Контакт'}</span>
+                <strong>${escapeHtml(contact.label)}</strong>
+              </div>
+
+              <div class="smm-compact-status">
+                ${statusBadge(target.analysis_status)}
+                ${statusBadge(target.send_status)}
+                ${sentCount > 0 ? `<span class="smm-sent-chip">sent x${sentCount}</span>` : ''}
+              </div>
+
+              <div class="smm-compact-actions">
+                <button class="btn btn-secondary" type="button" data-smm-copy="${escapeHtml(target.id)}">📋 Копіювати текст</button>
+                ${
+                  contact.href
+                    ? `<a class="btn btn-primary" href="${escapeHtml(contact.href)}" target="_blank" rel="noopener">${escapeHtml(contact.button)}</a>`
+                    : `<button class="btn btn-secondary" type="button" disabled>Немає контакту</button>`
+                }
+                <button class="btn btn-secondary" type="button" data-smm-manual-sent="${escapeHtml(target.id)}">✅ sent</button>
+              </div>
+            </article>
+          `;
+        }).join('')}
+      </div>
+    `;
+  }
+
   function renderTargets() {
     renderSummary();
 
@@ -181,6 +265,11 @@
 
     if (!visibleTargets.length) {
       listWrap.innerHTML = '<p class="crm-empty">За цим фільтром сайтів немає.</p>';
+      return;
+    }
+
+    if (currentViewMode === 'compact') {
+      renderCompactTargets(visibleTargets);
       return;
     }
 
@@ -418,8 +507,18 @@
   loadBtn?.addEventListener('click', loadTargets);
   analyzeAllBtn?.addEventListener('click', analyzeAll);
 
+  if (viewModeSelect) {
+    viewModeSelect.value = currentViewMode;
+  }
+
   statusFilter?.addEventListener('change', () => {
     currentFilter = statusFilter.value || 'all';
+    renderTargets();
+  });
+
+  viewModeSelect?.addEventListener('change', () => {
+    currentViewMode = viewModeSelect.value || 'expanded';
+    localStorage.setItem('avantSmmViewMode', currentViewMode);
     renderTargets();
   });
 
