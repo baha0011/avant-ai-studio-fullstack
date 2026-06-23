@@ -180,14 +180,53 @@ export function buildLeadMessage(rawLead) {
   ].join('\n');
 }
 
+function getLeadActions(status = 'new') {
+  const normalized = String(status || 'new');
+
+  if (normalized === 'new') {
+    return [
+      { text: '🔄 Взяти в роботу', status: 'in_progress' },
+      { text: '✅ Закрити', status: 'closed' }
+    ];
+  }
+
+  if (normalized === 'in_progress') {
+    return [
+      { text: '✅ Закрити', status: 'closed' },
+      { text: '🆕 Повернути в new', status: 'new' }
+    ];
+  }
+
+  if (normalized === 'closed') {
+    return [
+      { text: '🔄 Повернути в роботу', status: 'in_progress' }
+    ];
+  }
+
+  if (normalized === 'cancelled') {
+    return [
+      { text: '🔄 Повернути в роботу', status: 'in_progress' },
+      { text: '🆕 Повернути в new', status: 'new' }
+    ];
+  }
+
+  return [
+    { text: '🔄 Взяти в роботу', status: 'in_progress' }
+  ];
+}
+
 function buildKeyboard(lead) {
   const publicUrl = getPublicUrl();
-  const keyboard = [
-    [
-      { text: '🔄 Взяти в роботу', callback_data: `lead_status:${lead.id}:in_progress` },
-      { text: '✅ Закрити', callback_data: `lead_status:${lead.id}:closed` }
-    ]
-  ];
+  const keyboard = [];
+
+  const actions = getLeadActions(lead.status).map((action) => ({
+    text: action.text,
+    callback_data: `lead_status:${lead.id}:${action.status}`
+  }));
+
+  if (actions.length) {
+    keyboard.push(actions);
+  }
 
   if (publicUrl) {
     keyboard.push([{ text: '📊 Відкрити admin', url: `${publicUrl}/admin.html` }]);

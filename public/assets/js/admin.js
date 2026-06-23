@@ -42,6 +42,41 @@
     return map[status] || status;
   }
 
+  function statusActions(status = 'new') {
+    const normalized = String(status || 'new');
+
+    if (normalized === 'new') {
+      return [
+        { label: '🔄 В роботу', next: 'in_progress', style: 'secondary' },
+        { label: '✅ Закрити', next: 'closed', style: 'primary' }
+      ];
+    }
+
+    if (normalized === 'in_progress') {
+      return [
+        { label: '✅ Закрити', next: 'closed', style: 'primary' },
+        { label: '🆕 Повернути в new', next: 'new', style: 'secondary' }
+      ];
+    }
+
+    if (normalized === 'closed') {
+      return [
+        { label: '🔄 Повернути в роботу', next: 'in_progress', style: 'secondary' }
+      ];
+    }
+
+    if (normalized === 'cancelled') {
+      return [
+        { label: '🔄 Повернути в роботу', next: 'in_progress', style: 'secondary' },
+        { label: '🆕 Повернути в new', next: 'new', style: 'secondary' }
+      ];
+    }
+
+    return [
+      { label: '🔄 В роботу', next: 'in_progress', style: 'secondary' }
+    ];
+  }
+
   function scoreClass(label) {
     return label === 'hot' ? 'hot' : label === 'warm' ? 'warm' : 'cold';
   }
@@ -96,6 +131,17 @@
     `;
   }
 
+  function renderStatusButtons(lead, mode = 'card') {
+    return statusActions(lead.status).map((action) => {
+      if (mode === 'drawer') {
+        const cls = action.style === 'primary' ? 'btn btn-primary' : 'btn btn-secondary';
+        return `<button class="${cls}" type="button" data-drawer-status="${escapeHtml(action.next)}">${escapeHtml(action.label)}</button>`;
+      }
+
+      return `<button type="button" data-status="${escapeHtml(lead.id)}" data-next="${escapeHtml(action.next)}">${escapeHtml(action.label)}</button>`;
+    }).join('');
+  }
+
   function leadCard(lead) {
     const source = lead.source_details || {};
     const details = lead.lead_details || {};
@@ -124,8 +170,7 @@
 
         <div class="lead-actions">
           <button type="button" data-open="${escapeHtml(lead.id)}">Картка</button>
-          <button type="button" data-status="${escapeHtml(lead.id)}" data-next="in_progress">В роботу</button>
-          <button type="button" data-status="${escapeHtml(lead.id)}" data-next="closed">Закрити</button>
+          ${renderStatusButtons(lead)}
         </div>
       </article>
     `;
@@ -149,12 +194,24 @@
   }
 
   async function updateStatus(id, status) {
+    const drawerWasOpen = drawer.classList.contains('open');
+
     try {
       await api(`/api/leads/${id}/status`, {
         method: 'PATCH',
         body: JSON.stringify({ status })
       });
+
       await loadLeads();
+
+      if (drawerWasOpen) {
+        const refreshedLead = leads.find((item) => String(item.id) === String(id));
+        if (refreshedLead) {
+          openDrawer(id);
+        } else {
+          drawer.classList.remove('open');
+        }
+      }
     } catch (error) {
       alert(`Не вдалося змінити статус: ${error.message}`);
     }
@@ -205,8 +262,7 @@
       </div>
 
       <div class="drawer-actions">
-        <button class="btn btn-secondary" type="button" data-drawer-status="in_progress">Взяти в роботу</button>
-        <button class="btn btn-primary" type="button" data-drawer-status="closed">Закрити</button>
+        ${renderStatusButtons(lead, 'drawer')}
       </div>
     `;
 
