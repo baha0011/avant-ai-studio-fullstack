@@ -3554,3 +3554,121 @@ body[data-page="admin"].admin-crm-mode[data-admin-role="manager"] .crm-table-wra
     grid-template-columns: 1fr;
   }
 }
+
+/* FINAL FIX: manager CRM layout should not overlap or stick to top */
+body[data-page="admin"].admin-crm-mode[data-admin-role="manager"] main {
+  display: block !important;
+  min-height: auto !important;
+  padding-top: 112px !important;
+}
+
+body[data-page="admin"].admin-crm-mode[data-admin-role="manager"] .crm-hero,
+body[data-page="admin"].admin-crm-mode[data-admin-role="manager"] .crm-hero-card,
+body[data-page="admin"].admin-crm-mode[data-admin-role="manager"] #adminStats,
+body[data-page="admin"].admin-crm-mode[data-admin-role="manager"] #crmPipeline,
+body[data-page="admin"].admin-crm-mode[data-admin-role="manager"] #exportCsvBtn,
+body[data-page="admin"].admin-crm-mode[data-admin-role="manager"] #summaryReportBtn,
+body[data-page="admin"].admin-crm-mode[data-admin-role="manager"] #openGoogleSheet {
+  display: none !important;
+}
+
+body[data-page="admin"].admin-crm-mode[data-admin-role="manager"] .crm-section {
+  display: block !important;
+  padding: 0 0 72px !important;
+  margin: 0 !important;
+}
+
+body[data-page="admin"].admin-crm-mode[data-admin-role="manager"] .crm-container {
+  width: min(1680px, calc(100vw - 28px)) !important;
+  max-width: none !important;
+  margin: 0 auto !important;
+}
+
+body[data-page="admin"].admin-crm-mode[data-admin-role="manager"] .crm-shell {
+  display: grid !important;
+  gap: 22px !important;
+  margin: 0 !important;
+  padding: 24px !important;
+  position: relative !important;
+  overflow: visible !important;
+}
+
+body[data-page="admin"].admin-crm-mode[data-admin-role="manager"] .crm-topbar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 14px !important;
+  flex-wrap: wrap !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+body[data-page="admin"].admin-crm-mode[data-admin-role="manager"] .admin-session-bar {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  flex-wrap: wrap !important;
+  max-width: 100% !important;
+}
+
+body[data-page="admin"].admin-crm-mode[data-admin-role="manager"] #loadLeads {
+  margin-left: auto !important;
+}
+
+body[data-page="admin"].admin-crm-mode[data-admin-role="manager"] .crm-controls {
+  display: grid !important;
+  grid-template-columns: minmax(280px, 1fr) minmax(180px, 260px) !important;
+  gap: 14px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+body[data-page="admin"].admin-crm-mode[data-admin-role="manager"] .crm-table-wrap {
+  display: block !important;
+  width: 100% !important;
+  margin: 0 !important;
+  overflow-x: auto !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+body[data-page="admin"].admin-crm-mode[data-admin-role="manager"] .crm-table {
+  min-width: 1180px !important;
+}
+
+body[data-page="admin"].admin-crm-mode[data-admin-role="manager"] .crm-mobile-list {
+  margin-top: 0 !important;
+}
+
+@media (max-width: 860px) {
+  body[data-page="admin"].admin-crm-mode[data-admin-role="manager"] main {
+    padding-top: 88px !important;
+  }
+
+  body[data-page="admin"].admin-crm-mode[data-admin-role="manager"] .crm-container {
+    width: min(100%, calc(100vw - 18px)) !important;
+  }
+
+  body[data-page="admin"].admin-crm-mode[data-admin-role="manager"] .crm-shell {
+    padding: 18px !important;
+    gap: 18px !important;
+  }
+
+  body[data-page="admin"].admin-crm-mode[data-admin-role="manager"] .crm-topbar {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  body[data-page="admin"].admin-crm-mode[data-admin-role="manager"] #loadLeads {
+    width: 100% !important;
+    margin-left: 0 !important;
+  }
+
+  body[data-page="admin"].admin-crm-mode[data-admin-role="manager"] .crm-controls {
+    grid-template-columns: 1fr !important;
+  }
+}
