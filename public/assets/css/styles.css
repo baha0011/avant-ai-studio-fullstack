@@ -5492,3 +5492,158 @@ body.smm-page .smm-compact-actions .btn {
     grid-template-columns: 1fr !important;
   }
 }
+
+/* FINAL FIX: SMM filters in one compact row */
+body.smm-page .smm-filterbar,
+body.smm-page .smm-filterbar-advanced {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: flex-end !important;
+  gap: 8px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  padding: 10px 12px !important;
+  box-sizing: border-box !important;
+  scrollbar-width: thin !important;
+}
+
+body.smm-page .smm-filterbar-advanced > * {
+  flex: 0 0 auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+}
+
+body.smm-page .smm-filter-field,
+body.smm-page .smm-view-label {
+  display: grid !important;
+  gap: 4px !important;
+  width: auto !important;
+  min-width: 0 !important;
+  font-size: 0.68rem !important;
+  line-height: 1.1 !important;
+  font-weight: 800 !important;
+  color: var(--muted) !important;
+}
+
+body.smm-page .smm-filter-search {
+  width: 220px !important;
+  min-width: 220px !important;
+  grid-column: auto !important;
+}
+
+body.smm-page .smm-filter-field:not(.smm-filter-search) {
+  width: 132px !important;
+  min-width: 132px !important;
+}
+
+body.smm-page .smm-filter-field:has(#smmSortMode) {
+  width: 230px !important;
+  min-width: 230px !important;
+}
+
+body.smm-page .smm-filter-field:has(#smmErrorPosition),
+body.smm-page .smm-filter-field:has(#smmSentPosition) {
+  width: 92px !important;
+  min-width: 92px !important;
+}
+
+body.smm-page .smm-view-label {
+  width: 128px !important;
+  min-width: 128px !important;
+}
+
+body.smm-page .smm-filter-field input,
+body.smm-page .smm-filter-field select,
+body.smm-page .smm-view-label select,
+body.smm-page #smmSearchInput,
+body.smm-page #smmAnalysisFilter,
+body.smm-page #smmContactFilter,
+body.smm-page #smmSendFilter,
+body.smm-page #smmSortMode,
+body.smm-page #smmErrorPosition,
+body.smm-page #smmSentPosition,
+body.smm-page #smmViewMode {
+  width: 100% !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+  box-sizing: border-box !important;
+  border-radius: 10px !important;
+  padding: 0 8px !important;
+  font-size: 0.75rem !important;
+  line-height: 1 !important;
+}
+
+body.smm-page .smm-filter-reset {
+  width: 78px !important;
+  min-width: 78px !important;
+  max-width: 78px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+  border-radius: 10px !important;
+  padding: 0 8px !important;
+  font-size: 0.72rem !important;
+  white-space: nowrap !important;
+}
+
+body.smm-page .smm-filter-count {
+  flex: 0 0 auto !important;
+  grid-column: auto !important;
+  width: auto !important;
+  min-width: 140px !important;
+  max-width: 260px !important;
+  min-height: 34px !important;
+  height: 34px !important;
+  padding: 6px 10px !important;
+  border-radius: 999px !important;
+  font-size: 0.72rem !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Keep compact list buttons normal, not huge */
+body.smm-page .smm-compact-actions {
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: 6px !important;
+}
+
+body.smm-page .smm-compact-actions .btn {
+  width: auto !important;
+  min-width: 74px !important;
+  max-width: 130px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  padding: 0 9px !important;
+  border-radius: 10px !important;
+  font-size: 0.72rem !important;
+}
+
+/* Cancel previous responsive multi-row rules for SMM filter */
+@media (max-width: 1320px),
+       (max-width: 1280px),
+       (max-width: 860px),
+       (max-width: 760px),
+       (max-width: 720px),
+       (max-width: 620px) {
+  body.smm-page .smm-filterbar,
+  body.smm-page .smm-filterbar-advanced {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    grid-template-columns: none !important;
+    overflow-x: auto !important;
+  }
+
+  body.smm-page .smm-filter-search {
+    grid-column: auto !important;
+  }
+
+  body.smm-page .smm-filter-reset {
+    width: 78px !important;
+    min-width: 78px !important;
+  }
+}
