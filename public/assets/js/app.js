@@ -108,6 +108,14 @@ function setupReveal() {
 
 function setupCanvas() {
   const canvas = document.getElementById('bgCanvas');
+  const isAdminPage = document.body?.dataset?.page === 'admin';
+  const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+
+  if (isAdminPage || prefersReducedMotion) {
+    if (canvas) canvas.remove();
+    return;
+  }
+
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
   let w, h, particles;
@@ -139,6 +147,14 @@ function setupCanvas() {
 
 function setupCursorGlow() {
   const glow = document.querySelector('.cursor-glow');
+  const isAdminPage = document.body?.dataset?.page === 'admin';
+  const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+
+  if (isAdminPage || prefersReducedMotion) {
+    if (glow) glow.remove();
+    return;
+  }
+
   if (!glow) return;
   window.addEventListener('pointermove', (e) => {
     glow.style.left = `${e.clientX}px`;
@@ -524,4 +540,12 @@ setupMenu(); setupReveal(); setupCanvas(); setupCursorGlow(); setupContactForm()
       setTimeout(syncThemeIconFinal, 20);
     }
   });
+})();
+
+
+/* CRM performance mode marker */
+(function () {
+  if (document.body?.dataset?.page === 'admin') {
+    document.body.classList.add('admin-performance-mode');
+  }
 })();
