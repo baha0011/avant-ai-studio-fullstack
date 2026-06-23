@@ -211,13 +211,12 @@ function buildOffer({ businessType, title, description }) {
 }
 
 function buildMessageUk({ companyName, businessType, offerSummary }) {
-  const name = telegramHtml(companyName || 'вашу компанію');
   const safeBusinessType = telegramHtml(businessType || 'бізнес');
   const safeOfferSummary = telegramHtml(offerSummary || '');
   const siteLink = `<a href="${telegramHtml(AVANT_SITE_URL)}">Avant AI Studio</a>`;
 
   return [
-    `Вітаю! Побачив сайт ${name} і вирішив написати з короткою ідеєю для автоматизації.`,
+    'Вітаю! Побачив ваш сайт і вирішив написати з короткою ідеєю для автоматизації.',
     '',
     `Ми в ${siteLink} робимо AI-асистентів для бізнесу: заявки, консультації, Telegram, CRM, Google Sheets і автоматичну передачу звернень менеджеру.`,
     '',

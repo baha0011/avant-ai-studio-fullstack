@@ -82,6 +82,21 @@
     return contacts[0] || '';
   }
 
+  function makeManualTelegramText(text = '') {
+    const siteUrl = 'https://avant-ai-studio.onrender.com';
+
+    return String(text || '')
+      .replace(/<a\s+href=["']([^"']+)["']\s*>\s*Avant AI Studio\s*<\/a>/gi, `Avant AI Studio\n${siteUrl}`)
+      .replace(/<[^>]+>/g, '')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+  }
+
   function telegramUrl(contact = '') {
     const value = String(contact || '').trim();
 
@@ -364,20 +379,21 @@
   async function copyMessage(id, button) {
     const textarea = document.querySelector(`[data-smm-message="${CSS.escape(String(id))}"]`);
     const text = textarea?.value || '';
+    const manualText = makeManualTelegramText(text);
 
-    if (!text.trim()) {
+    if (!manualText.trim()) {
       alert('Повідомлення порожнє.');
       return;
     }
 
-    await navigator.clipboard.writeText(text).catch(() => null);
+    await navigator.clipboard.writeText(manualText).catch(() => null);
 
     if (button) {
       const old = button.textContent;
-      button.textContent = '✓ Скопійовано';
+      button.textContent = '✓ Скопійовано без HTML';
       setTimeout(() => {
         button.textContent = old;
-      }, 1000);
+      }, 1200);
     }
   }
 
