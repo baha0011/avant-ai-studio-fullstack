@@ -20,6 +20,22 @@
   const resetFiltersBtn = document.getElementById('smmResetFiltersBtn');
   const filterCount = document.getElementById('smmFilterCount');
 
+  const leadModal = document.getElementById('smmLeadModal');
+  const leadForm = document.getElementById('smmLeadForm');
+  const leadModalTitle = document.getElementById('smmLeadModalTitle');
+  const leadSiteLink = document.getElementById('smmLeadSiteLink');
+  const leadCompanyInput = document.getElementById('smmLeadCompany');
+  const leadBusinessInput = document.getElementById('smmLeadBusiness');
+  const leadTelegramInput = document.getElementById('smmLeadTelegram');
+  const leadPhoneInput = document.getElementById('smmLeadPhone');
+  const leadMessageInput = document.getElementById('smmLeadMessage');
+  const leadTelegramLink = document.getElementById('smmLeadTelegramLink');
+  const leadError = document.getElementById('smmLeadError');
+  const leadSaveBtn = document.getElementById('smmLeadSaveBtn');
+  const leadCopyBtn = document.getElementById('smmLeadCopyBtn');
+  const leadModalClose = document.getElementById('smmLeadModalClose');
+  const leadModalCancel = document.getElementById('smmLeadModalCancel');
+
   if (!root || !workspace || !listWrap) return;
 
   let currentUser = null;
@@ -429,6 +445,7 @@
               </div>
 
               <div class="smm-compact-actions">
+                <button class="btn btn-secondary smm-card-btn" type="button" data-smm-open="${escapeHtml(target.id)}">🗂 Картка</button>
                 <button class="btn btn-secondary smm-copy-btn" type="button" data-smm-copy="${escapeHtml(target.id)}">📋 Копіювати</button>
                 ${
                   contact.href
@@ -442,6 +459,129 @@
         }).join('')}
       </div>
     `;
+  }
+
+  function findTarget(id) {
+    return targets.find((item) => String(item.id) === String(id));
+  }
+
+  function updateTargetCache(updatedTarget) {
+    const index = targets.findIndex((item) => String(item.id) === String(updatedTarget.id));
+
+    if (index >= 0) {
+      targets[index] = updatedTarget;
+    } else {
+      targets.unshift(updatedTarget);
+    }
+  }
+
+  function setLeadModalError(message = '') {
+    if (leadError) leadError.textContent = message;
+  }
+
+  function openLeadCard(id) {
+    const target = findTarget(id);
+
+    if (!target || !leadModal || !leadForm) return;
+
+    const tg = firstTelegram(target);
+    const phone = firstPhone(target);
+    const site = target.normalized_url || target.url || '#';
+    const title = target.company_name || target.normalized_url || target.url || `ID ${target.id}`;
+    const tgUrl = telegramUrl(tg);
+
+    leadModal.dataset.targetId = String(target.id);
+
+    if (leadModalTitle) leadModalTitle.textContent = title;
+    if (leadSiteLink) {
+      leadSiteLink.href = site;
+      leadSiteLink.textContent = site;
+    }
+
+    if (leadCompanyInput) leadCompanyInput.value = target.company_name || '';
+    if (leadBusinessInput) leadBusinessInput.value = target.business_type || '';
+    if (leadTelegramInput) leadTelegramInput.value = tg || '';
+    if (leadPhoneInput) leadPhoneInput.value = phone || '';
+    if (leadMessageInput) leadMessageInput.value = target.message_uk || '';
+
+    if (leadTelegramLink) {
+      leadTelegramLink.hidden = !tgUrl;
+      leadTelegramLink.href = tgUrl || '#';
+    }
+
+    setLeadModalError('');
+    leadModal.hidden = false;
+    document.body.classList.add('smm-modal-open');
+
+    setTimeout(() => {
+      leadCompanyInput?.focus();
+    }, 50);
+  }
+
+  function closeLeadCard() {
+    if (!leadModal) return;
+
+    leadModal.hidden = true;
+    leadModal.dataset.targetId = '';
+    document.body.classList.remove('smm-modal-open');
+    setLeadModalError('');
+  }
+
+  async function saveLeadDetails(event) {
+    event.preventDefault();
+
+    const id = leadModal?.dataset.targetId;
+    if (!id) return;
+
+    const body = {
+      company_name: leadCompanyInput?.value?.trim() || '',
+      business_type: leadBusinessInput?.value?.trim() || '',
+      telegram_contact: leadTelegramInput?.value?.trim() || '',
+      phone: leadPhoneInput?.value?.trim() || '',
+      message_uk: leadMessageInput?.value || ''
+    };
+
+    if (leadSaveBtn) {
+      leadSaveBtn.disabled = true;
+      leadSaveBtn.textContent = 'Зберігаємо...';
+    }
+
+    try {
+      const data = await api(`/api/smm/targets/${id}/details`, {
+        method: 'PATCH',
+        body: JSON.stringify(body)
+      });
+
+      updateTargetCache(data.target);
+      closeLeadCard();
+      renderTargets();
+    } catch (error) {
+      setLeadModalError(error.message || 'Не вдалося зберегти картку');
+    } finally {
+      if (leadSaveBtn) {
+        leadSaveBtn.disabled = false;
+        leadSaveBtn.textContent = '💾 Зберегти';
+      }
+    }
+  }
+
+  async function copyLeadModalMessage() {
+    const text = makeManualTelegramText(leadMessageInput?.value || '');
+
+    if (!text) {
+      setLeadModalError('Повідомлення порожнє.');
+      return;
+    }
+
+    await navigator.clipboard.writeText(text).catch(() => null);
+
+    if (leadCopyBtn) {
+      const old = leadCopyBtn.textContent;
+      leadCopyBtn.textContent = '✓ Скопійовано';
+      setTimeout(() => {
+        leadCopyBtn.textContent = old;
+      }, 1200);
+    }
   }
 
   function renderTargets() {
@@ -518,6 +658,8 @@
           </label>
 
           <div class="smm-card-actions">
+            <button class="btn btn-secondary" type="button" data-smm-open="${escapeHtml(target.id)}" data-smm-open-expanded="1">🗂 Картка</button>
+            <button class="btn btn-secondary" type="button" data-smm-open="${escapeHtml(target.id)}">🗂 Картка</button>
             <button class="btn btn-secondary" type="button" data-smm-analyze="${escapeHtml(target.id)}">🔍 Аналіз</button>
             <button class="btn btn-secondary" type="button" data-smm-save-message="${escapeHtml(target.id)}">💾 Зберегти текст</button>
             <button class="btn btn-secondary" type="button" data-smm-copy="${escapeHtml(target.id)}">📋 Копіювати</button>
@@ -676,7 +818,7 @@
 
   async function copyMessage(id, button) {
     const textarea = document.querySelector(`[data-smm-message="${CSS.escape(String(id))}"]`);
-    const target = targets.find((item) => String(item.id) === String(id));
+    const target = findTarget(id);
     const text = textarea?.value || target?.message_uk || '';
     const manualText = makeManualTelegramText(text);
 
@@ -772,6 +914,9 @@
   });
 
   document.addEventListener('click', async (event) => {
+    const openCard = event.target.closest('[data-smm-open]');
+    if (openCard) return openLeadCard(openCard.dataset.smmOpen);
+
     const analyze = event.target.closest('[data-smm-analyze]');
     if (analyze) return analyzeTarget(analyze.dataset.smmAnalyze);
 
@@ -793,6 +938,23 @@
     if (!toggle) return;
 
     await setSendEnabled(toggle.dataset.smmToggle, toggle.checked);
+  });
+
+  leadForm?.addEventListener('submit', saveLeadDetails);
+  leadCopyBtn?.addEventListener('click', copyLeadModalMessage);
+  leadModalClose?.addEventListener('click', closeLeadCard);
+  leadModalCancel?.addEventListener('click', closeLeadCard);
+
+  leadModal?.addEventListener('click', (event) => {
+    if (event.target?.hasAttribute('data-smm-modal-close')) {
+      closeLeadCard();
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && leadModal && !leadModal.hidden) {
+      closeLeadCard();
+    }
   });
 
   setTimeout(loadTargets, 500);

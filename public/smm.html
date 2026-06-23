@@ -198,6 +198,62 @@
             <div class="smm-targets" id="smmTargets">
               <p class="crm-empty">Сайти ще не додані.</p>
             </div>
+
+            <div class="smm-lead-modal" id="smmLeadModal" hidden>
+              <div class="smm-lead-modal-backdrop" data-smm-modal-close></div>
+
+              <form class="smm-lead-card" id="smmLeadForm">
+                <div class="smm-lead-card-head">
+                  <div>
+                    <span class="eyebrow"><span class="eyebrow-dot"></span><span>SMM target card</span></span>
+                    <h3 id="smmLeadModalTitle">Картка компанії</h3>
+                    <a id="smmLeadSiteLink" href="#" target="_blank" rel="noopener">Відкрити сайт</a>
+                  </div>
+
+                  <button class="smm-lead-close" type="button" id="smmLeadModalClose" aria-label="Закрити">×</button>
+                </div>
+
+                <div class="smm-lead-grid">
+                  <label>
+                    Назва компанії
+                    <input id="smmLeadCompany" type="text" maxlength="160" placeholder="Назва компанії">
+                  </label>
+
+                  <label>
+                    Сфера
+                    <input id="smmLeadBusiness" type="text" maxlength="140" placeholder="Стоматологія, курси, СТО...">
+                  </label>
+
+                  <label>
+                    Telegram
+                    <input id="smmLeadTelegram" type="text" maxlength="90" placeholder="@username або https://t.me/username">
+                  </label>
+
+                  <label>
+                    Телефон
+                    <input id="smmLeadPhone" type="text" maxlength="90" placeholder="+380...">
+                  </label>
+                </div>
+
+                <label class="smm-lead-message">
+                  Повідомлення українською
+                  <textarea id="smmLeadMessage" placeholder="Текст повідомлення для ручної відправки..."></textarea>
+                </label>
+
+                <div class="smm-lead-links">
+                  <a class="btn btn-secondary" id="smmLeadTelegramLink" href="#" target="_blank" rel="noopener" hidden>💬 Відкрити Telegram</a>
+                  <button class="btn btn-secondary" type="button" id="smmLeadCopyBtn">📋 Копіювати текст</button>
+                </div>
+
+                <p class="smm-lead-error" id="smmLeadError" role="alert"></p>
+
+                <div class="smm-lead-actions">
+                  <button class="btn btn-secondary" type="button" id="smmLeadModalCancel">Скасувати</button>
+                  <button class="btn btn-primary" type="submit" id="smmLeadSaveBtn">💾 Зберегти</button>
+                </div>
+              </form>
+            </div>
+
           </div>
         </div>
       </div>

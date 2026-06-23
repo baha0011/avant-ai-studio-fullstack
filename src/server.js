@@ -650,6 +650,61 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function parseSmmEditableList(value, maxItems = 5, maxLength = 120) {
+  const rawItems = Array.isArray(value)
+    ? value
+    : String(value || '').split(/[\n,;]+/);
+
+  const items = [];
+
+  for (const item of rawItems) {
+    const cleaned = cleanText(item, maxLength).trim();
+
+    if (cleaned && !items.includes(cleaned)) {
+      items.push(cleaned);
+    }
+
+    if (items.length >= maxItems) break;
+  }
+
+  return items;
+}
+
+function normalizeSmmTelegramContact(value = '') {
+  let contact = cleanText(value, 90).trim();
+
+  if (!contact) return '';
+
+  const urlMatch = contact.match(/^(?:https?:\/\/)?(?:www\.)?(?:t\.me|telegram\.me)\/([a-zA-Z0-9_]{5,32})\/?$/i);
+  if (urlMatch) {
+    contact = `@${urlMatch[1]}`;
+  }
+
+  if (/^[a-zA-Z0-9_]{5,32}$/.test(contact)) {
+    contact = `@${contact}`;
+  }
+
+  if (!/^@[a-zA-Z0-9_]{5,32}$/.test(contact)) {
+    throw new Error('Telegram must be @username or https://t.me/username');
+  }
+
+  return contact;
+}
+
+function normalizeSmmPhoneContact(value = '') {
+  const phone = cleanText(value, 90).trim();
+
+  if (!phone) return '';
+
+  const digits = phone.replace(/\D/g, '');
+
+  if (digits.length < 5) {
+    throw new Error('Phone number is too short');
+  }
+
+  return phone;
+}
+
 app.get('/api/smm/targets', requireAdminSession, requireSuperAdmin, async (req, res) => {
   try {
     const targets = await listSmmTargets();
@@ -761,6 +816,69 @@ app.patch('/api/smm/targets/:id/send-enabled', requireAdminSession, requireSuper
   } catch (error) {
     console.error('[SMM send enabled]', error);
     res.status(400).json({ ok: false, error: error.message || 'Failed to update send toggle' });
+  }
+});
+
+
+app.patch('/api/smm/targets/:id/details', requireAdminSession, requireSuperAdmin, async (req, res) => {
+  try {
+    const target = await getSmmTargetById(req.params.id);
+
+    if (!target) {
+      return res.status(404).json({ ok: false, error: 'Target not found' });
+    }
+
+    const telegramContacts = parseSmmEditableList(
+      req.body.telegram_contacts ?? req.body.telegram_contact ?? req.body.telegram ?? '',
+      5,
+      90
+    )
+      .map(normalizeSmmTelegramContact)
+      .filter(Boolean);
+
+    const phones = parseSmmEditableList(
+      req.body.phones ?? req.body.phone ?? '',
+      5,
+      90
+    )
+      .map(normalizeSmmPhoneContact)
+      .filter(Boolean);
+
+    const patch = {
+      company_name: cleanText(req.body.company_name || '', 160),
+      business_type: cleanText(req.body.business_type || '', 140),
+      telegram_contacts: telegramContacts,
+      phones
+    };
+
+    if (req.body.description !== undefined) {
+      patch.description = cleanText(req.body.description || '', 1200);
+    }
+
+    if (req.body.offer_summary !== undefined) {
+      patch.offer_summary = cleanText(req.body.offer_summary || '', 1600);
+    }
+
+    if (req.body.message_uk !== undefined || req.body.message !== undefined) {
+      patch.message_uk = cleanText(req.body.message_uk || req.body.message || '', 4000);
+    }
+
+    const hasAnyContact = telegramContacts.length > 0 || phones.length > 0;
+
+    if (hasAnyContact && ['no_telegram', 'manual_required', 'skipped'].includes(target.send_status)) {
+      patch.send_status = 'not_sent';
+
+      if (target.analysis_status !== 'failed') {
+        patch.error_message = '';
+      }
+    }
+
+    const updated = await updateSmmTarget(target.id, patch);
+
+    res.json({ ok: true, target: updated });
+  } catch (error) {
+    console.error('[SMM details update]', error);
+    res.status(400).json({ ok: false, error: error.message || 'Failed to update SMM target' });
   }
 });
 
