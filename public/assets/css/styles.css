@@ -3683,3 +3683,16 @@ body[data-page="admin"][data-admin-role="manager"] #manageUsersBtn,
 body[data-page="admin"].admin-crm-mode[data-admin-role="manager"] #manageUsersBtn {
   display: none !important;
 }
+
+/* User management button: hide only for manager, keep for admin/super_admin */
+body[data-page="admin"][data-admin-role="manager"] #manageUsersBtn,
+body[data-page="admin"].admin-crm-mode[data-admin-role="manager"] #manageUsersBtn {
+  display: none !important;
+}
+
+body[data-page="admin"][data-admin-role="admin"] #manageUsersBtn,
+body[data-page="admin"].admin-crm-mode[data-admin-role="admin"] #manageUsersBtn,
+body[data-page="admin"][data-admin-role="super_admin"] #manageUsersBtn,
+body[data-page="admin"].admin-crm-mode[data-admin-role="super_admin"] #manageUsersBtn {
+  display: inline-flex !important;
+}

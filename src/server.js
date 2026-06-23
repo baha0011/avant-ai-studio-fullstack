@@ -117,6 +117,14 @@ function requireSuperAdmin(req, res, next) {
   next();
 }
 
+function requireUserManagerAccess(req, res, next) {
+  if (!['super_admin', 'admin'].includes(req.adminUser?.role)) {
+    return res.status(403).json({ ok: false, error: 'Admin access required' });
+  }
+
+  next();
+}
+
 async function ensureBootstrapSuperAdmin() {
   try {
     await deleteExpiredAdminSessions().catch(() => null);
@@ -214,7 +222,7 @@ app.get('/api/admin/me', requireAdminSession, async (req, res) => {
   res.json({ ok: true, user: safeAdminUser(req.adminUser) });
 });
 
-app.get('/api/admin/users', requireAdminSession, requireSuperAdmin, async (req, res) => {
+app.get('/api/admin/users', requireAdminSession, requireUserManagerAccess, async (req, res) => {
   try {
     const users = await listAdminUsers();
     res.json({ ok: true, users });
@@ -224,7 +232,7 @@ app.get('/api/admin/users', requireAdminSession, requireSuperAdmin, async (req, 
   }
 });
 
-app.post('/api/admin/users', requireAdminSession, requireSuperAdmin, async (req, res) => {
+app.post('/api/admin/users', requireAdminSession, requireUserManagerAccess, async (req, res) => {
   try {
     const email = normalizeEmail(req.body.email || '');
     const password = String(req.body.password || '');
@@ -250,7 +258,7 @@ app.post('/api/admin/users', requireAdminSession, requireSuperAdmin, async (req,
   }
 });
 
-app.patch('/api/admin/users/:id', requireAdminSession, requireSuperAdmin, async (req, res) => {
+app.patch('/api/admin/users/:id', requireAdminSession, requireUserManagerAccess, async (req, res) => {
   try {
     const patch = {};
 
