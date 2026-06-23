@@ -4760,3 +4760,16 @@ html[data-theme="light"] .smm-auto-chat-label input {
 [data-smm-save-chat] {
   display: none !important;
 }
+
+/* Prevent login flash while admin session is being checked */
+body[data-page="admin"]:not(.admin-login-mode):not(.admin-crm-mode) #adminLoginPanel,
+body[data-page="admin"]:not(.admin-login-mode):not(.admin-crm-mode) #adminCrmRoot,
+body[data-page="admin"]:not(.admin-login-mode):not(.admin-crm-mode) .crm-hero {
+  display: none !important;
+}
+
+body.admin-auth-checking #adminLoginPanel,
+body.admin-auth-checking #adminCrmRoot,
+body.admin-auth-checking .crm-hero {
+  display: none !important;
+}

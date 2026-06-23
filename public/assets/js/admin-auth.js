@@ -32,10 +32,27 @@
     if (errorBox) errorBox.textContent = message;
   }
 
+  function setAuthChecking() {
+    currentAdmin = null;
+    window.AVANT_ADMIN_USER = null;
+
+    document.body.classList.remove('admin-login-mode');
+    document.body.classList.remove('admin-crm-mode');
+    document.body.classList.add('admin-auth-checking');
+    document.body.dataset.adminRole = '';
+
+    loginPanel.hidden = true;
+    crmRoot.style.display = 'none';
+
+    if (crmHero) crmHero.hidden = true;
+    if (sessionBar) sessionBar.hidden = true;
+  }
+
   function setLocked() {
     currentAdmin = null;
     window.AVANT_ADMIN_USER = null;
 
+    document.body.classList.remove('admin-auth-checking');
     document.body.classList.add('admin-login-mode');
     document.body.classList.remove('admin-crm-mode');
     document.body.dataset.adminRole = '';
@@ -50,6 +67,7 @@
     currentAdmin = user;
     window.AVANT_ADMIN_USER = user;
 
+    document.body.classList.remove('admin-auth-checking');
     document.body.classList.remove('admin-login-mode');
     document.body.classList.add('admin-crm-mode');
     document.body.dataset.adminRole = user.role || '';
@@ -322,6 +340,6 @@
     if (event.target === usersModal) closeUsersModal();
   });
 
-  setLocked();
+  setAuthChecking();
   checkMe();
 })();
