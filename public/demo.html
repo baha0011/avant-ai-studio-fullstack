@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Демо — Avant AI Studio</title>
+  <meta name="description" content="Інтерактивне демо ШІ-асистента Avant AI Studio: чат, Telegram-заявка, схема інтеграцій і FAQ." />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <link rel="icon" href="assets/icons/favicon.ico?v=2" sizes="any" />
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32x32.png?v=2" />
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png?v=2" />
+  <link rel="manifest" href="assets/icons/site.webmanifest?v=2" />
+  <meta name="theme-color" content="#060814" />
+</head>
+<body data-page="demo">
+  <canvas class="canvas-bg" id="bgCanvas" aria-hidden="true"></canvas>
+  <div class="noise" aria-hidden="true"></div>
+  <div class="cursor-glow" aria-hidden="true"></div>
+
+  <header class="header">
+    <a class="logo" href="index.html" aria-label="Avant AI Studio"><span class="logo-mark logo-image"><img src="assets/icons/icon-512.png" alt="" /></span><span>Avant AI Studio</span></a>
+    <nav class="nav" aria-label="Primary navigation">
+      <a href="index.html" data-nav="home">Головна</a>
+      <a href="services.html" data-nav="services">Послуги</a>
+      <a href="integrations.html" data-nav="integrations">Рішення</a>
+      <a href="demo.html" data-nav="demo">Демо</a>
+      <a href="process.html" data-nav="process">Процес</a>
+      <a class="nav-cta" href="contact.html" data-nav="contact">Залишити заявку</a>
+    </nav>
+    <div class="header-actions"><button class="lamp-toggle" type="button" aria-label="Переключити тему" aria-pressed="false">
+        <span class="lamp-shade"></span>
+        <span class="lamp-bulb"></span>
+        <span class="lamp-chain"></span>
+      </button><button class="menu-toggle" type="button" aria-controls="mobileMenu" aria-expanded="false" aria-label="Відкрити меню"><span></span></button></div>
+  </header>
+
+  <div class="mobile-panel" id="mobileMenu">
+    <nav class="mobile-nav" aria-label="Mobile navigation">
+      <a href="index.html" data-nav="home">Головна</a>
+      <a href="services.html" data-nav="services">Послуги</a>
+      <a href="integrations.html" data-nav="integrations">Рішення</a>
+      <a href="demo.html" data-nav="demo">Демо</a>
+      <a href="process.html" data-nav="process">Процес</a>
+      <a href="contact.html" data-nav="contact">Залишити заявку</a>
+    </nav>
+  </div>
+
+  <main>
+    <section class="page-hero demo-hero">
+      <div class="container page-hero-grid">
+        <div class="reveal">
+          <div class="eyebrow"><span class="eyebrow-dot"></span><span>Інтерактивне демо</span></div>
+          <h1><span class="gradient-text">Подивіться, як ШІ-асистент приймає клієнта, створює заявку і передає її команді.</span></h1>
+          <p class="lead">Це демонстраційний сценарій: клієнт ставить питання, асистент відповідає, уточнює деталі, а власник отримує структуровану заявку в Telegram і таблиці.</p>
+          <div class="hero-actions"><a class="btn btn-primary" href="#demo-chat">Спробувати чат</a><a class="btn btn-secondary" href="#demo-faq">Питання та відповіді</a></div>
+        </div>
+
+        <div class="demo-mini-card reveal">
+          <div class="demo-mini-orbit"><img src="assets/icons/icon-512.png" alt="" /></div>
+          <div class="demo-mini-lines">
+            <span>Client message</span>
+            <span>AI qualification</span>
+            <span>Telegram lead</span>
+            <span>Google Sheets row</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="demo-chat">
+      <div class="container">
+        <div class="section-head reveal">
+          <div class="section-label">Живий сценарій</div>
+          <h2>Спробуйте демо-чат так, ніби ви клієнт бізнесу.</h2>
+          <p class="section-description">Оберіть готове питання або введіть своє. Асистент покаже, як може відповідати клієнту і підводити його до заявки.</p>
+        </div>
+
+        <div class="demo-lab reveal">
+          <div class="demo-chat-card">
+            <div class="demo-chat-head">
+              <div class="assistant-title"><div class="avatar avatar-image"><img src="assets/icons/icon-512.png" alt="" /></div><div><strong>Avant Demo Assistant</strong><span>online · відповідає за секунди</span></div></div>
+              <div class="status-pill">Demo</div>
+            </div>
+
+            <div class="quick-prompts" aria-label="Швидкі питання">
+              <button type="button" data-demo-prompt="Скільки коштує консультація?">Ціна консультації</button>
+              <button type="button" data-demo-prompt="Чи можна записатися завтра?">Запис завтра</button>
+              <button type="button" data-demo-prompt="Я хочу дізнатися про послугу">Питання про послугу</button>
+            </div>
+
+            <div class="demo-chat-window" id="demoChatWindow" aria-live="polite">
+              <div class="demo-msg ai">Вітаю! Я демо-асистент. Можу відповісти на питання клієнта, уточнити деталі і підготувати заявку для менеджера.</div>
+            </div>
+
+            <form class="demo-chat-form" id="demoChatForm">
+              <input id="demoChatInput" type="text" placeholder="Наприклад: хочу записатися на консультацію" autocomplete="off">
+              <button class="btn btn-primary" type="submit">Надіслати</button>
+            </form>
+          </div>
+
+          <aside class="telegram-preview-card">
+            <div class="telegram-top">
+              <span>Telegram</span>
+              <strong>Нова заявка</strong>
+            </div>
+
+            <div class="telegram-lead-card" id="telegramLeadCard">
+              <div class="tg-row"><span>ID</span><strong>#A-1042</strong></div>
+              <div class="tg-row"><span>Ім’я</span><strong>Анна</strong></div>
+              <div class="tg-row"><span>Контакт</span><strong>@anna_client</strong></div>
+              <div class="tg-row"><span>Ніша</span><strong>Стоматологія</strong></div>
+              <div class="tg-row"><span>Запит</span><strong id="tgRequest">Хоче дізнатися про консультацію</strong></div>
+              <div class="tg-row"><span>Статус</span><strong class="badge new">new</strong></div>
+            </div>
+
+            <p class="muted">Таку заявку власник або адміністратор може отримувати одразу після діалогу з клієнтом.</p>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <section class="section before-after-section">
+      <div class="container">
+        <div class="section-head reveal">
+          <div class="section-label">До / Після</div>
+          <h2>Різниця між ручною комунікацією і системою з ШІ-асистентом.</h2>
+        </div>
+
+        <div class="before-after-grid reveal">
+          <article class="before-card compare-card">
+            <div class="compare-label">До</div>
+            <h3>Заявки розсипані по чатах</h3>
+            <ul>
+              <li>Клієнт чекає відповіді</li>
+              <li>Адміністратор пропускає повідомлення</li>
+              <li>Немає єдиної таблиці заявок</li>
+              <li>Власник не бачить, де губляться гроші</li>
+            </ul>
+          </article>
+
+          <article class="after-card compare-card">
+            <div class="compare-label">Після</div>
+            <h3>Кожна заявка проходить зрозумілий шлях</h3>
+            <ul>
+              <li>Асистент відповідає одразу</li>
+              <li>Контакт і задача структуровані</li>
+              <li>Telegram повідомляє команду</li>
+              <li>Google Sheets / Supabase зберігають дані</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section integration-animation-section">
+      <div class="container">
+        <div class="section-head reveal">
+          <div class="section-label">Схема інтеграцій</div>
+          <h2>Заявка не просто відправляється — вона проходить повний бізнес-маршрут.</h2>
+          <p class="section-description">Анімована схема показує, як клієнтський діалог перетворюється на дані для команди.</p>
+        </div>
+
+        <div class="animated-pipeline reveal" aria-label="Сайт, асистент, backend, Telegram, Google Sheets">
+          <div class="pipeline-track"></div>
+          <div class="pipeline-pulse"></div>
+
+          <div class="pipeline-step">
+            <span>01</span>
+            <strong>Клієнт</strong>
+            <p>Пише питання на сайті або в Telegram</p>
+          </div>
+          <div class="pipeline-step">
+            <span>02</span>
+            <strong>ШІ-асистент</strong>
+            <p>Відповідає, уточнює деталі, збирає контакт</p>
+          </div>
+          <div class="pipeline-step">
+            <span>03</span>
+            <strong>Backend</strong>
+            <p>Створює заявку і зберігає її в базі</p>
+          </div>
+          <div class="pipeline-step">
+            <span>04</span>
+            <strong>Telegram</strong>
+            <p>Надсилає повідомлення адміністратору</p>
+          </div>
+          <div class="pipeline-step">
+            <span>05</span>
+            <strong>Sheets / CRM</strong>
+            <p>Дублює дані в таблицю або CRM</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="demo-faq">
+      <div class="container">
+        <div class="section-head reveal">
+          <div class="section-label">FAQ</div>
+          <h2>Питання, які зазвичай виникають перед запуском ШІ-асистента.</h2>
+        </div>
+
+        <div class="faq-list reveal">
+          <details class="faq-item" open>
+            <summary>Чи потрібна CRM для старту?</summary>
+            <p>Ні. Для першого MVP можна почати з простого ланцюга: форма або чат → backend → Telegram → Google Sheets. CRM можна підключити пізніше.</p>
+          </details>
+
+          <details class="faq-item">
+            <summary>Чи може асистент працювати українською і російською?</summary>
+            <p>Так. Сценарії відповідей можна зробити українською, російською або двома мовами залежно від аудиторії бізнесу.</p>
+          </details>
+
+          <details class="faq-item">
+            <summary>Що отримує власник після заявки?</summary>
+            <p>Структуроване повідомлення в Telegram: ім’я, контакт, ніша, запит, час створення і статус. Також заявка може дублюватися в Google Sheets або Supabase.</p>
+          </details>
+
+          <details class="faq-item">
+            <summary>Чи можна почати без складного ШІ?</summary>
+            <p>Так. Часто перший корисний етап — це автоматичний збір заявок, Telegram-сповіщення і таблиця. Потім додається розумна логіка діалогів.</p>
+          </details>
+
+          <details class="faq-item">
+            <summary>Що потрібно для оцінки мого бізнесу?</summary>
+            <p>Достатньо коротко описати нішу, звідки приходять клієнти, які питання вони ставлять і де зараз губляться заявки.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section class="section bottom-cta">
+      <div class="container">
+        <div class="panel reveal">
+          <div class="section-label">Наступний крок</div>
+          <h2>Хочете таку систему під свій бізнес?</h2>
+          <p class="section-description">Залиште заявку — розберемо вашу комунікацію, покажемо точки втрат і запропонуємо перший практичний MVP.</p>
+          <br>
+          <a class="btn btn-primary" href="contact.html">Залишити заявку</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <img src="assets/icons/icon-512.png" alt="" />
+        <div>
+          <strong>Avant AI Studio</strong>
+          <span>ШІ-асистенти для заявок, консультацій і клієнтського сервісу.</span>
+        </div>
+      </div>
+      <div class="footer-contacts" aria-label="Контакти">
+        <a href="mailto:vovaazazz5@gmail.com">✉️ Email: vovaazazz5@gmail.com</a>
+        <a href="https://t.me/BahaRabbit" target="_blank" rel="noopener">💬 Telegram: @BahaRabbit</a>
+        <span>📍 Київ / онлайн</span>
+      </div>
+    </div>
+  </footer>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

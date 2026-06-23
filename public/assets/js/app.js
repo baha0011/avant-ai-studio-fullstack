@@ -309,3 +309,82 @@ setupMenu(); setupReveal(); setupCanvas(); setupCursorGlow(); setupContactForm()
 
   calculateLoss();
 })();
+
+
+/* Interactive demo chat */
+(() => {
+  const form = document.getElementById('demoChatForm');
+  const input = document.getElementById('demoChatInput');
+  const windowEl = document.getElementById('demoChatWindow');
+  const tgRequest = document.getElementById('tgRequest');
+
+  if (!form || !input || !windowEl) return;
+
+  const answers = [
+    {
+      test: /ц[іi]н|варт|кошту|стоим|сколько/i,
+      text: 'Можу зорієнтувати по вартості після короткого уточнення. Яку саме послугу ви розглядаєте і коли вам зручно отримати консультацію?',
+      request: 'Питає про вартість консультації'
+    },
+    {
+      test: /завтра|час|запис|можна|слот|доступ/i,
+      text: 'Так, можу передати запит адміністратору. Напишіть, будь ласка, ім’я, контакт і бажаний час — команда швидко підтвердить можливість запису.',
+      request: 'Хоче записатися на завтра'
+    },
+    {
+      test: /послуг|процедур|сервис|service|дізнатися|узнать/i,
+      text: 'З радістю підкажу. Опишіть коротко, що саме вас цікавить, а я уточню деталі і підготую заявку для менеджера.',
+      request: 'Хоче дізнатися про послугу'
+    }
+  ];
+
+  const fallback = {
+    text: 'Дякую! Я можу уточнити деталі, зібрати контакт і передати заявку команді. Напишіть, будь ласка, ваше ім’я і зручний спосіб зв’язку.',
+    request: 'Залишив запит через демо-чат'
+  };
+
+  const addMessage = (text, type = 'ai') => {
+    const msg = document.createElement('div');
+    msg.className = `demo-msg ${type}`;
+    msg.textContent = text;
+    windowEl.appendChild(msg);
+    windowEl.scrollTop = windowEl.scrollHeight;
+    return msg;
+  };
+
+  const addTyping = () => {
+    const msg = document.createElement('div');
+    msg.className = 'demo-msg ai typing';
+    msg.innerHTML = '<span></span><span></span><span></span>';
+    windowEl.appendChild(msg);
+    windowEl.scrollTop = windowEl.scrollHeight;
+    return msg;
+  };
+
+  const respond = (question) => {
+    addMessage(question, 'user');
+
+    const match = answers.find((item) => item.test.test(question)) || fallback;
+    const typing = addTyping();
+
+    setTimeout(() => {
+      typing.remove();
+      addMessage(match.text, 'ai');
+      if (tgRequest) tgRequest.textContent = match.request;
+    }, 650);
+  };
+
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const question = input.value.trim();
+    if (!question) return;
+    input.value = '';
+    respond(question);
+  });
+
+  document.querySelectorAll('[data-demo-prompt]').forEach((button) => {
+    button.addEventListener('click', () => {
+      respond(button.dataset.demoPrompt);
+    });
+  });
+})();

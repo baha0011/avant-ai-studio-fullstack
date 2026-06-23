@@ -19,7 +19,14 @@
 
   <header class="header">
     <a class="logo" href="index.html" aria-label="Avant AI Studio"><span class="logo-mark logo-image"><img src="assets/icons/icon-512.png" alt="" /></span><span>Avant AI Studio</span></a>
-    <nav class="nav" aria-label="Primary navigation"><a href="index.html" data-nav="home">Головна</a><a href="services.html" data-nav="services">Послуги</a><a href="integrations.html" data-nav="integrations">Рішення</a><a href="process.html" data-nav="process">Процес</a><a class="nav-cta" href="contact.html" data-nav="contact">Залишити заявку</a></nav>
+    <nav class="nav" aria-label="Primary navigation">
+      <a href="index.html" data-nav="home">Головна</a>
+      <a href="services.html" data-nav="services">Послуги</a>
+      <a href="integrations.html" data-nav="integrations">Рішення</a>
+      <a href="demo.html" data-nav="demo">Демо</a>
+      <a href="process.html" data-nav="process">Процес</a>
+      <a class="nav-cta" href="contact.html" data-nav="contact">Залишити заявку</a>
+    </nav>
     <div class="header-actions"><button class="lamp-toggle" type="button" aria-label="Переключити тему" aria-pressed="false">
         <span class="lamp-shade"></span>
         <span class="lamp-bulb"></span>
@@ -27,9 +34,18 @@
       </button><button class="menu-toggle" type="button" aria-controls="mobileMenu" aria-expanded="false" aria-label="Відкрити меню"><span></span></button></div>
   </header>
 
-  <div class="mobile-panel" id="mobileMenu"><nav class="mobile-nav" aria-label="Mobile navigation"><a href="index.html" data-nav="home">Головна</a><a href="services.html" data-nav="services">Послуги</a><a href="integrations.html" data-nav="integrations">Рішення</a><a href="process.html" data-nav="process">Процес</a><a href="contact.html" data-nav="contact">Залишити заявку</a></nav></div>
+  <div class="mobile-panel" id="mobileMenu">
+    <nav class="mobile-nav" aria-label="Mobile navigation">
+      <a href="index.html" data-nav="home">Головна</a>
+      <a href="services.html" data-nav="services">Послуги</a>
+      <a href="integrations.html" data-nav="integrations">Рішення</a>
+      <a href="demo.html" data-nav="demo">Демо</a>
+      <a href="process.html" data-nav="process">Процес</a>
+      <a href="contact.html" data-nav="contact">Залишити заявку</a>
+    </nav>
+  </div>
 
-  <main>
+<main>
     <section class="page-hero"><div class="container"><div class="reveal"><div class="eyebrow"><span class="eyebrow-dot"></span><span>Заявка</span></div><h1><span class="gradient-text">Залиште заявку на безкоштовний розбір комунікації з клієнтами.</span></h1><p class="lead">Опишіть коротко бізнес і задачу. Ми підкажемо, який ШІ-асистент можна запустити першим і які заявки він буде автоматизувати.</p></div></div></section>
     <section class="section"><div class="container contact-layout"><form class="form-card reveal" id="leadForm" novalidate><h3>Заявка на консультацію</h3><br><div class="form-grid"><div class="field"><label for="name">Ім’я</label><input id="name" name="name" type="text" required minlength="2" autocomplete="name" placeholder="Ваше ім’я"></div><div class="field"><label for="contactField">Телефон / Telegram</label><input id="contactField" name="contact" type="text" required minlength="3" autocomplete="tel" placeholder="+380 або @username"></div><div class="field full"><label for="niche">Ніша бізнесу</label><select id="niche" name="niche" required><option value="">Оберіть нішу</option><option value="clinic">Клініка або стоматологія</option><option value="beauty">Салон краси</option><option value="education">Онлайн-школа</option><option value="service">Сервісна компанія</option><option value="sales">Відділ продажів</option><option value="other">Інший бізнес</option></select></div><div class="field full"><label for="message">Короткий опис задачі</label><textarea id="message" name="message" required minlength="8" placeholder="Наприклад: потрібен ШІ-асистент для запису клієнтів, відповідей на питання та Telegram-сповіщень команді."></textarea></div></div><button class="btn btn-primary form-submit" type="submit">Надіслати заявку</button><div class="form-message" id="formMessage" role="status" aria-live="polite"></div></form><aside class="form-card reveal contact-aside">
 
