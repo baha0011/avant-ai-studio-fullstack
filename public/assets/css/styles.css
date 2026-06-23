@@ -4723,3 +4723,34 @@ html[data-theme="light"] .smm-message-label textarea {
     min-width: 150px !important;
   }
 }
+
+/* SMM CRM auto Telegram chat id */
+.smm-auto-chat-label {
+  display: grid;
+  gap: 7px;
+  margin-top: 14px;
+  color: var(--muted);
+  font-size: .82rem;
+  font-weight: 800;
+}
+
+.smm-auto-chat-label input {
+  width: 100%;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 14px;
+  padding: 11px 12px;
+  background: rgba(255,255,255,.065);
+  color: var(--text);
+  outline: none;
+}
+
+.smm-auto-chat-label small {
+  color: var(--muted);
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+html[data-theme="light"] .smm-auto-chat-label input {
+  background: rgba(255,255,255,.92);
+  border-color: rgba(15,23,42,.12);
+}
