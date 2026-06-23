@@ -502,6 +502,72 @@
     }
   }
 
+  function parseLogMessage(log) {
+    const raw = String(log.message || '');
+
+    if (log.channel === 'manager_note') {
+      try {
+        const parsed = JSON.parse(raw);
+
+        if (parsed && typeof parsed === 'object') {
+          return {
+            author: parsed.author || parsed.authorEmail || 'CRM user',
+            authorEmail: parsed.authorEmail || '',
+            role: parsed.role || '',
+            comment: parsed.comment || raw,
+            isStructured: true
+          };
+        }
+      } catch {
+        return {
+          author: 'Старий коментар',
+          authorEmail: '',
+          role: '',
+          comment: raw,
+          isStructured: false
+        };
+      }
+    }
+
+    return {
+      author: '',
+      authorEmail: '',
+      role: '',
+      comment: raw,
+      isStructured: false
+    };
+  }
+
+  function renderLogItem(log) {
+    const parsed = parseLogMessage(log);
+    const isNote = log.channel === 'manager_note';
+
+    if (isNote) {
+      return `
+        <article class="crm-log-item manager_note crm-comment-log">
+          <div class="crm-comment-log-head">
+            <strong>${escapeHtml(parsed.author || 'CRM user')}</strong>
+            ${parsed.role ? `<span>${escapeHtml(parsed.role)}</span>` : ''}
+          </div>
+          ${parsed.authorEmail ? `<small class="crm-comment-author-email">${escapeHtml(parsed.authorEmail)}</small>` : ''}
+          <p>${escapeHtml(parsed.comment || '')}</p>
+          <small>${escapeHtml(formatDate(log.created_at))}</small>
+        </article>
+      `;
+    }
+
+    return `
+      <article class="crm-log-item ${escapeHtml(log.channel || '')}">
+        <div>
+          <strong>${escapeHtml(log.channel || 'log')}</strong>
+          <span>${escapeHtml(log.status || '')}</span>
+        </div>
+        <p>${escapeHtml(parsed.comment || '')}</p>
+        <small>${escapeHtml(formatDate(log.created_at))}</small>
+      </article>
+    `;
+  }
+
   async function renderLeadLogs(id) {
     const logsWrap = drawerBody.querySelector('#leadLogs');
     if (!logsWrap) return;
@@ -517,16 +583,7 @@
         return;
       }
 
-      logsWrap.innerHTML = logs.map((log) => `
-        <article class="crm-log-item ${escapeHtml(log.channel || '')}">
-          <div>
-            <strong>${escapeHtml(log.channel || 'log')}</strong>
-            <span>${escapeHtml(log.status || '')}</span>
-          </div>
-          <p>${escapeHtml(log.message || '')}</p>
-          <small>${escapeHtml(formatDate(log.created_at))}</small>
-        </article>
-      `).join('');
+      logsWrap.innerHTML = logs.map(renderLogItem).join('');
     } catch (error) {
       logsWrap.innerHTML = `<p class="muted">Не вдалося завантажити історію: ${escapeHtml(error.message)}</p>`;
     }
@@ -791,16 +848,19 @@
           </dl>
         </section>
 
-        <section class="crm-info-block full">
-          <h3>Коментар менеджера</h3>
-          <textarea id="managerNote" class="crm-note-textarea" placeholder="Наприклад: написав клієнту, чекаю відповідь, бюджет підтвердив..."></textarea>
-          <button class="btn btn-primary crm-note-save" type="button" id="saveManagerNoteBtn">Зберегти коментар</button>
-        </section>
+        <section class="crm-info-block full crm-comments-workspace">
+          <div class="crm-comment-editor">
+            <h3>Коментар менеджера</h3>
+            <p class="muted">Окреме робоче поле для нотаток по ліду. В історії буде видно, хто залишив коментар.</p>
+            <textarea id="managerNote" class="crm-note-textarea" placeholder="Наприклад: написав клієнту, чекаю відповідь, бюджет підтвердив..."></textarea>
+            <button class="btn btn-primary crm-note-save" type="button" id="saveManagerNoteBtn">Зберегти коментар</button>
+          </div>
 
-        <section class="crm-info-block full">
-          <h3>Історія дій</h3>
-          <div class="crm-logs" id="leadLogs">
-            <p class="muted">Завантажуємо історію...</p>
+          <div class="crm-comment-history">
+            <h3>Історія дій і коментарів</h3>
+            <div class="crm-logs" id="leadLogs">
+              <p class="muted">Завантажуємо історію...</p>
+            </div>
           </div>
         </section>
       </div>

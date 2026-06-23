@@ -471,7 +471,20 @@ app.post('/api/leads/:id/notes', requireAdminSession, async (req, res) => {
     }
 
     const lead = await getLeadById(req.params.id);
-    const log = await addIntegrationLog(lead.id, 'manager_note', 'created', comment);
+    const author = req.adminUser?.name || req.adminUser?.email || 'CRM user';
+    const authorEmail = req.adminUser?.email || '';
+
+    const log = await addIntegrationLog(
+      lead.id,
+      'manager_note',
+      'created',
+      JSON.stringify({
+        author,
+        authorEmail,
+        role: req.adminUser?.role || '',
+        comment
+      })
+    );
 
     res.status(201).json({ ok: true, log });
   } catch (error) {

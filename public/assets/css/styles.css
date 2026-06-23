@@ -4053,3 +4053,107 @@ html[data-theme="light"] .crm-status-select {
     max-width: none;
   }
 }
+
+/* Wider lead drawer + separate comments workspace */
+.crm-drawer-panel {
+  width: min(1480px, calc(100vw - 28px)) !important;
+  max-width: none !important;
+}
+
+.crm-drawer-grid {
+  grid-template-columns: minmax(280px, .85fr) minmax(420px, 1.15fr) !important;
+  gap: 18px !important;
+}
+
+.crm-comments-workspace {
+  display: grid !important;
+  grid-template-columns: minmax(380px, .9fr) minmax(520px, 1.1fr) !important;
+  gap: 18px !important;
+  align-items: stretch !important;
+}
+
+.crm-comment-editor,
+.crm-comment-history {
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 20px;
+  padding: 18px;
+  background:
+    radial-gradient(circle at 12% 10%, rgba(185,243,255,.075), transparent 34%),
+    rgba(0,0,0,.12);
+}
+
+.crm-comment-editor h3,
+.crm-comment-history h3 {
+  margin-top: 0;
+}
+
+.crm-note-textarea {
+  min-height: 260px !important;
+  font-size: 15px !important;
+  line-height: 1.55 !important;
+}
+
+.crm-comment-history .crm-logs {
+  max-height: 430px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.crm-comment-log {
+  border-color: rgba(185,243,255,.18) !important;
+  background:
+    linear-gradient(135deg, rgba(185,243,255,.075), rgba(255,255,255,.035)) !important;
+}
+
+.crm-comment-log-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.crm-comment-log-head strong {
+  color: var(--text);
+}
+
+.crm-comment-log-head span {
+  border: 1px solid rgba(185,243,255,.20);
+  border-radius: 999px;
+  padding: 4px 8px;
+  color: var(--muted);
+  font-size: .72rem;
+}
+
+.crm-comment-author-email {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  opacity: .82;
+}
+
+.crm-comment-log p {
+  white-space: pre-wrap;
+  line-height: 1.55;
+}
+
+html[data-theme="light"] .crm-comment-editor,
+html[data-theme="light"] .crm-comment-history,
+html[data-theme="light"] .crm-comment-log {
+  background: rgba(255,255,255,.86) !important;
+  border-color: rgba(15,23,42,.10) !important;
+}
+
+@media (max-width: 1100px) {
+  .crm-drawer-panel {
+    width: min(100%, calc(100vw - 18px)) !important;
+  }
+
+  .crm-drawer-grid,
+  .crm-comments-workspace {
+    grid-template-columns: 1fr !important;
+  }
+
+  .crm-comment-history .crm-logs {
+    max-height: none;
+  }
+}
