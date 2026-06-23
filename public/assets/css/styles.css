@@ -4278,3 +4278,10 @@ html[data-theme="light"] .crm-comment-log {
     max-height: none;
   }
 }
+
+/* Make comment input smaller in lead card */
+.crm-comments-left .crm-note-textarea {
+  min-height: 120px !important;
+  height: 120px !important;
+  max-height: 180px !important;
+}
