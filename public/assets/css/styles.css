@@ -3099,3 +3099,77 @@ html[data-theme="light"] .copy-id-btn {
   border-color: rgba(255,228,120,.28);
   background: rgba(255,228,120,.08);
 }
+
+/* CRM v2 missing features fix */
+.crm-contact-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.tg-open-btn {
+  text-decoration: none;
+}
+
+.crm-note-textarea {
+  width: 100%;
+  min-height: 112px;
+  resize: vertical;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 14px;
+  background: rgba(255,255,255,.065);
+  color: var(--text);
+  outline: none;
+}
+
+.crm-note-save {
+  margin-top: 10px;
+}
+
+.crm-logs {
+  display: grid;
+  gap: 10px;
+}
+
+.crm-log-item {
+  padding: 13px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(255,255,255,.045);
+}
+
+.crm-log-item div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.crm-log-item strong {
+  color: var(--text);
+}
+
+.crm-log-item span,
+.crm-log-item small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.crm-log-item p {
+  color: var(--muted);
+  margin: 0 0 6px;
+  white-space: pre-wrap;
+}
+
+.crm-log-item.manager_note {
+  border-color: rgba(185,243,255,.28);
+  background: rgba(35,214,255,.08);
+}
+
+.crm-log-item.telegram_action,
+.crm-log-item.crm_action {
+  border-color: rgba(93,245,181,.24);
+  background: rgba(93,245,181,.07);
+}

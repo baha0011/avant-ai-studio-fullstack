@@ -150,16 +150,33 @@ export async function updateLeadStatus(id, status) {
 }
 
 export async function addIntegrationLog(leadId, channel, status, message = '') {
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('integration_logs')
     .insert({
       lead_id: leadId,
       channel,
       status,
-      message: String(message).slice(0, 1200)
-    });
+      message: String(message).slice(0, 1800)
+    })
+    .select('*')
+    .single();
 
   if (error) throw error;
+  return data;
+}
+
+export async function getLeadLogs(leadId, limit = 100) {
+  const safeLimit = Math.min(Math.max(Number(limit) || 100, 1), 300);
+
+  const { data, error } = await supabase
+    .from('integration_logs')
+    .select('*')
+    .eq('lead_id', leadId)
+    .order('created_at', { ascending: false })
+    .limit(safeLimit);
+
+  if (error) throw error;
+  return data || [];
 }
 
 function startOfDay(date) {

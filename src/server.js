@@ -8,6 +8,7 @@ import dotenv from 'dotenv';
 import {
   addIntegrationLog,
   getLeadById,
+  getLeadLogs,
   getStats,
   insertLead,
   listLeads,
@@ -21,7 +22,7 @@ import {
   isTelegramEnabled,
   sendTelegramLead
 } from './telegram.js';
-import { requireAdmin, validateLead } from './validators.js';
+import { cleanText, requireAdmin, validateLead } from './validators.js';
 
 dotenv.config();
 
@@ -156,10 +157,47 @@ app.get('/api/leads', requireAdmin, async (req, res) => {
   }
 });
 
+app.get('/api/leads/:id/logs', requireAdmin, async (req, res) => {
+  try {
+    const logs = await getLeadLogs(req.params.id);
+    res.json({ ok: true, logs });
+  } catch (error) {
+    console.error('[Lead logs]', error);
+    res.status(500).json({ ok: false, error: 'Failed to load lead logs' });
+  }
+});
+
+app.post('/api/leads/:id/notes', requireAdmin, async (req, res) => {
+  try {
+    const comment = cleanText(req.body.comment, 1400);
+
+    if (comment.length < 2) {
+      return res.status(400).json({ ok: false, error: 'Comment is too short' });
+    }
+
+    const lead = await getLeadById(req.params.id);
+    const log = await addIntegrationLog(lead.id, 'manager_note', 'created', comment);
+
+    res.status(201).json({ ok: true, log });
+  } catch (error) {
+    console.error('[Manager note]', error);
+    res.status(500).json({ ok: false, error: 'Failed to save manager note' });
+  }
+});
+
 app.patch('/api/leads/:id/status', requireAdmin, async (req, res) => {
   try {
+    const before = await getLeadById(req.params.id);
     const lead = await updateLeadStatus(req.params.id, req.body.status);
     const sheet = await syncSheetStatus(lead, req.body.status);
+
+    await addIntegrationLog(
+      lead.id,
+      'crm_action',
+      'status_changed',
+      `Status changed: ${before.status} → ${lead.status}`
+    ).catch(() => null);
+
     res.json({ ok: true, lead, sheet });
   } catch (error) {
     res.status(400).json({ ok: false, error: error.message });
@@ -187,8 +225,17 @@ app.post('/api/telegram/webhook/:secret', async (req, res) => {
   const [, leadId, status] = match;
 
   try {
+    const before = await getLeadById(leadId);
     const lead = await updateLeadStatus(leadId, status);
     await syncSheetStatus(lead, status);
+
+    await addIntegrationLog(
+      lead.id,
+      'telegram_action',
+      'status_changed',
+      `Telegram button: ${before.status} → ${lead.status}`
+    ).catch(() => null);
+
     await answerTelegramCallback(callback.id, `Статус оновлено: ${status}`);
     await editTelegramLeadMessage(lead, callback.message);
     return res.json({ ok: true, leadId, status });

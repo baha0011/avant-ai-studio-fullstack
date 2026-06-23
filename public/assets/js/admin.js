@@ -15,6 +15,8 @@
   const drawer = document.getElementById('leadDrawer');
   const drawerBody = document.getElementById('leadDrawerBody');
   const drawerClose = document.getElementById('leadDrawerClose');
+  const exportCsvBtn = document.getElementById('exportCsvBtn');
+  const summaryReportBtn = document.getElementById('summaryReportBtn');
 
   let leads = [];
   let stats = {};
@@ -22,10 +24,10 @@
   let activeLeadId = null;
 
   const STATUS_META = {
-    new: { label: 'New', icon: '🆕', className: 'new' },
-    in_progress: { label: 'In work', icon: '🔄', className: 'in-progress' },
-    closed: { label: 'Closed', icon: '✅', className: 'closed' },
-    cancelled: { label: 'Cancelled', icon: '❌', className: 'cancelled' }
+    new: { label: 'New', human: 'Нова', icon: '🆕', className: 'new' },
+    in_progress: { label: 'In work', human: 'В роботі', icon: '🔄', className: 'in-progress' },
+    closed: { label: 'Closed', human: 'Закрита', icon: '✅', className: 'closed' },
+    cancelled: { label: 'Cancelled', human: 'Скасована', icon: '❌', className: 'cancelled' }
   };
 
   const NICHE_MAP = {
@@ -67,7 +69,7 @@
   }
 
   function getStatusMeta(status = 'new') {
-    return STATUS_META[status] || { label: status || 'new', icon: '•', className: 'new' };
+    return STATUS_META[status] || { label: status || 'new', human: status || 'new', icon: '•', className: 'new' };
   }
 
   function statusBadge(status = 'new') {
@@ -81,6 +83,19 @@
 
   function scoreBadge(lead) {
     return `<span class="crm-score ${scoreClass(lead.lead_score_label)}">${escapeHtml(lead.lead_score_emoji || '⚪')} ${escapeHtml(lead.lead_score_title || 'Cold lead')} · ${Number(lead.lead_score || 0)}/100</span>`;
+  }
+
+  function getTelegramUrl(contact = '') {
+    const value = clean(contact);
+
+    if (/^@[a-zA-Z0-9_]{5,32}$/.test(value)) {
+      return `https://t.me/${value.slice(1)}`;
+    }
+
+    const match = value.match(/(?:https?:\/\/)?t\.me\/([a-zA-Z0-9_]{5,32})/i);
+    if (match) return `https://t.me/${match[1]}`;
+
+    return '';
   }
 
   function statusActions(status = 'new') {
@@ -111,9 +126,7 @@
       ];
     }
 
-    return [
-      { label: 'В роботу', next: 'in_progress', icon: '🔄', type: 'secondary' }
-    ];
+    return [{ label: 'В роботу', next: 'in_progress', icon: '🔄', type: 'secondary' }];
   }
 
   function getToken() {
@@ -131,17 +144,6 @@
 
     try {
       await navigator.clipboard.writeText(text);
-
-      if (button) {
-        const oldText = button.textContent;
-        button.textContent = '✓';
-        button.classList.add('copied');
-
-        setTimeout(() => {
-          button.textContent = oldText;
-          button.classList.remove('copied');
-        }, 900);
-      }
     } catch {
       const textarea = document.createElement('textarea');
       textarea.value = text;
@@ -152,14 +154,16 @@
       textarea.select();
       document.execCommand('copy');
       textarea.remove();
+    }
 
-      if (button) {
-        const oldText = button.textContent;
-        button.textContent = '✓';
-        setTimeout(() => {
-          button.textContent = oldText;
-        }, 900);
-      }
+    if (button) {
+      const oldText = button.textContent;
+      button.textContent = '✓';
+      button.classList.add('copied');
+      setTimeout(() => {
+        button.textContent = oldText;
+        button.classList.remove('copied');
+      }, 900);
     }
   }
 
@@ -196,9 +200,9 @@
       stats = data.stats || {};
       renderAll();
 
-      if (activeLeadId) {
+      if (activeLeadId && drawer.classList.contains('open')) {
         const stillExists = leads.find((lead) => String(lead.id) === String(activeLeadId));
-        if (stillExists && drawer.classList.contains('open')) openDrawer(activeLeadId);
+        if (stillExists) openDrawer(activeLeadId);
       }
     } catch (error) {
       leads = [];
@@ -275,9 +279,10 @@
 
   function shortProject(lead) {
     const details = lead.lead_details || {};
-    const format = details.format || 'Формат не вказано';
-    const budget = details.budget || 'Бюджет не вказано';
-    return { format, budget };
+    return {
+      format: details.format || 'Формат не вказано',
+      budget: details.budget || 'Бюджет не вказано'
+    };
   }
 
   function sourceLabel(lead) {
@@ -292,6 +297,19 @@
 
   function clientContact(lead) {
     return lead.contact || '—';
+  }
+
+  function contactWithCopy(lead) {
+    const contact = clientContact(lead);
+    const tgUrl = getTelegramUrl(contact);
+
+    return `
+      <div class="crm-contact-line">
+        <span>${escapeHtml(contact)}</span>
+        <button class="copy-id-btn" type="button" data-copy-contact="${escapeHtml(contact)}" title="Скопіювати контакт">⧉</button>
+        ${tgUrl ? `<a class="copy-id-btn tg-open-btn" href="${escapeHtml(tgUrl)}" target="_blank" rel="noopener" title="Написати клієнту">💬</a>` : ''}
+      </div>
+    `;
   }
 
   function actionButtons(lead, compact = false) {
@@ -332,7 +350,7 @@
           <td>
             <div class="crm-client">
               <strong>${escapeHtml(lead.name || 'Без імені')}</strong>
-              <span>${escapeHtml(clientContact(lead))}</span>
+              ${contactWithCopy(lead)}
               <small>${escapeHtml(formatNiche(lead.niche))}</small>
             </div>
           </td>
@@ -380,7 +398,7 @@
             ${statusBadge(lead.status)}
           </div>
           <strong>${escapeHtml(lead.name || 'Без імені')}</strong>
-          <span>${escapeHtml(clientContact(lead))}</span>
+          ${contactWithCopy(lead)}
           <p>${escapeHtml(project.format)}</p>
           <div class="crm-mobile-meta">
             <small>${escapeHtml(lead.public_id)}</small>
@@ -425,11 +443,16 @@
         copyText(button.dataset.copyId, button);
       });
     });
+
+    document.querySelectorAll('[data-copy-contact]').forEach((button) => {
+      button.addEventListener('click', (event) => {
+        event.stopPropagation();
+        copyText(button.dataset.copyContact, button);
+      });
+    });
   }
 
   async function updateStatus(id, status) {
-    const previousText = event?.target?.textContent;
-
     try {
       await api(`/api/leads/${id}/status`, {
         method: 'PATCH',
@@ -440,8 +463,244 @@
       await loadLeads();
     } catch (error) {
       alert(`Не вдалося змінити статус: ${error.message}`);
-      if (event?.target && previousText) event.target.textContent = previousText;
     }
+  }
+
+  async function saveManagerNote(id) {
+    const textarea = drawerBody.querySelector('#managerNote');
+    const comment = textarea?.value?.trim();
+
+    if (!comment) {
+      alert('Напишіть коментар менеджера.');
+      return;
+    }
+
+    try {
+      await api(`/api/leads/${id}/notes`, {
+        method: 'POST',
+        body: JSON.stringify({ comment })
+      });
+
+      textarea.value = '';
+      await renderLeadLogs(id);
+    } catch (error) {
+      alert(`Не вдалося зберегти коментар: ${error.message}`);
+    }
+  }
+
+  async function renderLeadLogs(id) {
+    const logsWrap = drawerBody.querySelector('#leadLogs');
+    if (!logsWrap) return;
+
+    logsWrap.innerHTML = '<p class="muted">Завантажуємо історію...</p>';
+
+    try {
+      const data = await api(`/api/leads/${id}/logs`);
+      const logs = data.logs || [];
+
+      if (!logs.length) {
+        logsWrap.innerHTML = '<p class="muted">Історія поки порожня.</p>';
+        return;
+      }
+
+      logsWrap.innerHTML = logs.map((log) => `
+        <article class="crm-log-item ${escapeHtml(log.channel || '')}">
+          <div>
+            <strong>${escapeHtml(log.channel || 'log')}</strong>
+            <span>${escapeHtml(log.status || '')}</span>
+          </div>
+          <p>${escapeHtml(log.message || '')}</p>
+          <small>${escapeHtml(formatDate(log.created_at))}</small>
+        </article>
+      `).join('');
+    } catch (error) {
+      logsWrap.innerHTML = `<p class="muted">Не вдалося завантажити історію: ${escapeHtml(error.message)}</p>`;
+    }
+  }
+
+  function openAuditReport(lead) {
+    const details = lead.lead_details || {};
+    const source = lead.source_details || {};
+    const scoreReasons = Array.isArray(lead.lead_score_reasons) ? lead.lead_score_reasons : [];
+
+    const reportHtml = `
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <title>AI Audit Report — ${escapeHtml(lead.public_id)}</title>
+  <style>
+    body { font-family: Arial, sans-serif; color: #111827; padding: 42px; line-height: 1.5; }
+    .top { border-bottom: 3px solid #111827; padding-bottom: 18px; margin-bottom: 26px; }
+    h1 { margin: 0; font-size: 30px; }
+    h2 { margin-top: 30px; font-size: 18px; }
+    .badge { display: inline-block; padding: 6px 10px; border-radius: 999px; background: #eef2ff; font-weight: 700; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .card { border: 1px solid #d1d5db; border-radius: 14px; padding: 16px; }
+    .muted { color: #6b7280; }
+    ul { padding-left: 20px; }
+    button { margin-bottom: 20px; padding: 10px 14px; border-radius: 10px; border: 1px solid #d1d5db; background: #111827; color: white; cursor: pointer; }
+    @media print { body { padding: 18px; } button { display: none; } }
+  </style>
+</head>
+<body>
+  <button onclick="window.print()">Save as PDF / Print</button>
+
+  <div class="top">
+    <p class="badge">Avant AI Studio</p>
+    <h1>AI Audit Report</h1>
+    <p class="muted">Заявка: ${escapeHtml(lead.public_id)} · ${escapeHtml(formatDate(lead.created_at))}</p>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Клієнт</h2>
+      <p><b>Імʼя:</b> ${escapeHtml(lead.name || '—')}</p>
+      <p><b>Контакт:</b> ${escapeHtml(lead.contact || '—')}</p>
+      <p><b>Ніша:</b> ${escapeHtml(formatNiche(lead.niche))}</p>
+    </div>
+
+    <div class="card">
+      <h2>Lead Quality</h2>
+      <p><b>Score:</b> ${escapeHtml(String(lead.lead_score || 0))}/100</p>
+      <p><b>Quality:</b> ${escapeHtml(lead.lead_score_title || 'Cold lead')}</p>
+      <p><b>Reasons:</b> ${escapeHtml(scoreReasons.join(', ') || '—')}</p>
+    </div>
+  </div>
+
+  <h2>Поточна задача</h2>
+  <div class="card">
+    <p><b>Формат:</b> ${escapeHtml(details.format || '—')}</p>
+    <p><b>Бюджет:</b> ${escapeHtml(details.budget || '—')}</p>
+    <p><b>Канал:</b> ${escapeHtml(details.channel || '—')}</p>
+    <p><b>Автоматизація:</b> ${escapeHtml(details.automation || '—')}</p>
+    <p><b>Опис:</b> ${escapeHtml(details.description || lead.message || '—')}</p>
+  </div>
+
+  <h2>Рекомендований MVP</h2>
+  <div class="card">
+    <ul>
+      <li>Збір заявки через форму або Telegram.</li>
+      <li>Автоматичне збереження в базу даних.</li>
+      <li>Google Sheets як простий операційний центр.</li>
+      <li>Telegram-сповіщення адміну з кнопками статусу.</li>
+      <li>CRM-панель для пошуку, статусів, коментарів і контролю заявок.</li>
+    </ul>
+  </div>
+
+  <h2>Джерело заявки</h2>
+  <div class="card">
+    <p><b>Source:</b> ${escapeHtml(source.utm_source || source.source || lead.source || 'website')}</p>
+    <p><b>Campaign:</b> ${escapeHtml(source.utm_campaign || '—')}</p>
+    <p><b>Page:</b> ${escapeHtml(source.page || source.landingPage || lead.page || '—')}</p>
+  </div>
+</body>
+</html>
+`;
+
+    const win = window.open('', '_blank');
+    if (!win) return alert('Браузер заблокував відкриття звіту.');
+    win.document.write(reportHtml);
+    win.document.close();
+  }
+
+  function openSummaryReport() {
+    const byStatus = countByStatus();
+    const byScore = countByScore();
+
+    const reportHtml = `
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <title>CRM Summary Report — Avant AI Studio</title>
+  <style>
+    body { font-family: Arial, sans-serif; color: #111827; padding: 42px; line-height: 1.5; }
+    h1 { margin-bottom: 8px; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 24px 0; }
+    .card { border: 1px solid #d1d5db; border-radius: 14px; padding: 16px; }
+    .card strong { display: block; font-size: 28px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 24px; }
+    th, td { border-bottom: 1px solid #e5e7eb; padding: 10px; text-align: left; }
+    button { margin-bottom: 20px; padding: 10px 14px; border-radius: 10px; border: 1px solid #d1d5db; background: #111827; color: white; cursor: pointer; }
+    @media print { button { display: none; } body { padding: 18px; } }
+  </style>
+</head>
+<body>
+  <button onclick="window.print()">Save as PDF / Print</button>
+  <h1>CRM Summary Report</h1>
+  <p>Avant AI Studio · ${escapeHtml(new Date().toLocaleString('uk-UA'))}</p>
+
+  <div class="grid">
+    <div class="card"><span>Усього</span><strong>${stats.total || 0}</strong></div>
+    <div class="card"><span>Сьогодні</span><strong>${stats.today || 0}</strong></div>
+    <div class="card"><span>Тиждень</span><strong>${stats.week || 0}</strong></div>
+    <div class="card"><span>Місяць</span><strong>${stats.month || 0}</strong></div>
+    <div class="card"><span>Hot</span><strong>${byScore.hot || 0}</strong></div>
+    <div class="card"><span>Warm</span><strong>${byScore.warm || 0}</strong></div>
+  </div>
+
+  <h2>Pipeline</h2>
+  <div class="grid">
+    <div class="card"><span>New</span><strong>${byStatus.new || 0}</strong></div>
+    <div class="card"><span>In work</span><strong>${byStatus.in_progress || 0}</strong></div>
+    <div class="card"><span>Closed</span><strong>${byStatus.closed || 0}</strong></div>
+  </div>
+
+  <h2>Leads</h2>
+  <table>
+    <thead><tr><th>ID</th><th>Клієнт</th><th>Статус</th><th>Score</th><th>Джерело</th></tr></thead>
+    <tbody>
+      ${leads.map((lead) => `
+        <tr>
+          <td>${escapeHtml(lead.public_id)}</td>
+          <td>${escapeHtml(lead.name || '')}</td>
+          <td>${escapeHtml(lead.status || '')}</td>
+          <td>${escapeHtml(String(lead.lead_score || 0))}/100</td>
+          <td>${escapeHtml(sourceLabel(lead))}</td>
+        </tr>
+      `).join('')}
+    </tbody>
+  </table>
+</body>
+</html>
+`;
+
+    const win = window.open('', '_blank');
+    if (!win) return alert('Браузер заблокував відкриття звіту.');
+    win.document.write(reportHtml);
+    win.document.close();
+  }
+
+  function downloadCsv() {
+    if (!leads.length) return alert('Спочатку завантажте заявки.');
+
+    const headers = ['Public ID', 'Name', 'Contact', 'Niche', 'Status', 'Lead Score', 'Quality', 'Source', 'Created At'];
+    const rows = leads.map((lead) => [
+      lead.public_id,
+      lead.name,
+      lead.contact,
+      formatNiche(lead.niche),
+      lead.status,
+      lead.lead_score,
+      lead.lead_score_title,
+      sourceLabel(lead),
+      formatDate(lead.created_at)
+    ]);
+
+    const csv = [headers, ...rows]
+      .map((row) => row.map((cell) => `"${String(cell || '').replaceAll('"', '""')}"`).join(','))
+      .join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.href = url;
+    link.download = `avant-crm-leads-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+
+    URL.revokeObjectURL(url);
   }
 
   function openDrawer(id) {
@@ -469,6 +728,7 @@
 
       <div class="crm-drawer-actions">
         ${actionButtons(lead)}
+        <button class="crm-action ghost" type="button" id="auditReportBtn">📄 AI Audit PDF</button>
       </div>
 
       <div class="crm-drawer-grid">
@@ -476,7 +736,7 @@
           <h3>Клієнт</h3>
           <dl>
             <div><dt>Імʼя</dt><dd>${escapeHtml(lead.name || '—')}</dd></div>
-            <div><dt>Контакт</dt><dd>${escapeHtml(clientContact(lead))}</dd></div>
+            <div><dt>Контакт</dt><dd>${contactWithCopy(lead)}</dd></div>
             <div><dt>Ніша</dt><dd>${escapeHtml(formatNiche(lead.niche))}</dd></div>
             <div><dt>Мова</dt><dd>${escapeHtml(lead.language || 'uk')}</dd></div>
           </dl>
@@ -516,6 +776,19 @@
             <div><dt>Reasons</dt><dd>${escapeHtml(scoreReasons.join(', ') || '—')}</dd></div>
           </dl>
         </section>
+
+        <section class="crm-info-block full">
+          <h3>Коментар менеджера</h3>
+          <textarea id="managerNote" class="crm-note-textarea" placeholder="Наприклад: написав клієнту, чекаю відповідь, бюджет підтвердив..."></textarea>
+          <button class="btn btn-primary crm-note-save" type="button" id="saveManagerNoteBtn">Зберегти коментар</button>
+        </section>
+
+        <section class="crm-info-block full">
+          <h3>Історія дій</h3>
+          <div class="crm-logs" id="leadLogs">
+            <p class="muted">Завантажуємо історію...</p>
+          </div>
+        </section>
       </div>
     `;
 
@@ -532,6 +805,18 @@
         copyText(button.dataset.copyId, button);
       });
     });
+
+    drawerBody.querySelectorAll('[data-copy-contact]').forEach((button) => {
+      button.addEventListener('click', (event) => {
+        event.stopPropagation();
+        copyText(button.dataset.copyContact, button);
+      });
+    });
+
+    drawerBody.querySelector('#saveManagerNoteBtn')?.addEventListener('click', () => saveManagerNote(lead.id));
+    drawerBody.querySelector('#auditReportBtn')?.addEventListener('click', () => openAuditReport(lead));
+
+    renderLeadLogs(lead.id);
   }
 
   function closeDrawer() {
@@ -551,12 +836,11 @@
   });
 
   loadBtn.addEventListener('click', loadLeads);
+  exportCsvBtn?.addEventListener('click', downloadCsv);
+  summaryReportBtn?.addEventListener('click', openSummaryReport);
 
   statusFilter.addEventListener('change', () => {
     activeStatus = statusFilter.value;
-    pipeline.querySelectorAll('[data-status]').forEach((button) => {
-      button.classList.toggle('active', button.dataset.status === activeStatus);
-    });
     loadLeads();
   });
 

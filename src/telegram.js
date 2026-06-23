@@ -66,13 +66,26 @@ function getPublicUrl() {
   return String(process.env.PUBLIC_URL || '').trim().replace(/\/+$/, '');
 }
 
+function getClientTelegramUrl(contact = '') {
+  const value = clean(contact);
+
+  if (/^@[a-zA-Z0-9_]{5,32}$/.test(value)) {
+    return `https://t.me/${value.slice(1)}`;
+  }
+
+  const match = value.match(/(?:https?:\/\/)?t\.me\/([a-zA-Z0-9_]{5,32})/i);
+  if (match) return `https://t.me/${match[1]}`;
+
+  return '';
+}
+
 function formatContact(contact = '') {
   const value = clean(contact);
   if (!value) return 'Не вказано';
 
-  if (value.startsWith('@') && /^@[a-zA-Z0-9_]{5,32}$/.test(value)) {
-    const username = value.slice(1);
-    return `<a href="https://t.me/${escapeHtml(username)}">${escapeHtml(value)}</a>`;
+  const url = getClientTelegramUrl(value);
+  if (url) {
+    return `<a href="${escapeHtml(url)}">${escapeHtml(value)}</a>`;
   }
 
   return `<code>${escapeHtml(value)}</code>`;
@@ -226,6 +239,11 @@ function buildKeyboard(lead) {
 
   if (actions.length) {
     keyboard.push(actions);
+  }
+
+  const clientUrl = getClientTelegramUrl(lead.contact);
+  if (clientUrl) {
+    keyboard.push([{ text: '💬 Написати клієнту', url: clientUrl }]);
   }
 
   if (publicUrl) {
