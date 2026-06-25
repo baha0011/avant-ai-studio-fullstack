@@ -70,6 +70,18 @@ const publicDir = path.join(rootDir, 'public');
 const app = express();
 const port = Number(process.env.PORT || 3000);
 
+const PROTECTED_OWNER_EMAIL = normalizeEmail(
+  process.env.ADMIN_OWNER_EMAIL || process.env.ADMIN_BOOTSTRAP_EMAIL || 'vovaazazz5@gmail.com'
+);
+
+function isProtectedOwnerEmail(email = '') {
+  return normalizeEmail(email) === PROTECTED_OWNER_EMAIL;
+}
+
+function isProtectedOwnerUser(user = null) {
+  return Boolean(user?.email && isProtectedOwnerEmail(user.email));
+}
+
 app.use(helmet({
   contentSecurityPolicy: false
 }));
@@ -253,6 +265,10 @@ app.post('/api/admin/users', requireAdminSession, requireUserManagerAccess, asyn
     const name = String(req.body.name || '').trim().slice(0, 120);
     const role = ['super_admin', 'admin', 'manager'].includes(req.body.role) ? req.body.role : 'admin';
 
+    if (isProtectedOwnerEmail(email) && !isProtectedOwnerUser(req.adminUser)) {
+      return res.status(403).json({ ok: false, error: 'Protected owner account cannot be created or changed by another admin' });
+    }
+
     if (role === 'super_admin' && req.adminUser?.role !== 'super_admin') {
       return res.status(403).json({ ok: false, error: 'Only super admin can create another super admin' });
     }
@@ -287,6 +303,26 @@ app.patch('/api/admin/users/:id', requireAdminSession, requireUserManagerAccess,
     const actorIsSuperAdmin = req.adminUser?.role === 'super_admin';
     const targetIsSuperAdmin = targetUser.role === 'super_admin';
     const isSelf = Number(req.adminUser?.id) === Number(targetUser.id);
+    const targetIsProtectedOwner = isProtectedOwnerUser(targetUser);
+    const actorIsProtectedOwner = isProtectedOwnerUser(req.adminUser);
+
+    if (targetIsProtectedOwner && !actorIsProtectedOwner) {
+      return res.status(403).json({ ok: false, error: 'Protected owner account cannot be edited by another admin' });
+    }
+
+    if (targetIsProtectedOwner) {
+      if (req.body.role !== undefined && req.body.role !== 'super_admin') {
+        return res.status(400).json({ ok: false, error: 'Protected owner role cannot be changed' });
+      }
+
+      if (req.body.is_active === false) {
+        return res.status(400).json({ ok: false, error: 'Protected owner account cannot be deactivated' });
+      }
+
+      if (req.body.email !== undefined && !isProtectedOwnerEmail(req.body.email)) {
+        return res.status(400).json({ ok: false, error: 'Protected owner email cannot be changed' });
+      }
+    }
 
     // Admin can manage admin/manager, but cannot change any super_admin field.
     if (targetIsSuperAdmin && !actorIsSuperAdmin) {
@@ -336,6 +372,16 @@ app.delete('/api/admin/users/:id', requireAdminSession, requireSuperAdmin, async
 
     if (!Number.isFinite(id)) {
       return res.status(400).json({ ok: false, error: 'Invalid user id' });
+    }
+
+    const targetUser = await getAdminUserById(id);
+
+    if (!targetUser) {
+      return res.status(404).json({ ok: false, error: 'User not found' });
+    }
+
+    if (isProtectedOwnerUser(targetUser)) {
+      return res.status(403).json({ ok: false, error: 'Protected owner account cannot be deleted' });
     }
 
     if (id === Number(req.adminUser.id)) {

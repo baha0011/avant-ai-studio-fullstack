@@ -18,7 +18,17 @@
 
   if (!loginPanel || !crmRoot || !loginForm) return;
 
+  const PROTECTED_OWNER_EMAIL = 'vovaazazz5@gmail.com';
+
   let currentAdmin = null;
+
+  function normalizeAdminEmail(value = '') {
+    return String(value || '').trim().toLowerCase();
+  }
+
+  function isProtectedOwner(user = null) {
+    return normalizeAdminEmail(user?.email) === PROTECTED_OWNER_EMAIL;
+  }
 
   function escapeHtml(value = '') {
     return String(value)
@@ -216,9 +226,12 @@
       usersList.innerHTML = users.map((user) => {
         const isSelf = currentAdmin && Number(currentAdmin.id) === Number(user.id);
         const actorIsSuperAdmin = currentAdmin?.role === 'super_admin';
+        const actorIsOwner = isProtectedOwner(currentAdmin);
         const targetIsSuperAdmin = user.role === 'super_admin';
-        const canEdit = actorIsSuperAdmin || !targetIsSuperAdmin;
-        const canDelete = actorIsSuperAdmin && !isSelf;
+        const targetIsOwner = isProtectedOwner(user);
+        const ownerLockedForActor = targetIsOwner && !actorIsOwner;
+        const canEdit = !ownerLockedForActor && (actorIsSuperAdmin || !targetIsSuperAdmin);
+        const canDelete = !targetIsOwner && actorIsSuperAdmin && !isSelf;
 
         return `
           <article class="admin-user-row" data-user-id="${user.id}">
